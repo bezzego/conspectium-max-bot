@@ -31,9 +31,16 @@ jobs:
           BRANCH="${{ github.ref_name }}"
           URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Экранирование для текста без Markdown
+          # Экранирование для HTML-сообщения
           escape() {
-            echo "$1" | sed -e 's/\\/\\\\/g' -e 's/\r//g'
+            echo "$1" | sed \
+              -e 's/&/\&amp;/g' \
+              -e 's/</\&lt;/g' \
+              -e 's/>/\&gt;/g' \
+              -e 's/"/\&quot;/g' \
+              -e "s/'/\&#39;/g" \
+              -e 's/\\/\\\\/g' \
+              -e 's/\r//g'
           }
 
           SAFE_REPO=$(escape "$REPO")
@@ -81,6 +88,11 @@ jobs:
               MESSAGE="📘 Событие: ${EVENT}\n\n👤 Автор: ${SAFE_ACTOR}\n${SAFE_REPO}"
               ;;
           esac
+
+          # Преобразуем переводы строк в HTML-формат
+          if [ -n "$MESSAGE" ]; then
+            MESSAGE=$(printf '%s' "$MESSAGE" | sed ':a;N;$!ba;s/\n/<br>/g')
+          fi
 
           # Проверяем, что сообщение не пустое
           if [ -n "$MESSAGE" ]; then
