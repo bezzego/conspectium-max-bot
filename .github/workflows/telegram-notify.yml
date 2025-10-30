@@ -31,8 +31,6 @@ jobs:
           REPO="${{ github.repository }}"
           BRANCH="${{ github.ref_name }}"
 
-          COMMITS_JSON='${{ toJson(github.event.commits) }}'
-
           # Экранирование для MarkdownV2 (устойчивое и полное)
           escape() {
             printf '%s' "$1" | sed \
@@ -68,8 +66,7 @@ jobs:
             push)
               COMMIT_MSG="$(echo "${{ github.event.head_commit.message }}" | head -n 1)"
               SAFE_COMMIT="$(escape "$COMMIT_MSG")"
-              COMMITS_COUNT=$(python -c 'import os, json; raw=os.environ.get("COMMITS_JSON","[]"); print(len(json.loads(raw)))')
-              MESSAGE="$(printf '🟢 *Push в репозиторий*:\n%s\n\n👤 *Автор:* %s\n🌿 *Ветка:* %s\n📦 *Коммитов:* %s\n💬 *Сообщение:* %s' "$SAFE_REPO" "$SAFE_ACTOR" "$SAFE_BRANCH" "$COMMITS_COUNT" "$SAFE_COMMIT")"
+              MESSAGE="$(printf '🟢 *Push в репозиторий*:\n%s\n\n👤 *Автор:* %s\n🌿 *Ветка:* %s\n💬 *Сообщение:* %s' "$SAFE_REPO" "$SAFE_ACTOR" "$SAFE_BRANCH" "$SAFE_COMMIT")"
               ;;
             pull_request)
               TITLE="${{ github.event.pull_request.title }}"
@@ -96,14 +93,14 @@ jobs:
               MESSAGE="$(printf '🚀 *Новый релиз опубликован*\n%s\n\n👤 *Автор:* %s' "$SAFE_REL" "$SAFE_ACTOR")"
               ;;
             create)
-              REF="${{ github.ref }}"
+              REF="${{ github.event.ref }}"
               SAFE_REF="$(escape "$REF")"
               TYPE_RAW='${{ github.event.ref_type }}'
               if [ "$TYPE_RAW" = "branch" ]; then KIND="ветка"; else KIND="тег"; fi
               MESSAGE="$(printf '✨ *Создана новая %s:*\n%s\n\n👤 *Автор:* %s' "$KIND" "$SAFE_REF" "$SAFE_ACTOR")"
               ;;
             delete)
-              REF="${{ github.ref }}"
+              REF="${{ github.event.ref }}"
               SAFE_REF="$(escape "$REF")"
               TYPE_RAW='${{ github.event.ref_type }}'
               if [ "$TYPE_RAW" = "branch" ]; then KIND="ветка"; else KIND="тег"; fi
