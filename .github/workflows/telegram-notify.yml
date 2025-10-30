@@ -31,10 +31,28 @@ jobs:
           REPO="${{ github.repository }}"
           BRANCH="${{ github.ref_name }}"
 
-          # Экранирование для MarkdownV2 (минимально необходимое и устойчивое к sed)
+          # Экранирование для MarkdownV2 (устойчивое и полное)
           escape() {
-            # Экраним спецсимволы MarkdownV2: _ * [ ] ( ) ~ ` > # + - = | { } . !
-            printf '%s' "$1" | sed -e 's/[\\_*$begin:math:display$$end:math:display$()~`>#+\-=|{}.!]/\\&/g'
+            printf '%s' "$1" | sed \
+              -e 's/\\/\\\\/g' \
+              -e 's/_/\\_/g' \
+              -e 's/\*/\\*/g' \
+              -e 's/\[/\\[/g' \
+              -e 's/\]/\\]/g' \
+              -e 's/(/\\(/g' \
+              -e 's/)/\\)/g' \
+              -e 's/~/\\~/g' \
+              -e 's/`/\\`/g' \
+              -e 's/>/\\>/g' \
+              -e 's/#/\\#/g' \
+              -e 's/\+/\\+/g' \
+              -e 's/-/\\-/g' \
+              -e 's/=/\\=/g' \
+              -e 's/|/\\|/g' \
+              -e 's/{/\\{/g' \
+              -e 's/}/\\}/g' \
+              -e 's/\./\\./g' \
+              -e 's/!/\\!/g'
           }
 
           SAFE_EVENT="$(escape "$EVENT")"
