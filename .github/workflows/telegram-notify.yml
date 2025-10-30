@@ -43,46 +43,46 @@ jobs:
           case "$EVENT" in
             push)
               COMMIT_MSG=$(escape "$(echo "${{ github.event.head_commit.message }}" | head -n 1)")
-              MESSAGE="🟢 *Push в* [${SAFE_REPO}]($URL)\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\nБранч: \`${SAFE_BRANCH}\`\nСообщение: _${COMMIT_MSG}_"
+              MESSAGE="🟢 *Push в репозиторий:*\n[${SAFE_REPO}](https://github.com/${SAFE_REPO})\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\n🌿 *Ветка:* \`${SAFE_BRANCH}\`\n💬 *Сообщение:* ${COMMIT_MSG}"
               ;;
             pull_request)
               TITLE=$(escape "${{ github.event.pull_request.title }}")
               ACTION=$(escape "${{ github.event.action }}")
               PR_URL="${{ github.event.pull_request.html_url }}"
-              MESSAGE="📦 *Pull Request ${ACTION}*\n[${TITLE}](${PR_URL})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
+              MESSAGE="📦 *Pull Request ${ACTION}:*\n[${TITLE}](${PR_URL})\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             pull_request_review)
               ACTION=$(escape "${{ github.event.action }}")
               PR_URL="${{ github.event.pull_request.html_url }}"
-              MESSAGE="🗣 *Review ${ACTION}*\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\n[Смотреть PR](${PR_URL})"
+              MESSAGE="🗣 *Review ${ACTION}:*\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\n[Смотреть PR](${PR_URL})"
               ;;
             issues)
               TITLE=$(escape "${{ github.event.issue.title }}")
               ACTION=$(escape "${{ github.event.action }}")
               ISSUE_URL="${{ github.event.issue.html_url }}"
-              MESSAGE="🗂 *Issue ${ACTION}*\n[${TITLE}](${ISSUE_URL})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
+              MESSAGE="🗂 *Issue ${ACTION}:*\n[${TITLE}](${ISSUE_URL})\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             release)
               REL_URL="${{ github.event.release.html_url }}"
               REL_NAME=$(escape "${{ github.event.release.name }}")
-              MESSAGE="🚀 *Новый релиз опубликован*\n[${REL_NAME}](${REL_URL})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
+              MESSAGE="🚀 *Новый релиз опубликован:*\n[${REL_NAME}](${REL_URL})\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             create)
               REF=$(escape "${{ github.ref }}")
-              MESSAGE="✨ *Создана новая ветка или тег*\n\`${REF}\`\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
+              MESSAGE="✨ *Создана новая ветка или тег:*\n\`${REF}\`\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             delete)
               REF=$(escape "${{ github.ref }}")
-              MESSAGE="🗑 *Удалена ветка или тег*\n\`${REF}\`\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
+              MESSAGE="🗑 *Удалена ветка или тег:*\n\`${REF}\`\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             fork)
-              MESSAGE="🍴 *Новый форк репозитория*\n[${SAFE_REPO}](https://github.com/${SAFE_REPO})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
+              MESSAGE="🍴 *Новый форк репозитория:*\n[${SAFE_REPO}](https://github.com/${SAFE_REPO})\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             watch)
-              MESSAGE="⭐️ *Новая звезда на репозитории*\n[${SAFE_REPO}](https://github.com/${SAFE_REPO})\nОт: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
+              MESSAGE="⭐️ *Новая звезда на репозитории:*\n[${SAFE_REPO}](https://github.com/${SAFE_REPO})\n\n👤 *От:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             *)
-              MESSAGE="📘 *Событие:* ${EVENT}\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\n[${SAFE_REPO}](${URL})"
+              MESSAGE="📘 *Событие:* ${EVENT}\n\n👤 *Автор:* [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\n[${SAFE_REPO}](${URL})"
               ;;
           esac
 
