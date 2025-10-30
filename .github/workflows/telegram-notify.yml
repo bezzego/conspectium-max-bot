@@ -15,87 +15,93 @@ on:
   watch:
     types: [started]
 
-
 jobs:
   notify:
     runs-on: ubuntu-latest
-    env:
-      TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-      TG_CHAT_IDS: ${{ secrets.TG_CHAT_IDS }}
     steps:
       - name: Send Telegram message
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_IDS: ${{ secrets.TG_CHAT_IDS }}
         run: |
+          set -e
+
           EVENT="${{ github.event_name }}"
           ACTOR="${{ github.actor }}"
           REPO="${{ github.repository }}"
           BRANCH="${{ github.ref_name }}"
-          URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Экранирование для HTML-сообщения
+          # Экранирование для MarkdownV2 (минимально необходимое и устойчивое к sed)
           escape() {
-            echo "$1" | sed \
-              -e 's/&/\&amp;/g' \
-              -e 's/</\&lt;/g' \
-              -e 's/>/\&gt;/g' \
-              -e 's/"/\&quot;/g' \
-              -e "s/'/\&#39;/g" \
-              -e 's/\\/\\\\/g' \
-              -e 's/\r//g'
+            # Экраним спецсимволы MarkdownV2: _ * [ ] ( ) ~ ` > # + - = | { } . !
+            printf '%s' "$1" | sed -e 's/[\\_*$begin:math:display$$end:math:display$()~`>#+\-=|{}.!]/\\&/g'
           }
 
-          SAFE_REPO=$(escape "$REPO")
-          SAFE_BRANCH=$(escape "$BRANCH")
-          SAFE_ACTOR=$(escape "$ACTOR")
+          SAFE_EVENT="$(escape "$EVENT")"
+          SAFE_ACTOR="$(escape "$ACTOR")"
+          SAFE_REPO="$(escape "$REPO")"
+          SAFE_BRANCH="$(escape "$BRANCH")"
+
+          MESSAGE=""
 
           case "$EVENT" in
             push)
-              COMMIT_MSG=$(escape "$(echo "${{ github.event.head_commit.message }}" | head -n 1)")
-              MESSAGE="🟢 Push в репозиторий:<br><b>${SAFE_REPO}</b><br><br><b>👤 Автор:</b> ${SAFE_ACTOR}<br><b>🌿 Ветка:</b> ${SAFE_BRANCH}<br><b>💬 Сообщение:</b> ${COMMIT_MSG}"
+              COMMIT_MSG="$(echo "${{ github.event.head_commit.message }}" | head -n 1)"
+              SAFE_COMMIT="$(escape "$COMMIT_MSG")"
+              MESSAGE="🟢 Push в репозиторий:\n${SAFE_REPO}\n\n👤 Автор: ${SAFE_ACTOR}\n🌿 Ветка: ${SAFE_BRANCH}\n💬 Сообщение: ${SAFE_COMMIT}"
               ;;
             pull_request)
-              TITLE=$(escape "${{ github.event.pull_request.title }}")
-              ACTION=$(escape "${{ github.event.action }}")
-              MESSAGE="📦 Pull Request ${ACTION}:<br><b>${TITLE}</b><br><br><b>👤 Автор:</b> ${SAFE_ACTOR}"
+              TITLE="${{ github.event.pull_request.title }}"
+              ACTION="${{ github.event.action }}"
+              SAFE_TITLE="$(escape "$TITLE")"
+              SAFE_ACTION="$(escape "$ACTION")"
+              MESSAGE="📦 Pull Request: ${SAFE_ACTION}\n${SAFE_TITLE}\n\n👤 Автор: ${SAFE_ACTOR}"
               ;;
             pull_request_review)
-              ACTION=$(escape "${{ github.event.action }}")
-              MESSAGE="🗣 Review ${ACTION}:<br><b>👤 Автор:</b> ${SAFE_ACTOR}"
+              ACTION="${{ github.event.action }}"
+              SAFE_ACTION="$(escape "$ACTION")"
+              MESSAGE="🗣 Review: ${SAFE_ACTION}\n\n👤 Автор: ${SAFE_ACTOR}"
               ;;
             issues)
-              TITLE=$(escape "${{ github.event.issue.title }}")
-              ACTION=$(escape "${{ github.event.action }}")
-              MESSAGE="🗂 Issue ${ACTION}:<br><b>${TITLE}</b><br><br><b>👤 Автор:</b> ${SAFE_ACTOR}"
+              TITLE="${{ github.event.issue.title }}"
+              ACTION="${{ github.event.action }}"
+              SAFE_TITLE="$(escape "$TITLE")"
+              SAFE_ACTION="$(escape "$ACTION")"
+              MESSAGE="🗂 Issue: ${SAFE_ACTION}\n${SAFE_TITLE}\n\n👤 Автор: ${SAFE_ACTOR}"
               ;;
             release)
-              REL_NAME=$(escape "${{ github.event.release.name }}")
-              MESSAGE="🚀 Новый релиз опубликован:<br><b>${REL_NAME}</b><br><br><b>👤 Автор:</b> ${SAFE_ACTOR}"
+              REL_NAME="${{ github.event.release.name }}"
+              SAFE_REL="$(escape "$REL_NAME")"
+              MESSAGE="🚀 Новый релиз опубликован:\n${SAFE_REL}\n\n👤 Автор: ${SAFE_ACTOR}"
               ;;
             create)
-              REF=$(escape "${{ github.ref }}")
-              MESSAGE="✨ Создана новая ветка или тег:<br><b>${REF}</b><br><br><b>👤 Автор:</b> ${SAFE_ACTOR}"
+              REF="${{ github.ref }}"
+              SAFE_REF="$(escape "$REF")"
+              MESSAGE="✨ Создана новая ветка или тег:\n${SAFE_REF}\n\n👤 Автор: ${SAFE_ACTOR}"
               ;;
             delete)
-              REF=$(escape "${{ github.ref }}")
-              MESSAGE="🗑 Удалена ветка или тег:<br><b>${REF}</b><br><br><b>👤 Автор:</b> ${SAFE_ACTOR}"
+              REF="${{ github.ref }}"
+              SAFE_REF="$(escape "$REF")"
+              MESSAGE="🗑 Удалена ветка или тег:\n${SAFE_REF}\n\n👤 Автор: ${SAFE_ACTOR}"
               ;;
             fork)
-              MESSAGE="🍴 Новый форк репозитория:<br><b>${SAFE_REPO}</b><br><br><b>👤 Автор:</b> ${SAFE_ACTOR}"
+              MESSAGE="🍴 Новый форк репозитория:\n${SAFE_REPO}\n\n👤 Автор: ${SAFE_ACTOR}"
               ;;
             watch)
-              MESSAGE="⭐️ Новая звезда на репозитории:<br><b>${SAFE_REPO}</b><br><br><b>👤 От:</b> ${SAFE_ACTOR}"
+              MESSAGE="⭐️ Новая звезда на репозитории:\n${SAFE_REPO}\n\n👤 От: ${SAFE_ACTOR}"
               ;;
             *)
-              MESSAGE="📘 Событие: ${EVENT}<br><br><b>👤 Автор:</b> ${SAFE_ACTOR}<br><b>📦 Репозиторий:</b> ${SAFE_REPO}"
+              MESSAGE="📘 Событие: ${SAFE_EVENT}\n\n👤 Автор: ${SAFE_ACTOR}\n📦 Репозиторий: ${SAFE_REPO}"
               ;;
           esac
 
-          # Проверяем, что сообщение не пустое
+          # Рассылка в несколько чатов
           if [ -n "$MESSAGE" ]; then
             for CHAT_ID in $TG_CHAT_IDS; do
               echo "Отправляю уведомление в $CHAT_ID"
               curl -s -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
                    -d chat_id="$CHAT_ID" \
-                   -d parse_mode="HTML" \
-                   -d text="$MESSAGE"
+                   -d parse_mode="MarkdownV2" \
+                   -d text="$MESSAGE" >/dev/null
             done
           fi
