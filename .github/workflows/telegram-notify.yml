@@ -1,3 +1,5 @@
+name: Telegram Notifications
+
 on:
   push:
   pull_request:
@@ -12,8 +14,7 @@ on:
   fork:
   watch:
     types: [started]
-  workflow_run:
-    types: [completed]
+
 
 jobs:
   notify:
@@ -30,64 +31,68 @@ jobs:
           BRANCH="${{ github.ref_name }}"
           URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Формируем сообщение в зависимости от события
+          # Экранирование для MarkdownV2
+          escape() {
+            echo "$1" | sed 's/\_/\\_/g; s/\*/\\*/g; s/\[/\\[/g; s/\]/\\]/g; s/\(/\\(/g; s/\)/\\)/g; s/\~/\\~/g; s/\`/\\`/g; s/\>/\\>/g; s/\#/\\#/g; s/\+/\\+/g; s/\-/\\-/g; s/\=/\\=/g; s/\|/\\|/g; s/\{/\\{/g; s/\}/\\}/g; s/\./\\./g; s/\!/\\!/g'
+          }
+
+          SAFE_REPO=$(escape "$REPO")
+          SAFE_BRANCH=$(escape "$BRANCH")
+          SAFE_ACTOR=$(escape "$ACTOR")
+
           case "$EVENT" in
             push)
-              COMMIT_MSG=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
-              MESSAGE="🟢 *Push в [$REPO]($URL)*%0AАвтор: [$ACTOR](https://github.com/$ACTOR)%0AБранч: \`$BRANCH\`%0AКоммит: _$COMMIT_MSG_"
+              COMMIT_MSG=$(escape "$(echo "${{ github.event.head_commit.message }}" | head -n 1)")
+              MESSAGE="🟢 *Push в* [${SAFE_REPO}]($URL)\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\nБранч: \`${SAFE_BRANCH}\`\nСообщение: _${COMMIT_MSG}_"
               ;;
             pull_request)
-              TITLE="${{ github.event.pull_request.title }}"
-              ACTION="${{ github.event.action }}"
+              TITLE=$(escape "${{ github.event.pull_request.title }}")
+              ACTION=$(escape "${{ github.event.action }}")
               PR_URL="${{ github.event.pull_request.html_url }}"
-              MESSAGE="📦 *Pull Request $ACTION*%0A[$TITLE]($PR_URL)%0AАвтор: [$ACTOR](https://github.com/$ACTOR)"
+              MESSAGE="📦 *Pull Request ${ACTION}*\n[${TITLE}](${PR_URL})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             pull_request_review)
-              ACTION="${{ github.event.action }}"
+              ACTION=$(escape "${{ github.event.action }}")
               PR_URL="${{ github.event.pull_request.html_url }}"
-              MESSAGE="🗣 *Review $ACTION*%0AАвтор: [$ACTOR](https://github.com/$ACTOR)%0A[Смотреть PR]($PR_URL)"
+              MESSAGE="🗣 *Review ${ACTION}*\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\n[Смотреть PR](${PR_URL})"
               ;;
             issues)
-              TITLE="${{ github.event.issue.title }}"
-              ACTION="${{ github.event.action }}"
+              TITLE=$(escape "${{ github.event.issue.title }}")
+              ACTION=$(escape "${{ github.event.action }}")
               ISSUE_URL="${{ github.event.issue.html_url }}"
-              MESSAGE="🗂 *Issue $ACTION*%0A[$TITLE]($ISSUE_URL)%0AАвтор: [$ACTOR](https://github.com/$ACTOR)"
+              MESSAGE="🗂 *Issue ${ACTION}*\n[${TITLE}](${ISSUE_URL})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             release)
               REL_URL="${{ github.event.release.html_url }}"
-              REL_NAME="${{ github.event.release.name }}"
-              MESSAGE="🚀 *Новый релиз опубликован!*%0A[$REL_NAME]($REL_URL)%0AАвтор: [$ACTOR](https://github.com/$ACTOR)"
+              REL_NAME=$(escape "${{ github.event.release.name }}")
+              MESSAGE="🚀 *Новый релиз опубликован*\n[${REL_NAME}](${REL_URL})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             create)
-              REF="${{ github.ref }}"
-              MESSAGE="✨ *Создана новая ветка или тег:* \`$REF\`%0AАвтор: [$ACTOR](https://github.com/$ACTOR)"
+              REF=$(escape "${{ github.ref }}")
+              MESSAGE="✨ *Создана новая ветка или тег*\n\`${REF}\`\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             delete)
-              REF="${{ github.ref }}"
-              MESSAGE="🗑 *Удалена ветка или тег:* \`$REF\`%0AАвтор: [$ACTOR](https://github.com/$ACTOR)"
+              REF=$(escape "${{ github.ref }}")
+              MESSAGE="🗑 *Удалена ветка или тег*\n\`${REF}\`\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             fork)
-              MESSAGE="🍴 *Новый форк репозитория [$REPO](https://github.com/$REPO)*%0AАвтор: [$ACTOR](https://github.com/$ACTOR)"
+              MESSAGE="🍴 *Новый форк репозитория*\n[${SAFE_REPO}](https://github.com/${SAFE_REPO})\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             watch)
-              MESSAGE="⭐️ *Новый звёздочный лайк!*%0AРепозиторий: [$REPO](https://github.com/$REPO)%0AОт: [$ACTOR](https://github.com/$ACTOR)"
-              ;;
-            workflow_run)
-              STATUS="${{ github.event.workflow_run.conclusion }}"
-              WF_NAME="${{ github.event.workflow_run.name }}"
-              WF_URL="${{ github.event.workflow_run.html_url }}"
-              MESSAGE="⚙️ *Workflow завершён:* [$WF_NAME]($WF_URL)%0AСтатус: *$STATUS*%0AАвтор: [$ACTOR](https://github.com/$ACTOR)"
+              MESSAGE="⭐️ *Новая звезда на репозитории*\n[${SAFE_REPO}](https://github.com/${SAFE_REPO})\nОт: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})"
               ;;
             *)
-              MESSAGE="📘 *Событие:* $EVENT%0AАвтор: [$ACTOR](https://github.com/$ACTOR)%0A[$REPO]($URL)"
+              MESSAGE="📘 *Событие:* ${EVENT}\nАвтор: [${SAFE_ACTOR}](https://github.com/${SAFE_ACTOR})\n[${SAFE_REPO}](${URL})"
               ;;
           esac
 
-          # Отправляем сообщение во все чаты
-          for CHAT_ID in $TG_CHAT_IDS; do
-            echo "Отправляю уведомление в $CHAT_ID"
-            curl -s -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
-                 -d chat_id="$CHAT_ID" \
-                 -d parse_mode="Markdown" \
-                 -d text="$MESSAGE"
-          done
+          # Проверяем, что сообщение не пустое
+          if [ -n "$MESSAGE" ]; then
+            for CHAT_ID in $TG_CHAT_IDS; do
+              echo "Отправляю уведомление в $CHAT_ID"
+              curl -s -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
+                   -d chat_id="$CHAT_ID" \
+                   -d parse_mode="MarkdownV2" \
+                   -d text="$MESSAGE"
+            done
+          fi
