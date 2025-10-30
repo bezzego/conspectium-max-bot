@@ -49,3 +49,10 @@ coverage/
 .coverage.*
 # Ignore Sphinx documentation build
 
+docs/_build/
+# Ignore virtual environment directories
+env/
+venv/
+ENV/
+.venv/
+# Ignore Jupyter Notebook checkpoints
