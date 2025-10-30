@@ -66,50 +66,50 @@ jobs:
             push)
               COMMIT_MSG="$(echo "${{ github.event.head_commit.message }}" | head -n 1)"
               SAFE_COMMIT="$(escape "$COMMIT_MSG")"
-              MESSAGE="🟢 Push в репозиторий:\n${SAFE_REPO}\n\n👤 Автор: ${SAFE_ACTOR}\n🌿 Ветка: ${SAFE_BRANCH}\n💬 Сообщение: ${SAFE_COMMIT}"
+              MESSAGE="$(printf '🟢 Push в репозиторий:\n%s\n\n👤 Автор: %s\n🌿 Ветка: %s\n💬 Сообщение: %s' "$SAFE_REPO" "$SAFE_ACTOR" "$SAFE_BRANCH" "$SAFE_COMMIT")"
               ;;
             pull_request)
               TITLE="${{ github.event.pull_request.title }}"
               ACTION="${{ github.event.action }}"
               SAFE_TITLE="$(escape "$TITLE")"
               SAFE_ACTION="$(escape "$ACTION")"
-              MESSAGE="📦 Pull Request: ${SAFE_ACTION}\n${SAFE_TITLE}\n\n👤 Автор: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '📦 Pull Request: %s\n%s\n\n👤 Автор: %s' "$SAFE_ACTION" "$SAFE_TITLE" "$SAFE_ACTOR")"
               ;;
             pull_request_review)
               ACTION="${{ github.event.action }}"
               SAFE_ACTION="$(escape "$ACTION")"
-              MESSAGE="🗣 Review: ${SAFE_ACTION}\n\n👤 Автор: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '🗣 Review: %s\n\n👤 Автор: %s' "$SAFE_ACTION" "$SAFE_ACTOR")"
               ;;
             issues)
               TITLE="${{ github.event.issue.title }}"
               ACTION="${{ github.event.action }}"
               SAFE_TITLE="$(escape "$TITLE")"
               SAFE_ACTION="$(escape "$ACTION")"
-              MESSAGE="🗂 Issue: ${SAFE_ACTION}\n${SAFE_TITLE}\n\n👤 Автор: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '🗂 Issue: %s\n%s\n\n👤 Автор: %s' "$SAFE_ACTION" "$SAFE_TITLE" "$SAFE_ACTOR")"
               ;;
             release)
               REL_NAME="${{ github.event.release.name }}"
               SAFE_REL="$(escape "$REL_NAME")"
-              MESSAGE="🚀 Новый релиз опубликован:\n${SAFE_REL}\n\n👤 Автор: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '🚀 Новый релиз опубликован:\n%s\n\n👤 Автор: %s' "$SAFE_REL" "$SAFE_ACTOR")"
               ;;
             create)
               REF="${{ github.ref }}"
               SAFE_REF="$(escape "$REF")"
-              MESSAGE="✨ Создана новая ветка или тег:\n${SAFE_REF}\n\n👤 Автор: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '✨ Создана новая ветка или тег:\n%s\n\n👤 Автор: %s' "$SAFE_REF" "$SAFE_ACTOR")"
               ;;
             delete)
               REF="${{ github.ref }}"
               SAFE_REF="$(escape "$REF")"
-              MESSAGE="🗑 Удалена ветка или тег:\n${SAFE_REF}\n\n👤 Автор: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '🗑 Удалена ветка или тег:\n%s\n\n👤 Автор: %s' "$SAFE_REF" "$SAFE_ACTOR")"
               ;;
             fork)
-              MESSAGE="🍴 Новый форк репозитория:\n${SAFE_REPO}\n\n👤 Автор: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '🍴 Новый форк репозитория:\n%s\n\n👤 Автор: %s' "$SAFE_REPO" "$SAFE_ACTOR")"
               ;;
             watch)
-              MESSAGE="⭐️ Новая звезда на репозитории:\n${SAFE_REPO}\n\n👤 От: ${SAFE_ACTOR}"
+              MESSAGE="$(printf '⭐️ Новая звезда на репозитории:\n%s\n\n👤 От: %s' "$SAFE_REPO" "$SAFE_ACTOR")"
               ;;
             *)
-              MESSAGE="📘 Событие: ${SAFE_EVENT}\n\n👤 Автор: ${SAFE_ACTOR}\n📦 Репозиторий: ${SAFE_REPO}"
+              MESSAGE="$(printf '📘 Событие: %s\n\n👤 Автор: %s\n📦 Репозиторий: %s' "$SAFE_EVENT" "$SAFE_ACTOR" "$SAFE_REPO")"
               ;;
           esac
 
