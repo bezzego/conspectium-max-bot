@@ -57,3 +57,5 @@ ENV/
 .venv/
 # Ignore Jupyter Notebook checkpoints
 .vscode/
+*.m4a
+*.mp3
