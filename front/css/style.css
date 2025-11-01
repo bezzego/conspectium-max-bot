@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+    --yellow: #f5d86e;
+    --bg-dark: #333;
+    --light-gray: #d3d3d3;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg-dark);
+    color: #fff;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+
+.top-bar {
+    background: var(--yellow);
+    color: #000;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Добавьте это */
+    padding: 12px 20px;
+    font-size: clamp(16px, 4vw, 20px);
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Занимает всю ширину */
+}
+
+.logo {
+    margin-top: 2px;
+    height: 50px;
+    width: 250px;
+    object-fit: contain; /* Сохраняет пропорции логотипа */
+}
+
+.title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 300;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 15px;
+    text-align: center;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.upload-btn {
+    width: calc(100% - 20px); 
+    max-width: 430px;
+    padding: clamp(16px, 4vw, 20px);
+    background: var(--yellow);
+    border-radius: 50px;
+    color: #000;
+    font-size: clamp(16px, 4vw, 18px);
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    margin: 2px 0; 
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+}
+
+.upload-btn:hover {
+    background: #f8e085;
+}
+
+.upload-btn i {
+    font-size: 25px;
+}
+
+.button-icon{
+    width: 40px;
+    height: 40px;
+}
+
+.button-link{
+    width: 35px;
+    height: 35px;
+    margin-bottom: 4px;
+}
+
+.button-icon-test{
+    width: 48px;
+    height: 48px;
+
+}
+
+.button-icon-tools{
+    width: 40px;
+    height: 40px;
+}
+
+.item-content {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #444;
+    text-align: left;
+    font-weight: 500;
+    /* Добавляем свойства для лучших переносов */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto; /* Автоматические переносы для поддерживающих браузеров */
+}
+
+/* Для браузеров, которые поддерживают hyphens */
+@supports (hyphens: auto) {
+    .item-content {
+        hyphens: auto;
+        hyphenate-limit-chars: 6 3 2; /* мин. длина слова, мин. букв до/после переноса */
+    }
+}

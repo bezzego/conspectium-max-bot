@@ -1,0 +1,172 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+
+:root {
+    --yellow: #f5d86e;
+    --bg-dark: #333;
+    --light-gray: #d3d3d3;
+    --container-max-width: 860px;
+    --container-min-width: 320px;
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+
+.container {
+    max-width: var(--container-max-width);
+    min-width: var(--container-min-width);
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    font-size: clamp(24px, 6vw, 28px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: #000;
+    transition: transform 0.2s;
+}
+
+.back-btn:hover {
+    transform: translateX(-2px);
+}
+
+.back-btn-placeholder {
+    width: 40px;
+    height: 40px;
+    visibility: hidden;
+}
+
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview {
+    background: var(--light-gray);
+    border-radius: 20px;
+    height: 521px;
+    max-height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    text-align: center;
+    padding: 20px;
+    font-size: clamp(16px, 3vw, 16px);
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
+
+.action-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.square-btn {
+    background: var(--light-gray);
+    color: #000;
+    flex: 1;
+    min-width: 140px;
+    height: 95px;
+    padding: clamp(12px, 3vw, 16px);
+    border-radius: 20px;
+    font-size: clamp(12px, 3vw, 14px);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.square-btn:hover {
+    transform: translateY(-2px);
+}
+
+.square-btn i {
+    font-size: 28px;
+    color: #333;
+}
+
+.action-card i {
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+    .container {
+        padding: 24px;
+        max-width: 800px;
+    }
+    
+    .top-bar {
+        padding: 16px 24px;
+        margin-bottom: 32px;
+    }
+    
+    .preview {
+        min-height: 350px;
+        margin-bottom: 32px;
+    }
+    
+    .action-row {
+        margin-bottom: 32px;
+        gap: 16px;
+    }
+    
+    .square-btn {
+        padding: 20px;
+        font-size: 16px;
+    }
+    
+    .square-btn i {
+        font-size: 28px;
+    }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 360px) {
+    .container {
+        padding: 12px;
+    }
+    
+    .action-row {
+        flex-direction: column;
+    }
+    
+    .square-btn {
+        width: 100%;
+    }
+    
+    .logo {
+        height: 40px;
+        width: 200px;
+    }
+    
+    .back-btn,
+    .back-btn-placeholder {
+        width: 35px;
+        height: 35px;
+    }
+}

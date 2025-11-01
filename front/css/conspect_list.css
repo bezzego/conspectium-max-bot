@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+
+:root {
+    --yellow: #f5d86e;
+    --bg-dark: #333;
+    --light-gray: #d3d3d3;
+    --container-max-width: 860px;
+    --container-min-width: 320px;
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+.container {
+    max-width: var(--container-max-width);
+    min-width: var(--container-min-width);
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.logo {
+    height: 50px;
+    width: 250px;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+.title{
+    margin-bottom: 15px;
+}
+
+.back-btn-placeholder {
+    width: 40px;
+    height: 40px;
+    visibility: hidden;
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    font-size: clamp(24px, 6vw, 28px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: #000;
+    transition: transform 0.2s;
+    margin-right: 0; /* Убираем старый margin */
+}
+
+.back-btn:hover {
+    transform: translateX(-2px);
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 360px) {
+
+    
+    .back-btn,
+    .back-btn-placeholder {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    font-size: clamp(24px, 6vw, 28px);
+    margin-right: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Стили для списка конспектов */
+.preview {
+    background: var(--light-gray);
+    border-radius: 20px;
+    height: 675px;
+    max-height: 675px;
+    display: flex;
+    flex-direction: column;
+    color: #333;
+    padding: 0;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.conspect-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px 20px;
+}
+
+.conspect-item {
+    margin-bottom: 11px;
+    padding-bottom: 11px;
+    position: relative;
+}
+
+.conspect-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.conspect-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 333px;
+    height: 1px;
+    background:  #7e7d7d;
+}
+
+.item-content {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #444;
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Стили для скроллбара */
+.conspect-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conspect-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.conspect-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.conspect-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 480px) {
+    .conspect-list {
+        padding: 20px 15px;
+    }
+    
+    
+    .item-content {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 360px) {
+    .conspect-item:not(:last-child)::after {
+        width: 250px;
+    }
+}
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+    .container {
+        padding: 24px;
+        max-width: 800px;
+    }
+    
+    .preview {
+        min-height: 300px;
+        margin-bottom: 32px;
+    }
+    
+    .action-row {
+        margin-bottom: 32px;
+        gap: 16px;
+    }
+    
+    .square-btn {
+        padding: 20px;
+    }
+    
+    .square-btn i {
+        font-size: 28px;
+    }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 360px) {
+    .container {
+        padding: 12px;
+    }
+    
+    .action-row {
+        flex-direction: column;
+    }
+    
+    .square-btn {
+        width: 100%;
+    }
+}
