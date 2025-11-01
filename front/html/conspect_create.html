@@ -25,32 +25,50 @@
 
         <main>
             <h1 class="title">Создай конспект!</h1>
-            <p class="subtitle">Загрузи аудио файл и получи конспект</p>
+            <p class="subtitle">Загрузи аудио или вставь текст — мы соберём структуру и ключевые тезисы</p>
 
             <section class="preview">
-                <p>Здесь появится конспект...</p>
+                <div id="conspectPlaceholder">Здесь появится сгенерированный конспект.</div>
+                <article id="conspectResult" class="conspect-result hidden">
+                    <h2 class="conspect-title"></h2>
+                    <p class="conspect-summary"></p>
+                    <h3>Ключевые идеи</h3>
+                    <ul class="conspect-keypoints"></ul>
+                </article>
             </section>
 
+            <div class="manual-create">
+                <h2>Конспект из текста</h2>
+                <label class="input-label" for="conspectTitleInput">Название (необязательно)</label>
+                <input id="conspectTitleInput" type="text" class="text-input" placeholder="Например, Макроэкономика: инфляция и ставки" />
+                <label class="input-label" for="conspectTextInput">Исходный текст</label>
+                <textarea id="conspectTextInput" class="text-input" rows="8" placeholder="Вставь сюда заметки или расшифровку аудио..."></textarea>
+                <button id="createFromTextBtn" class="primary-btn">Сгенерировать конспект</button>
+            </div>
+
             <div class="action-row">
-                <button class="square-btn">
+                <button class="square-btn" id="createQuizFromLatest">
                     <i><img class="button-icon-test" src="/img/test.png" alt=""></i>
                     <span>Создай тест,<br>закрепи знания</span>
                 </button>
 
-                <button class="square-btn">
+                <button class="square-btn" id="shareConspectBtn">
                     <i><img class="button-icon-test" src="/img/share.png" alt=""></i>
                     <span>Поделись ссылкой<br>на конспект</span>
                 </button>
             </div>
 
-            <button class="upload-btn">
+            <input type="file" id="audioUploadInput" accept="audio/*" hidden />
+            <button class="upload-btn" id="uploadAudioButton">
                 <i class="fas fa-microphone"></i>
                 Загрузить аудио...
             </button>
         </main>
     </div>
 
-    <script src="/front/js/script.js"></script>
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/conspect_create.js" defer></script>
 
 </body>
 </html>

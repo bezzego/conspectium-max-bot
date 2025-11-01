@@ -1,9 +1,7 @@
 // Улучшенная функция для добавления мягких переносов
 function addWordBreaksImproved() {
-    console.log('Запуск улучшенной функции переносов...');
     
     const textElements = document.querySelectorAll('.item-content');
-    console.log('Найдено элементов:', textElements.length);
     
     textElements.forEach((element, index) => {
         const originalText = element.textContent;
@@ -14,10 +12,7 @@ function addWordBreaksImproved() {
         });
         
         element.innerHTML = textWithBreaks;
-        console.log(`Элемент ${index + 1} обработан`);
     });
-    
-    console.log('Все элементы обработаны');
 }
 
 // Умное добавление переносов
@@ -84,7 +79,6 @@ function addSmartHyphens(word) {
 
 // Простая версия - перенос каждые 4-6 символов
 function addSimpleWordBreaksUniversal() {
-    console.log('Запуск универсальной версии переносов...');
     
     const textElements = document.querySelectorAll('.item-content .question-text');
     
@@ -117,7 +111,6 @@ function addSimpleWordBreaksUniversal() {
 
 // Агрессивная версия - гарантированные переносы
 function addAggressiveWordBreaks() {
-    console.log('Запуск агрессивной версии переносов...');
     
     const textElements = document.querySelectorAll('.item-content');
     
@@ -168,7 +161,6 @@ function checkLongWordsUniversal() {
         const longWords = words.filter(word => word.length >= 5);
         
         if (longWords.length > 0) {
-            console.log('Слова для переноса найдены:', longWords);
             hasLongWords = true;
         }
     });
@@ -178,14 +170,11 @@ function checkLongWordsUniversal() {
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM загружен, запускаем улучшенный скрипт переносов...');
     
     // Даем небольшую задержку для полной загрузки
     setTimeout(() => {
-        console.log('Проверяем слова для переноса...');
         
         if (checkLongWordsUniversal()) {
-            console.log('Найдены слова для переноса, применяем улучшенные переносы...');
             
             // Сначала пробуем умную версию
             addWordBreaksImproved();
@@ -194,12 +183,10 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const stillLongWords = checkLongWordsUniversal();
                 if (stillLongWords) {
-                    console.log('Переносы не сработали, применяем агрессивную версию');
                     addAggressiveWordBreaks();
                 }
             }, 100);
         } else {
-            console.log('Слова для переноса не найдены');
         }
     }, 100);
 });

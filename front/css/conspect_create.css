@@ -170,3 +170,95 @@ main {
         height: 35px;
     }
 }
+
+.preview {
+    align-items: flex-start;
+    overflow-y: auto;
+}
+
+.conspect-result {
+    text-align: left;
+    width: 100%;
+    max-width: 680px;
+    color: #1c1c1e;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.conspect-result h2 {
+    font-size: clamp(18px, 4vw, 24px);
+    margin-bottom: 4px;
+}
+
+.conspect-result h3 {
+    font-size: clamp(16px, 3.2vw, 20px);
+}
+
+.conspect-keypoints {
+    list-style: disc;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.manual-create {
+    background: #f2f2f7;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1c1c1e;
+}
+
+.text-input {
+    width: 100%;
+    border: 1px solid #d1d1d6;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: 'Manrope', Arial, sans-serif;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.text-input:focus {
+    border-color: #0a84ff;
+}
+
+.primary-btn {
+    align-self: flex-start;
+    background: #1c1c1e;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.primary-btn:hover {
+    transform: translateY(-1px);
+    background: #000;
+}
+
+#conspectPlaceholder {
+    color: #666;
+    font-size: 16px;
+}
+
+@media (max-width: 600px) {
+    .manual-create {
+        padding: 16px;
+    }
+}

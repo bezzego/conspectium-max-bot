@@ -10,7 +10,7 @@
     <!-- Иконка для вкладки -->
     <link rel="icon" type="image/png" href="/img/short_icon_white.png">
 </head>
-<body>
+<body class="page-main">
 
     <header class="top-bar">
         <div class="brand">
@@ -25,47 +25,7 @@
         <p class="subtitle">Создай конспект из аудио файла. Изучи тему. <br> Закрепи знания, пройдя тест</p>
 
         <section class="preview">
-            <div class="conspect-list">
-                <div class="conspect-item">
-                    <div class="item-content">1. Центральные банки борются с инфляцией, повышая ключевые процентные ставки, чтобы охладить потребительский спрос</div>
-                </div>
-                
-                <div class="conspect-item">
-                    <div class="item-content">2. Криптоактивы и CBDC бросают вызов традиционным финансовым системам, переопределяя понятие денег.</div>
-                </div>
-                
-                <div class="conspect-item">
-                    <div class="item-content">3. Протекционистские меры и политика "снижения рисков" (de-risking) меняют структуру мировых цепочек поставок.</div>
-                </div>
-                
-                <div class="conspect-item">
-                    <div class="item-content">4. Распространение удалённой работы и искусственного интеллекта кардинально трансформирует требования к профессиям и занятости.</div>
-                </div>
-
-                <div class="conspect-item">
-                    <div class="item-content">5. Устойчивость суверенного долга становится ключевым вызовом для многих стран на фоне роста расходов на оборону и соцпрограммы.</div>
-                </div>
-
-                <div class="conspect-item">
-                    <div class="item-content">6. Зелёная экономика и устойчивое развитие становятся приоритетами для многих корпораций и государств в условиях климатических изменений.</div>
-                </div>
-
-                <div class="conspect-item">
-                    <div class="item-content">7. Цифровая трансформация ускоряет внедрение автоматизации и роботизации в традиционных отраслях промышленности и услуг.</div>
-                </div>
-
-                <div class="conspect-item">
-                    <div class="item-content">8. Гибридные форматы работы сочетают преимущества офлайн-взаимодействия и удалённой коммуникации, создавая новые вызовы для менеджмента.</div>
-                </div>
-
-                <div class="conspect-item">
-                    <div class="item-content">9. Кибербезопасность становится критически важной в условиях роста цифровых активов и увеличения количества кибератак.</div>
-                </div>
-
-                <div class="conspect-item">
-                    <div class="item-content">10. Развитие искусственного интеллекта требует пересмотра этических норм и законодательного регулирования в области технологий.</div>
-                </div>
-            </div>
+            <div class="conspect-list" id="mainConspects"></div>
         </section>
 
         <!-- Горизонтальный скролл блоков -->
@@ -81,12 +41,12 @@
                     <span style="margin-top: 3px;">Создай<br>конспект</span>
                 </a>
                 
-                <a href="#" class="action-card">
+                <a href="/front/html/choose_test.html" class="action-card">
                     <i><img class="button-icon" src="/img/icon-checklist.png" alt=""></i>
                     <span class="margin-span">Список моих<br>тестов</span>
                 </a>
                 
-                <a href="#" class="action-card">
+                <a href="/front/html/choose_test.html" class="action-card">
                     <i><img class="button-link" src="/img/icon-link.png" alt=""></i>
                     <span class="margin-span">Скинули ссылку?<br>пройди тест</span>
                 </a>
@@ -96,22 +56,24 @@
                     <span class="margin-span">Список<br>конспектов</span>
                 </a>
 
-                <a href="#" class="action-card">
+                <a href="#" class="action-card" id="audioActionCard">
                     <i><img class="button-icon" src="/img/voice.png" alt=""></i>
                     <span class="margin-span">Создай конспект<br>из аудио</span>
                 </a>
             </div>
         </div>
 
-        <button class="upload-btn">
+        <input type="file" id="audioUploadInput" accept="audio/*" hidden />
+        <button class="upload-btn" id="uploadAudioButton">
             <i class="fas fa-microphone"></i>
             Загрузить аудио...
         </button>
     </main>
 
-    <script src="/front/js/script.js"></script>
-    <script src="/front/js/conspect_list.js"></script>
-    <script src="/front/js/popup.js"></script>
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/conspect_list.js" defer></script>
+    <script src="/front/js/popup.js" defer></script>
 
 </body>
 </html>

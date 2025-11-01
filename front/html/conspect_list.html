@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/conspect_list.css">
 </head>
-<body>
+<body class="page-conspects">
     <div class="container">
         <header class="top-bar">
             <button class="back-btn" onclick="goBack()">
@@ -27,66 +27,20 @@
             <h1 class="title">Список конспектов</h1>
 
             <section class="preview">
-                <div class="conspect-list">
-                    <div class="conspect-item">
-                        <div class="item-content">1. Центральные банки борются с инфляцией, повышая ключевые процентные ставки, чтобы охладить потребительский спрос.</div>
-                    </div>
-                    
-                    <div class="conspect-item">
-                        <div class="item-content">2. Криптоактивы и CBDC бросают вызов традиционным финансовым системам, переопределяя понятие денег.</div>
-                    </div>
-                    
-                    <div class="conspect-item">
-                        <div class="item-content">3. Протекционистские меры и политика "снижения рисков" (de-risking) меняют структуру мировых цепочек поставок.</div>
-                    </div>
-                    
-                    <div class="conspect-item">
-                        <div class="item-content">4. Распространение удалённой работы и искусственного интеллекта кардинально трансформирует требования к профессиям и занятости.</div>
-                    </div>
-                    
-                    <div class="conspect-item">
-                        <div class="item-content">5. Устойчивость суверенного долга становится ключевым вызовом для многих стран на фоне роста расходов на оборону и соцпрограммы.</div>
-                    </div>
-
-                    <div class="conspect-item">
-                        <div class="item-content">6. Цифровая экономика: Криптоактивы и CBDC бросают вызов традиционным финансовым системам, переопределяя понятие денег.</div>
-                    </div>
-
-                    <div class="conspect-item">
-                        <div class="item-content">7. Инфляция: Центральные банки борются с инфляцией, повышая ключевые процентные ставки, чтобы охладить потребительский спрос.</div>
-                    </div>
-
-                    <div class="conspect-item">
-                        <div class="item-content">8. Зелёная экономика и устойчивое развитие становятся приоритетами для многих корпораций и государств в условиях климатических изменений.</div>
-                    </div>
-
-                    <div class="conspect-item">
-                        <div class="item-content">9. Цифровая трансформация ускоряет внедрение автоматизации и роботизации в традиционных отраслях промышленности и услуг.</div>
-                    </div>
-
-                    <div class="conspect-item">
-                        <div class="item-content">10. Гибридные форматы работы сочетают преимущества офлайн-взаимодействия и удалённой коммуникации, создавая новые вызовы для менеджмента.</div>
-                    </div>
-
-                    <div class="conspect-item">
-                        <div class="item-content">11. Кибербезопасность становится критически важной в условиях роста цифровых активов и увеличения количества кибератак.</div>
-                    </div>
-
-                    <div class="conspect-item">
-                        <div class="item-content">12. Развитие искусственного интеллекта требует пересмотра этических норм и законодательного регулирования в области технологий.</div>
-                    </div>
-                </div>
+                <div class="conspect-list" id="conspectList"></div>
             </section>
 
-            <button class="upload-btn">
+            <input type="file" id="audioUploadInput" accept="audio/*" hidden />
+            <button class="upload-btn" id="uploadAudioButton">
                 <i class="fas fa-microphone"></i>
                 Загрузить аудио...
             </button>
         </main>
     </div>
 
-    <script src="/front/js/script.js"></script>
-    <script src="/front/js/conspect_list.js"></script>
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/conspect_list.js" defer></script>
 
 </body>
 </html>

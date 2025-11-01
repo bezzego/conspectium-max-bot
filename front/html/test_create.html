@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/test_create.css">
 </head>
-<body>
+<body class="page-test-create">
     <div class="container">
         <header class="top-bar">
             <button class="back-btn" onclick="goBack()">
@@ -36,24 +36,26 @@
                     <span>Создать тест<br>по существующему конспекту</span>
                 </button>
 
-                <button class="creation-btn right-btn">
+                <button class="creation-btn right-btn" id="openManualConstructor">
                     <i><img class="button-icon-tools" src="/img/icon-tools.png" alt=""></i>
                     <span>Создать тест<br>при помощи конструктора</span>
                 </button>
 
-                <button class="creation-btn left-btn">
+                <button class="creation-btn left-btn" id="shareQuizBtn">
                     <i><img class="button-icon-test" src="/img/share.png" alt=""></i>
                     <span>Поделиться ссылкой<br>на ранее созданный тест</span>
                 </button>
             </div>
 
-            <button class="upload-btn">
+            <input type="file" id="audioUploadInput" accept="audio/*" hidden />
+            <button class="upload-btn" id="uploadAudioButton">
                 <i class="fas fa-microphone"></i>
                 Загрузить аудио...
             </button>
         </main>
     </div>
 
-    <script src="/front/js/script.js"></script>
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/script.js" defer></script>
 </body>
 </html>
