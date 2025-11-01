@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Конспектиум</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/test.css">
+</head>
+<body>
+    <div class="container">
+        <header class="top-bar">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="brand">
+                    <a href="/front/html/main.html" class="logo-link">
+                        <img class="logo" src="/img/logo_black.png" alt="logo">
+                    </a>
+            </div>
+            <!-- Пустой элемент для балансировки -->
+            <div class="back-btn-placeholder"></div>
+        </header>
+
+        <main>
+            <h1 class="title">Проверь свои знания. Пройди тест</h1>
+
+           <section class="preview">
+    <div class="questions-container">
+        <!-- Вопрос 1 -->
+        <div class="question-item" data-question="1">
+            <div class="question-text">1. Каковы преимущества и риски международной торговли?</div>
+            <div class="answers-container">
+                <label class="answer-option">
+                    <input type="radio" name="question1" value="a">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">a) Преимущества: доступ к новым рынкам, риски: валютные колебания</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question1" value="b">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">b) Преимущества: экономия на масштабе, риски: политическая нестабильность</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question1" value="c">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">c) Преимущества: диверсификация, риски: торговые барьеры</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question1" value="d">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">d) Все вышеперечисленное верно</span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Вопрос 2 -->
+        <div class="question-item" data-question="2">
+            <div class="question-text">2. Как центральные банки борются с инфляцией?</div>
+            <div class="answers-container">
+                <label class="answer-option">
+                    <input type="radio" name="question2" value="a">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">a) Повышают ключевые процентные ставки</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question2" value="b">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">b) Увеличивают резервные требования для банков</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question2" value="c">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">c) Продают государственные ценные бумаги</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question2" value="d">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">d) Все вышеперечисленные методы</span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Вопрос 3 -->
+        <div class="question-item" data-question="3">
+            <div class="question-text">3. Что такое ключевая процентная ставка?</div>
+            <div class="answers-container">
+                <label class="answer-option">
+                    <input type="radio" name="question3" value="a">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">a) Ставка, под которую ЦБ кредитует коммерческие банки</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question3" value="b">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">b) Основной инструмент денежно-кредитной политики</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question3" value="c">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">c) Индикатор стоимости заемных средств в экономике</span>
+                </label>
+                <label class="answer-option">
+                    <input type="radio" name="question3" value="d">
+                    <span class="checkmark"></span>
+                    <span class="answer-text">d) Все ответы верны</span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Вопрос 4 -->
+        <div class="question-item" data-question="4">
+            <div class="question-text">4. Как инфляция влияет на потребительский спрос?</div>
+            <div class="answers-container">
+                <label class="answer-option"><input type="radio" name="question4" value="a"><span class="checkmark"></span><span class="answer-text">a) Снижает покупательную способность</span></label>
+                <label class="answer-option"><input type="radio" name="question4" value="b"><span class="checkmark"></span><span class="answer-text">b) Стимулирует текущее потребление</span></label>
+                <label class="answer-option"><input type="radio" name="question4" value="c"><span class="checkmark"></span><span class="answer-text">c) Увеличивает склонность к сбережениям</span></label>
+                <label class="answer-option"><input type="radio" name="question4" value="d"><span class="checkmark"></span><span class="answer-text">d) Верны ответы a и b</span></label>
+            </div>
+        </div>
+        
+        <!-- Вопрос 5 -->
+        <div class="question-item" data-question="5">
+            <div class="question-text">5. Что такое дефляция и чем она опасна?</div>
+            <div class="answers-container">
+                <label class="answer-option"><input type="radio" name="question5" value="a"><span class="checkmark"></span><span class="answer-text">a) Снижение общего уровня цен</span></label>
+                <label class="answer-option"><input type="radio" name="question5" value="b"><span class="checkmark"></span><span class="answer-text">b) Опасна снижением потребительских расходов</span></label>
+                <label class="answer-option"><input type="radio" name="question5" value="c"><span class="checkmark"></span><span class="answer-text">c) Может привести к дефляционной спирали</span></label>
+                <label class="answer-option"><input type="radio" name="question5" value="d"><span class="checkmark"></span><span class="answer-text">d) Все ответы верны</span></label>
+            </div>
+        </div>
+
+        <!-- Вопрос 6 -->
+        <div class="question-item" data-question="6">
+            <div class="question-text">6. Какие инструменты есть у ЦБ для регулирования экономики?</div>
+            <div class="answers-container">
+                <label class="answer-option"><input type="radio" name="question6" value="a"><span class="checkmark"></span><span class="answer-text">a) Процентные ставки и операции на открытом рынке</span></label>
+                <label class="answer-option"><input type="radio" name="question6" value="b"><span class="checkmark"></span><span class="answer-text">b) Нормативы обязательных резервов</span></label>
+                <label class="answer-option"><input type="radio" name="question6" value="c"><span class="checkmark"></span><span class="answer-text">c) Валютные интервенции и макропруденциальная политика</span></label>
+                <label class="answer-option"><input type="radio" name="question6" value="d"><span class="checkmark"></span><span class="answer-text">d) Все перечисленные инструменты</span></label>
+            </div>
+        </div>
+
+        <!-- Вопрос 7 -->
+        <div class="question-item" data-question="7">
+            <div class="question-text">7. Как процентные ставки влияют на инвестиции?</div>
+            <div class="answers-container">
+                <label class="answer-option"><input type="radio" name="question7" value="a"><span class="checkmark"></span><span class="answer-text">a) Высокие ставки снижают привлекательность инвестиций</span></label>
+                <label class="answer-option"><input type="radio" name="question7" value="b"><span class="checkmark"></span><span class="answer-text">b) Низкие ставки стимулируют инвестиционную активность</span></label>
+                <label class="answer-option"><input type="radio" name="question7" value="c"><span class="checkmark"></span><span class="answer-text">c) Влияют на стоимость заемного капитала</span></label>
+                <label class="answer-option"><input type="radio" name="question7" value="d"><span class="checkmark"></span><span class="answer-text">d) Все утверждения верны</span></label>
+            </div>
+        </div>
+
+        <!-- Вопрос 8 -->
+        <div class="question-item" data-question="8">
+            <div class="question-text">8. Что показывает индекс потребительских цен?</div>
+            <div class="answers-container">
+                <label class="answer-option"><input type="radio" name="question8" value="a"><span class="checkmark"></span><span class="answer-text">a) Изменение стоимости потребительской корзины</span></label>
+                <label class="answer-option"><input type="radio" name="question8" value="b"><span class="checkmark"></span><span class="answer-text">b) Уровень инфляции в стране</span></label>
+                <label class="answer-option"><input type="radio" name="question8" value="c"><span class="checkmark"></span><span class="answer-text">c) Динамику покупательной способности денег</span></label>
+                <label class="answer-option"><input type="radio" name="question8" value="d"><span class="checkmark"></span><span class="answer-text">d) Все перечисленное верно</span></label>
+            </div>
+        </div>
+
+        <!-- Вопрос 9 -->
+        <div class="question-item" data-question="9">
+            <div class="question-text">9. Как инфляция влияет на сбережения?</div>
+            <div class="answers-container">
+                <label class="answer-option"><input type="radio" name="question9" value="a"><span class="checkmark"></span><span class="answer-text">a) Снижает реальную стоимость сбережений</span></label>
+                <label class="answer-option"><input type="radio" name="question9" value="b"><span class="checkmark"></span><span class="answer-text">b) Стимулирует поиск защищенных активов</span></label>
+                <label class="answer-option"><input type="radio" name="question9" value="c"><span class="checkmark"></span><span class="answer-text">c) Влияет на инвестиционные стратегии</span></label>
+                <label class="answer-option"><input type="radio" name="question9" value="d"><span class="checkmark"></span><span class="answer-text">d) Все ответы правильные</span></label>
+            </div>
+        </div>
+
+        <!-- Вопрос 10 -->
+        <div class="question-item" data-question="10">
+            <div class="question-text">10. В чем разница между акцией и облигацией?</div>
+            <div class="answers-container">
+                <label class="answer-option"><input type="radio" name="question10" value="a"><span class="checkmark"></span><span class="answer-text">a) Акция - доля в компании, облигация - долговое обязательство</span></label>
+                <label class="answer-option"><input type="radio" name="question10" value="b"><span class="checkmark"></span><span class="answer-text">b) Акционеры получают дивиденды, держатели облигаций - купоны</span></label>
+                <label class="answer-option"><input type="radio" name="question10" value="c"><span class="checkmark"></span><span class="answer-text">c) Акции более рискованные, облигации более стабильные</span></label>
+                <label class="answer-option"><input type="radio" name="question10" value="d"><span class="checkmark"></span><span class="answer-text">d) Все перечисленные различия верны</span></label>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <button class="upload-btn">
+                Ответитить
+            </button>
+        </main>
+    </div>
+
+    <script src="/front/js/script.js"></script>
+    <script src="/front/js/conspect_list.js"></script>
+    <script src="/front/js/test.js"></script>
+
+</body>
+</html>
