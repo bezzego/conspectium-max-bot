@@ -86,7 +86,7 @@ function addSmartHyphens(word) {
 function addSimpleWordBreaksUniversal() {
     console.log('Запуск универсальной версии переносов...');
     
-    const textElements = document.querySelectorAll('.item-content');
+    const textElements = document.querySelectorAll('.item-content .question-text');
     
     textElements.forEach((element, index) => {
         const originalText = element.textContent;
