@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+
+.logo{
+    margin-right: 32px;
+}
+.subtitle{
+    margin-bottom: 50px;
+}
+
+/* Контейнер для кнопок создания */
+.buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+}
+
+/* Стили для кнопок создания */
+.creation-btn {
+    width: 239px;
+    height: 150px;
+    background: var(--light-gray);
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.creation-btn:hover {
+    transform: translateY(-4px);
+    background: #e8e8e8;
+}
+
+.creation-btn i {
+    font-size: 32px;
+    color: #333;
+}
+
+.creation-btn span {
+    font-size: 14px;
+    line-height: 1.3;
+    color: #000;
+    font-weight: 600;
+}
+
+/* Позиционирование кнопок */
+.left-btn {
+    align-self: flex-start;
+    margin-left: 0;
+}
+
+.right-btn {
+    align-self: flex-end;
+    margin-right: 0;
+}
+
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+    
+    .buttons-container {
+        gap: 25px;
+        margin-bottom: 50px;
+    }
+    
+    .creation-btn {
+        width: 260px;
+        height: 146px;
+    }
+    
+    .creation-btn span {
+        font-size: 15px;
+    }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+    .buttons-container {
+        gap: 15px;
+    }
+    
+    .creation-btn span {
+        font-size: 13px;
+    }
+    
+}

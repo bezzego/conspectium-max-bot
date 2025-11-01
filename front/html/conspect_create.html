@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Конспектиум</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/conspect_create.css">
+</head>
+<body>
+    <div class="container">
+        <header class="top-bar">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="brand">
+                    <a href="/front/html/main.html" class="logo-link">
+                        <img class="logo" src="/img/logo_black.png" alt="logo">
+                    </a>
+            </div>
+            <!-- Пустой элемент для балансировки -->
+            <div class="back-btn-placeholder"></div>
+        </header>
+
+        <main>
+            <h1 class="title">Создай конспект!</h1>
+            <p class="subtitle">Загрузи аудио файл и получи конспект</p>
+
+            <section class="preview">
+                <p>Здесь появится конспект...</p>
+            </section>
+
+            <div class="action-row">
+                <button class="square-btn">
+                    <i><img class="button-icon-test" src="/img/test.png" alt=""></i>
+                    <span>Создай тест,<br>закрепи знания</span>
+                </button>
+
+                <button class="square-btn">
+                    <i><img class="button-icon-test" src="/img/share.png" alt=""></i>
+                    <span>Поделись ссылкой<br>на конспект</span>
+                </button>
+            </div>
+
+            <button class="upload-btn">
+                <i class="fas fa-microphone"></i>
+                Загрузить аудио...
+            </button>
+        </main>
+    </div>
+
+    <script src="/front/js/script.js"></script>
+
+</body>
+</html>
