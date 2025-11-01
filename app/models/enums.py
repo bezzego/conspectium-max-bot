@@ -1,0 +1,40 @@
+from enum import Enum
+
+
+class AudioSourceType(str, Enum):
+    UPLOAD = "upload"
+    TELEGRAM_VOICE = "telegram_voice"
+    EXTERNAL_URL = "external_url"
+
+
+class AudioProcessingStatus(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    READY = "ready"
+    FAILED = "failed"
+
+
+class ConspectStatus(str, Enum):
+    DRAFT = "draft"
+    PROCESSING = "processing"
+    READY = "ready"
+    FAILED = "failed"
+
+
+class QuizStatus(str, Enum):
+    PROCESSING = "processing"
+    READY = "ready"
+    FAILED = "failed"
+
+
+class GenerationJobType(str, Enum):
+    TRANSCRIPTION = "transcription"
+    CONSPECT = "conspect"
+    QUIZ = "quiz"
+
+
+class GenerationJobStatus(str, Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
