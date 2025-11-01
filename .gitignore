@@ -56,3 +56,4 @@ venv/
 ENV/
 .venv/
 # Ignore Jupyter Notebook checkpoints
+.vscode/
