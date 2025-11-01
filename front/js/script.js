@@ -30,6 +30,16 @@
     `;
     document.head.appendChild(style);
 
+<<<<<<< HEAD
+=======
+    // Обработчик для кнопки загрузки
+    document.querySelector(".upload-btn").addEventListener("click", function(e) {
+        e.preventDefault();
+        alert("Загрузка аудио пока в разработке 🚀");
+    });
+
+
+>>>>>>> e59242ee43c8af5ce1d99bfb877db27e51b4c800
     // Функция для возврата назад
     function goBack() {
         if (document.referrer && document.referrer.includes(window.location.hostname)) {
@@ -63,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'choose_test.html';
         });
     }
+<<<<<<< HEAD
 });
 
 
@@ -447,3 +458,6 @@ function handleAudioFile(file) {
     showUploadNotification(file);
     processAudioFile(file);
 }
+=======
+});
+>>>>>>> e59242ee43c8af5ce1d99bfb877db27e51b4c800

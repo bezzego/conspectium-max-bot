@@ -1,0 +1,59 @@
+.env
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.idea/
+.vscode/
+
+# Ignore Telegram bot token file
+token.txt
+# Ignore database file
+database.db
+logs/
+*.log
+# Ignore coverage reports
+htmlcov/
+.coverage
+# Ignore pytest cache
+.pytest_cache/
+# Ignore build and distribution directories
+
+build/
+dist/
+*.egg-info/
+# Ignore system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# Ignore MacOS files
+.AppleDouble
+.LSOverride
+# Ignore npm debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# Ignore lock files
+package-lock.json
+yarn.lock
+# Ignore environment-specific files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Ignore JetBrains IDE files
+*.iml
+.idea/
+# Ignore coverage reports
+coverage/
+.coverage.*
+# Ignore Sphinx documentation build
+
+docs/_build/
+# Ignore virtual environment directories
+env/
+venv/
+ENV/
+.venv/
+# Ignore Jupyter Notebook checkpoints
+.vscode/

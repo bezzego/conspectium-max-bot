@@ -1,0 +1,129 @@
+name: Telegram Notifications
+
+on:
+  push:
+  pull_request:
+  issues:
+    types: [opened, closed, reopened, edited]
+  pull_request_review:
+    types: [submitted]
+  release:
+    types: [published, created, edited]
+  create:
+  delete:
+  fork:
+  watch:
+    types: [started]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram message
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_IDS: ${{ secrets.TG_CHAT_IDS }}
+        run: |
+          set -e
+
+          EVENT="${{ github.event_name }}"
+          ACTOR="${{ github.actor }}"
+          REPO="${{ github.repository }}"
+          BRANCH="${{ github.ref_name }}"
+
+          # Экранирование для MarkdownV2 (устойчивое и полное)
+          escape() {
+            printf '%s' "$1" | sed \
+              -e 's/\\/\\\\/g' \
+              -e 's/_/\\_/g' \
+              -e 's/\*/\\*/g' \
+              -e 's/\[/\\[/g' \
+              -e 's/\]/\\]/g' \
+              -e 's/(/\\(/g' \
+              -e 's/)/\\)/g' \
+              -e 's/~/\\~/g' \
+              -e 's/`/\\`/g' \
+              -e 's/>/\\>/g' \
+              -e 's/#/\\#/g' \
+              -e 's/\+/\\+/g' \
+              -e 's/-/\\-/g' \
+              -e 's/=/\\=/g' \
+              -e 's/|/\\|/g' \
+              -e 's/{/\\{/g' \
+              -e 's/}/\\}/g' \
+              -e 's/\./\\./g' \
+              -e 's/!/\\!/g'
+          }
+
+          SAFE_EVENT="$(escape "$EVENT")"
+          SAFE_ACTOR="$(escape "$ACTOR")"
+          SAFE_REPO="$(escape "$REPO")"
+          SAFE_BRANCH="$(escape "$BRANCH")"
+
+          MESSAGE=""
+
+          case "$EVENT" in
+            push)
+              COMMIT_MSG="$(echo "${{ github.event.head_commit.message }}" | head -n 1)"
+              SAFE_COMMIT="$(escape "$COMMIT_MSG")"
+              MESSAGE="$(printf '🟢 *Push в репозиторий*:\n%s\n\n👤 *Автор:* %s\n🌿 *Ветка:* %s\n💬 *Сообщение:* %s' "$SAFE_REPO" "$SAFE_ACTOR" "$SAFE_BRANCH" "$SAFE_COMMIT")"
+              ;;
+            pull_request)
+              TITLE="${{ github.event.pull_request.title }}"
+              ACTION="${{ github.event.action }}"
+              SAFE_TITLE="$(escape "$TITLE")"
+              SAFE_ACTION="$(escape "$ACTION")"
+              MESSAGE="$(printf '📦 *Pull Request* (%s)\n%s\n\n👤 *Автор:* %s' "$SAFE_ACTION" "$SAFE_TITLE" "$SAFE_ACTOR")"
+              ;;
+            pull_request_review)
+              ACTION="${{ github.event.action }}"
+              SAFE_ACTION="$(escape "$ACTION")"
+              MESSAGE="$(printf '🗣 *Review* (%s)\n\n👤 *Автор:* %s' "$SAFE_ACTION" "$SAFE_ACTOR")"
+              ;;
+            issues)
+              TITLE="${{ github.event.issue.title }}"
+              ACTION="${{ github.event.action }}"
+              SAFE_TITLE="$(escape "$TITLE")"
+              SAFE_ACTION="$(escape "$ACTION")"
+              MESSAGE="$(printf '🗂 *Issue* (%s)\n%s\n\n👤 *Автор:* %s' "$SAFE_ACTION" "$SAFE_TITLE" "$SAFE_ACTOR")"
+              ;;
+            release)
+              REL_NAME="${{ github.event.release.name }}"
+              SAFE_REL="$(escape "$REL_NAME")"
+              MESSAGE="$(printf '🚀 *Новый релиз опубликован*\n%s\n\n👤 *Автор:* %s' "$SAFE_REL" "$SAFE_ACTOR")"
+              ;;
+            create)
+              REF="${{ github.event.ref }}"
+              SAFE_REF="$(escape "$REF")"
+              TYPE_RAW='${{ github.event.ref_type }}'
+              if [ "$TYPE_RAW" = "branch" ]; then KIND="ветка"; else KIND="тег"; fi
+              MESSAGE="$(printf '✨ *Создана новая %s:*\n%s\n\n👤 *Автор:* %s' "$KIND" "$SAFE_REF" "$SAFE_ACTOR")"
+              ;;
+            delete)
+              REF="${{ github.event.ref }}"
+              SAFE_REF="$(escape "$REF")"
+              TYPE_RAW='${{ github.event.ref_type }}'
+              if [ "$TYPE_RAW" = "branch" ]; then KIND="ветка"; else KIND="тег"; fi
+              MESSAGE="$(printf '🗑 *Удалена %s:*\n%s\n\n👤 *Автор:* %s' "$KIND" "$SAFE_REF" "$SAFE_ACTOR")"
+              ;;
+            fork)
+              MESSAGE="$(printf '🍴 *Новый форк репозитория:*\n%s\n\n👤 *Автор:* %s' "$SAFE_REPO" "$SAFE_ACTOR")"
+              ;;
+            watch)
+              MESSAGE="$(printf '⭐️ *Новая звезда на репозитории:*\n%s\n\n👤 *От:* %s' "$SAFE_REPO" "$SAFE_ACTOR")"
+              ;;
+            *)
+              MESSAGE="$(printf '📘 *Событие:* %s\n\n👤 *Автор:* %s\n📦 *Репозиторий:* %s' "$SAFE_EVENT" "$SAFE_ACTOR" "$SAFE_REPO")"
+              ;;
+          esac
+
+          # Рассылка в несколько чатов
+          if [ -n "$MESSAGE" ]; then
+            for CHAT_ID in $TG_CHAT_IDS; do
+              echo "Отправляю уведомление в $CHAT_ID"
+              curl -s -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
+                   -d chat_id="$CHAT_ID" \
+                   -d parse_mode="MarkdownV2" \
+                   -d text="$MESSAGE" >/dev/null
+            done
+          fi
