@@ -16,7 +16,8 @@
 
 body {
     background: var(--background);
-    overflow: hidden;
+    /* NOTE: don't force overflow:hidden globally — this file is included on multiple pages.
+       Page scroll blocking is handled dynamically when the loading overlay is shown. */
 }
 
 .loading-overlay {
@@ -529,27 +530,6 @@ body {
     63% { transform: rotate(-360deg); }
 }
 
-.progress {
-    position: relative;
-    margin-top: 20px;
-    width: 300px; /* Уменьшено с 400px */
-    height: 6px; /* Уменьшено с 8px */
-    background: #444;
-    border-radius: 3px;
-    overflow: hidden;
-    border: 1px solid #555;
-}
-
-.progress::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 100%;
-    background: var(--primary);
-    animation: progress 6s linear forwards;
-}
 
 .loading-text {
     margin-top: 15px;

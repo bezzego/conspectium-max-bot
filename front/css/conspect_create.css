@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
     --yellow: #f5d86e;
     --bg-dark: #333;
-    --light-gray: #d3d3d3;
+    --light-gray: #dddcdc;
     --container-max-width: 860px;
     --container-min-width: 320px;
 }
@@ -12,6 +12,10 @@
     margin: 0; 
     padding: 0; 
     box-sizing: border-box; 
+}
+
+.title-h2{
+    color: #333;
 }
 
 
@@ -85,8 +89,7 @@ main {
     color: #000;
     flex: 1;
     min-width: 140px;
-    height: 95px;
-    padding: clamp(12px, 3vw, 16px);
+    padding: 15px 10px;
     border-radius: 20px;
     font-size: clamp(12px, 3vw, 14px);
     border: none;
@@ -205,10 +208,10 @@ main {
 }
 
 .manual-create {
-    background: #f2f2f7;
+    background: var(--light-gray);
     border-radius: 18px;
     padding: 20px;
-    margin-bottom: 24px;
+    margin-bottom: 34px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -222,13 +225,14 @@ main {
 
 .text-input {
     width: 100%;
-    border: 1px solid #d1d1d6;
+    border: 1px solid #b2b2b3;
     border-radius: 14px;
     padding: 12px 16px;
     font-size: 15px;
     font-family: 'Manrope', Arial, sans-serif;
     outline: none;
     transition: border-color 0.2s ease;
+    background: #ebebeb;
 }
 
 .text-input:focus {
@@ -237,14 +241,15 @@ main {
 
 .primary-btn {
     align-self: flex-start;
-    background: #1c1c1e;
-    color: #fff;
+    background: var(--yellow);
+    color: #000000;
     border: none;
     border-radius: 14px;
     padding: 12px 24px;
-    font-size: 15px;
+    font-size: 16px;
     cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease
+
 }
 
 .primary-btn:hover {
@@ -255,10 +260,4 @@ main {
 #conspectPlaceholder {
     color: #666;
     font-size: 16px;
-}
-
-@media (max-width: 600px) {
-    .manual-create {
-        padding: 16px;
-    }
 }

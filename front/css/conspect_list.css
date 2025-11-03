@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
     --yellow: #f5d86e;
     --bg-dark: #333;
-    --light-gray: #d3d3d3;
+    --light-gray: #dddcdc;
     --container-max-width: 860px;
     --container-min-width: 320px;
 }
@@ -174,61 +174,29 @@ main {
     background: #555;
 }
 
-/* Адаптивность для маленьких экранов */
-@media (max-width: 480px) {
-    .conspect-list {
-        padding: 20px 15px;
-    }
-    
-    
-    .item-content {
-        font-size: 15px;
-    }
+.conspect-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
-@media (max-width: 360px) {
-    .conspect-item:not(:last-child)::after {
-        width: 250px;
-    }
+.conspect-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(333px, 90vw); /* Максимум 333px, но не более 90% ширины экрана */
+    height: 1px;
+    background: #7e7d7d;
 }
 
-/* Адаптивность для планшетов */
-@media (min-width: 768px) {
-    .container {
-        padding: 24px;
-        max-width: 800px;
-    }
-    
-    .preview {
-        min-height: 300px;
-        margin-bottom: 32px;
-    }
-    
-    .action-row {
-        margin-bottom: 32px;
-        gap: 16px;
-    }
-    
-    .square-btn {
-        padding: 20px;
-    }
-    
-    .square-btn i {
-        font-size: 28px;
-    }
-}
-
-/* Адаптивность для очень маленьких экранов */
-@media (max-width: 360px) {
-    .container {
-        padding: 12px;
-    }
-    
-    .action-row {
-        flex-direction: column;
-    }
-    
-    .square-btn {
-        width: 100%;
-    }
+.conspect-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(280px, 80vw, 650px); /* Минимум 280px, адаптивно до 800px */
+    height: 1px;
+    background: #7e7d7d;
 }

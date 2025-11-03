@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
     --yellow: #f5d86e;
@@ -30,8 +30,8 @@
 }
 
 .conspect-item {
-    margin-bottom: 11px;
-    padding-bottom: 11px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
     position: relative;
 }
 
@@ -46,10 +46,31 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 333px;
+    width: min(333px, 90vw); /* Максимум 333px, но не более 90% ширины экрана */
     height: 1px;
-    background:  #7e7d7d;
+    background: #7e7d7d;
 }
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+    .conspect-item:not(:last-child)::after {
+        width: min(500px, 55vw); /* Увеличиваем максимальную ширину на планшетах */
+    }
+}
+
+
+
+.conspect-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(280px, 80vw, 650px); /* Минимум 280px, адаптивно до 800px */
+    height: 1px;
+    background: #7e7d7d;
+}
+
 
 .item-content {
     font-size: 15px;
@@ -199,4 +220,3 @@
         height: 120px;
     }
 }
-

@@ -394,58 +394,280 @@ window.goBack = goBack;
     let conspectModalOverlay = null;
     let modalEscHandler = null;
 
-    function showConspectModal(conspect) {
-        closeConspectModal();
+function showConspectModal(conspect) {
+    closeConspectModal();
 
-        conspectModalOverlay = document.createElement('div');
-        conspectModalOverlay.className = 'conspect-modal-overlay';
+    // Стили для модального окна
+    const modalStyles = `
+        .conspect-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); display: flex; align-items: center; 
+            justify-content: center; z-index: 10000; opacity: 0; 
+            transition: opacity 0.3s ease; padding: 20px;
+        }
+        .conspect-modal-overlay.visible { opacity: 1; }
+        .conspect-modal {
+            background: #dddcdc; border-radius: 20px; width: 100%; 
+            max-width: 600px; max-height: 80vh; display: flex; 
+            flex-direction: column; overflow: hidden; transform: translateY(20px); 
+            transition: transform 0.3s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            position: relative;
+        }
+        .conspect-modal-overlay.visible .conspect-modal { transform: translateY(0); }
+        .modal-header {
+            background: #ebeaea; padding: 20px 30px 15px; 
+            border-bottom: 1px solid #7e7d7d; position: relative;
+        }
+        .modal-header-content { 
+            padding-right: 50px; 
+        }
+        .modal-header h2 { 
+            color: #333; 
+            font-size: 18px; 
+            font-weight: 700; 
+            margin: 0 0 8px 0; 
+            line-height: 1.3;
+        }
+        .modal-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .modal-meta {
+            color: #6c6c70;
+            font-size: 15px;
+            font-weight: 500;
+            margin: 0;
+        }
+        .meta-copy-btn {
+            background: transparent;
+            border: none;
+            color: #6c6c70;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        .meta-copy-btn:hover {
+            color: #b9b9b5ff;
+            background: rgba(0,0,0,0.05);
+        }
+        .conspect-badge {
+            display: inline-block;
+            background: #f5d86e;
+            color: #333;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .modal-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+        }
+        .modal-btn {
+            background: transparent;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            color: #333;
+        }
+        .modal-btn:hover {
+            background: rgba(0,0,0,0.1);
+            transform: scale(1.1);
+        }
+        .modal-btn.close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+        }
+        .modal-body {
+            padding: 20px 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-summary {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .modal-body h3 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .modal-keypoints {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .modal-keypoints li {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            padding-left: 16px;
+            position: relative;
+            font-weight: 500;
+        }
+        .modal-keypoints li::before {
+            content: '•';
+            color: #f5d86e;
+            font-size: 16px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .conspect-modal-overlay { padding: 15px; }
+            .modal-header { padding: 15px 20px 12px; }
+            .modal-body { padding: 15px 20px; }
+            .modal-actions { top: 12px; right: 12px; }
+            .modal-header-content { padding-right: 45px; }
+        }
+        
+        @media (max-width: 480px) {
+            .conspect-modal-overlay { padding: 10px; }
+            .modal-header { padding: 12px 15px 10px; }
+            .modal-body { padding: 12px 15px; }
+            .modal-header h2 { font-size: 16px; }
+            .modal-meta { font-size: 14px; }
+            .modal-summary { font-size: 15px; }
+        }
+    `;
+    
+    // Добавляем стили в head если их еще нет
+    if (!document.getElementById('modal-styles')) {
+        const styleEl = document.createElement('style');
+        styleEl.id = 'modal-styles';
+        styleEl.textContent = modalStyles;
+        document.head.appendChild(styleEl);
+    }
 
-        const createdAt = conspect.created_at
-            ? new Date(conspect.created_at).toLocaleString('ru-RU')
-            : '';
+    const createdAt = conspect.created_at
+        ? new Date(conspect.created_at).toLocaleString('ru-RU')
+        : '';
 
-        const keyPoints = (conspect.keywords || []).map((point) => `<li>${point}</li>`).join('');
-        const meta = conspect.raw_response && conspect.raw_response.mode === 'offline'
-            ? '<span class="conspect-badge">Офлайн черновик</span>'
-            : '';
+    const keyPoints = (conspect.keywords || []).map((point) => `<li>${point}</li>`).join('');
+    const meta = conspect.raw_response && conspect.raw_response.mode === 'offline'
+        ? '<div class="conspect-badge">Офлайн черновик</div>'
+        : '';
 
-        conspectModalOverlay.innerHTML = `
-            <div class="conspect-modal">
-                <div class="modal-header">
-                    <div>
-                        <h2>${conspect.title || 'Без названия'}</h2>
-                        ${createdAt ? `<p class="modal-meta">Создан: ${createdAt}</p>` : ''}
-                    </div>
-                    <button class="modal-close" aria-label="Закрыть">&times;</button>
+    conspectModalOverlay = document.createElement('div');
+    conspectModalOverlay.className = 'conspect-modal-overlay';
+
+    conspectModalOverlay.innerHTML = `
+        <div class="conspect-modal">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <h2>${conspect.title || 'Без названия'}</h2>
+                    ${createdAt ? `
+                        <div class="modal-meta-row">
+                            <p class="modal-meta">Создан: ${createdAt}</p>
+                            <button class="meta-copy-btn" title="Копировать конспект">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    ` : ''}
+                    ${meta}
                 </div>
-                ${meta}
-                <div class="modal-body">
-                    <p class="modal-summary">${conspect.summary || 'Описание отсутствует.'}</p>
-                    ${keyPoints ? `<h3>Ключевые идеи</h3><ul class="modal-keypoints">${keyPoints}</ul>` : ''}
+                <div class="modal-actions">
+                    <button class="modal-btn close-btn" aria-label="Закрыть">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
-        `;
+            <div class="modal-body">
+                <p class="modal-summary">${conspect.summary || 'Описание отсутствует.'}</p>
+                ${keyPoints ? `
+                    <h3>Ключевые идеи</h3>
+                    <ul class="modal-keypoints">${keyPoints}</ul>
+                ` : ''}
+            </div>
+        </div>
+    `;
 
-        document.body.appendChild(conspectModalOverlay);
-        requestAnimationFrame(() => {
-            conspectModalOverlay.classList.add('visible');
-        });
+    document.body.appendChild(conspectModalOverlay);
+    requestAnimationFrame(() => {
+        conspectModalOverlay.classList.add('visible');
+    });
 
-        const closeButton = conspectModalOverlay.querySelector('.modal-close');
-        closeButton?.addEventListener('click', closeConspectModal);
-        conspectModalOverlay.addEventListener('click', (event) => {
-            if (event.target === conspectModalOverlay) {
-                closeConspectModal();
-            }
-        });
+    // Обработчик кнопки закрытия
+    const closeButton = conspectModalOverlay.querySelector('.close-btn');
+    closeButton?.addEventListener('click', closeConspectModal);
+    
 
-        modalEscHandler = (event) => {
-            if (event.key === 'Escape') {
-                closeConspectModal();
-            }
-        };
-        document.addEventListener('keydown', modalEscHandler);
-    }
+    const copyButton = conspectModalOverlay.querySelector('.meta-copy-btn');
+    copyButton?.addEventListener('click', () => {
+        copyConspectToClipboard(conspect);
+    });
+
+    conspectModalOverlay.addEventListener('click', (event) => {
+        if (event.target === conspectModalOverlay) {
+            closeConspectModal();
+        }
+    });
+
+    modalEscHandler = (event) => {
+        if (event.key === 'Escape') {
+            closeConspectModal();
+        }
+    };
+    document.addEventListener('keydown', modalEscHandler);
+}
+
+function copyConspectToClipboard(conspect) {
+    const keyPoints = conspect.keywords ? conspect.keywords.map(point => `• ${point}`).join('\n') : '';
+    
+    const textToCopy = `
+${conspect.title || 'Без названия'}
+
+${conspect.summary || 'Описание отсутствует.'}
+
+${keyPoints ? 'Ключевые идеи:\n' + keyPoints : ''}
+    `.trim();
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        // Используем window.ConspectiumApp напрямую для избежания ошибок
+        if (window.ConspectiumApp) {
+            window.ConspectiumApp.notify('Конспект скопирован в буфер обмена', 'success');
+        }
+        
+        // Визуальная обратная связь на кнопке
+        const copyBtn = document.querySelector('.meta-copy-btn');
+        if (copyBtn) {
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+            copyBtn.style.color = '#b9b9b5ff;';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHTML;
+                copyBtn.style.color = '';
+            }, 2000);
+        }
+    }).catch(err => {
+        console.error('Ошибка копирования: ', err);
+        // Используем window.ConspectiumApp напрямую для избежания ошибок
+        if (window.ConspectiumApp) {
+            window.ConspectiumApp.notify('Не удалось скопировать конспект', 'error');
+        }
+    });
+}
+
 
     function closeConspectModal() {
         if (conspectModalOverlay) {
@@ -463,3 +685,6 @@ window.goBack = goBack;
 
     window.closeConspectModal = closeConspectModal;
 })();
+
+// Делаем функцию глобально доступной для choose_test.js
+window.showConspectModal = showConspectModal;
