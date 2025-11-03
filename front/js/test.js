@@ -180,11 +180,17 @@
 
         try {
             app.showLoading('Считаем результат...');
-            const result = await app.authFetch(`/quizzes/${quizId}/results`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ answers }),
-            });
+            
+            // Имитируем задержку в 4 секунды перед показом результата
+            const [result] = await Promise.all([
+                app.authFetch(`/quizzes/${quizId}/results`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answers }),
+                }),
+                new Promise(resolve => setTimeout(resolve, 6000)) // Задержка 4 секунды
+            ]);
+            
             app.hideLoading();
 
             const resultEl = document.getElementById('quizResult');
@@ -198,8 +204,7 @@
 
             const submitBtn = document.getElementById('submitQuizBtn');
             if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Тест пройден';
+                submitBtn.classList.add('hidden');
             }
         } catch (err) {
             console.error(err);

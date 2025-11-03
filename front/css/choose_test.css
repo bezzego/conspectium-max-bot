@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
     --yellow: #f5d86e;
     --bg-dark: #333;
-    --light-gray: #d3d3d3;
+    --light-gray: #dddcdc;
     --container-max-width: 860px;
     --container-min-width: 320px;
 }
@@ -61,35 +61,10 @@
     height: 40px;
     color: #000;
     transition: transform 0.2s;
-    margin-right: 0; /* Убираем старый margin */
 }
 
 .back-btn:hover {
     transform: translateX(-2px);
-}
-
-/* Адаптивность для маленьких экранов */
-@media (max-width: 360px) {
-
-    
-    .back-btn,
-    .back-btn-placeholder {
-        width: 35px;
-        height: 35px;
-    }
-}
-
-.back-btn {
-    background: transparent;
-    border: none;
-    font-size: clamp(24px, 6vw, 28px);
-    margin-right: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
 }
 
 main {
@@ -123,6 +98,9 @@ main {
     margin-bottom: 11px;
     padding-bottom: 11px;
     position: relative;
+    min-height: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .conspect-item:last-child {
@@ -130,6 +108,7 @@ main {
     padding-bottom: 0;
 }
 
+/* Полоска для разделения строк */
 .conspect-item:not(:last-child)::after {
     content: '';
     position: absolute;
@@ -138,15 +117,103 @@ main {
     transform: translateX(-50%);
     width: 333px;
     height: 1px;
-    background:  #7e7d7d;
+    background: #7e7d7d;
+    border-radius: 50px;
+}
+
+/* Адаптация полоски для активного состояния */
+.conspect-item.active:not(:last-child)::after {
+    width: calc(333px + 20px);
+    bottom: -10px;
 }
 
 .item-content {
+    margin-top: 13px;
     font-size: 15px;
     line-height: 1.5;
     color: #444;
     text-align: left;
     font-weight: 500;
+    transition: opacity 0.3s ease;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    padding: 0 20px;
+}
+
+/* Затемнение фона при активном состоянии */
+.conspect-item.active {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    margin: 0 -10px;
+    padding: 10px 10px 11px 10px;
+}
+
+/* Затемнение текста конспекта */
+.conspect-item.active .item-content {
+    opacity: 0.3;
+}
+
+/* Позиционирование кнопок по краям */
+.item-buttons {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+    gap: 20px;
+}
+
+.conspect-item.active .item-buttons {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Стили для кнопок конспекта */
+.action-btn {
+    width: 141px;
+    height: 34px;
+    background: #333;
+    border: none;
+    border-radius: 15px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Manrope', sans-serif;
+    flex-shrink: 0;
+    pointer-events: auto;
+    flex: 1;
+    max-width: 141px;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.create-test-btn {
+    background: var(--yellow);
+    color: #000;
+}
+
+.create-test-btn:hover {
+    background: #f8e085;
+}
+
+.open-conspect-btn:hover {
+    background: #444;
 }
 
 /* Стили для скроллбара */
@@ -168,126 +235,65 @@ main {
     background: #555;
 }
 
-/* Стили для контейнера конспекта */
-.conspect-item {
-    margin-bottom: 11px;
-    padding-bottom: 11px;
-    position: relative;
-    min-height: 60px; /* Увеличиваем высоту для кнопок */
-}
-
-/* Скрываем текст при активных кнопках */
-.conspect-item.active .item-content {
-    opacity: 0.3;
-    transition: opacity 0.3s ease;
-}
-
-.item-content {
-    transition: opacity 0.3s ease;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-}
-
-/* Стили для кнопок конспекта */
-.item-buttons {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.action-btn {
-    width: 141px;
-    height: 34px;
-    background: #333;
-    border: none;
-    border-radius: 15px;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Montserrat', sans-serif;
-    flex-shrink: 0;
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-}
-
-.create-test-btn {
-    background: var(--yellow);
-    color: #000;
-}
-
-.create-test-btn:hover {
-    background: #f8e085;
-}
-
-.open-conspect-btn:hover {
-    background: #444;
-}
-
-/* Адаптивность для маленьких экранов */
-@media (max-width: 480px) {
-    .action-btn {
-        width: 130px;
-    }
-    
-    .item-buttons {
-        padding: 0 15px;
-    }
-}
-
-@media (max-width: 360px) {
-    .action-btn {
-        width: 120px;
-    }
-    
-    .item-buttons {
-        padding: 0 10px;
-    }
-}
-
-/* Адаптивность для маленьких экранов */
-@media (max-width: 480px) {
-    .action-btn {
-        width: 120px;
-    }
-    
-    .item-buttons {
-        padding: 0 10px;
-    }
-}
-
-/* Адаптивность для маленьких экранов */
-@media (max-width: 480px) {
-    .item-buttons {
-        gap: 8px;
-    }
-    
-    .action-btn {
-        width: 100%;
-        max-width: 141px;
-    }
-}
-
 /* Адаптивность для маленьких экранов */
 @media (max-width: 480px) {
     .conspect-list {
-        padding: 20px 15px;
+        padding: 10px 15px;
     }
     
+    .item-buttons {
+        gap: 20px;
+    }
+    
+    .action-btn {
+        width: auto;
+        min-width: 120px;
+        flex: 1;
+    }
     
     .item-content {
+        padding: 0 15px;
         font-size: 15px;
     }
+    
+    .conspect-item.active {
+        margin: 0 -5px;
+    }
+    
 }
 
 @media (max-width: 360px) {
+    .container {
+        padding: 12px;
+    }
+    
+    .back-btn,
+    .back-btn-placeholder {
+        width: 35px;
+        height: 35px;
+    }
+    
     .conspect-item:not(:last-child)::after {
         width: 250px;
+    }
+    
+    .conspect-item.active:not(:last-child)::after {
+        width: calc(250px + 10px);
+    }
+    
+    .item-buttons {
+        padding: 0 10px;
+        gap: 15px;
+    }
+    
+    .action-btn {
+        min-width: 110px;
+        height: 32px;
+        font-size: 10px;
+    }
+    
+    .item-content {
+        padding: 0 10px;
     }
 }
 
@@ -301,33 +307,5 @@ main {
     .preview {
         min-height: 300px;
         margin-bottom: 32px;
-    }
-    
-    .action-row {
-        margin-bottom: 32px;
-        gap: 16px;
-    }
-    
-    .square-btn {
-        padding: 20px;
-    }
-    
-    .square-btn i {
-        font-size: 28px;
-    }
-}
-
-/* Адаптивность для очень маленьких экранов */
-@media (max-width: 360px) {
-    .container {
-        padding: 12px;
-    }
-    
-    .action-row {
-        flex-direction: column;
-    }
-    
-    .square-btn {
-        width: 100%;
     }
 }
