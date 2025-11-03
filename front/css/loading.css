@@ -16,7 +16,6 @@
 
 body {
     background: var(--background);
-    overflow: hidden;
 }
 
 .loading-overlay {
@@ -30,6 +29,14 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+}
+
+.loading-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .loading-content {

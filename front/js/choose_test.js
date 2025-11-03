@@ -229,9 +229,9 @@ async function createQuiz(conspectId) {
     signature.style.opacity = '0';
     document.body.appendChild(signature);
     
-    // Показываем анимацию
+    // Показываем анимацию (через класс .visible чтобы сработал CSS transition)
     setTimeout(() => {
-        loadingOverlay.style.opacity = '1';
+        loadingOverlay.classList.add('visible');
     }, 10);
     
     // Через 1 секунду показываем подпись
@@ -257,33 +257,32 @@ function hideWizardAnimation() {
     const elements = window.wizardElements;
     
     if (!elements) return;
-    
+
     // Сразу скрываем подпись (на случай если функция вызвана раньше)
     if (elements.signature) {
         elements.signature.style.opacity = '0';
         elements.signature.style.transition = 'opacity 0.3s ease';
-        
+
         setTimeout(() => {
             if (elements.signature.parentNode) {
                 elements.signature.parentNode.removeChild(elements.signature);
             }
         }, 300);
     }
-    
-    // Плавное исчезновение анимации
+
+    // Плавное исчезновение анимации (через класс .visible)
     if (elements.overlay) {
-        elements.overlay.style.opacity = '0';
-        elements.overlay.style.transition = 'opacity 0.5s ease';
-        
+        elements.overlay.classList.remove('visible');
+
         setTimeout(() => {
             if (elements.overlay.parentNode) {
                 elements.overlay.parentNode.removeChild(elements.overlay);
             }
-        }, 500);
+        }, 400);
     }
-        
-        // Очищаем ссылки
-        window.wizardElements = null;
+
+    // Очищаем ссылки
+    window.wizardElements = null;
     }
 
     // Добавляем стили для подписи
