@@ -355,17 +355,18 @@ class GenerationService:
             ]
 
         questions = []
-        for idx, point in enumerate(points[:5], start=1):
+
+        for idx in range(10):
+            source = points[idx % len(points)]
             questions.append(
                 {
-                    "question": f"Верно ли утверждение: {point}",
+                    "question": f"Верно ли утверждение: {source}",
                     "answers": [
                         {"text": "Да, верно", "is_correct": True},
                         {"text": "Нет, не упоминалось", "is_correct": False},
                         {"text": "Частично", "is_correct": False},
                         {"text": "Трудно сказать", "is_correct": False},
                     ],
-                    "explanation": "Ответ отмечен как верный автоматически. Уточните детали вручную.",
                 }
             )
 

@@ -83,8 +83,10 @@ window.goBack = goBack;
             const file = input.files[0];
             try {
                 app.showLoading('Загружаем аудио...');
+                showConspectPlaceholder(`Загружаем аудио «${file.name}»...`);
                 const audio = await app.uploadAudio(file);
                 app.showLoading('Создаём конспект...');
+                showConspectPlaceholder('Нейросеть создаёт конспект, это займет немного времени...');
                 const conspectId = await app.createConspectFromAudio(audio.id, file.name);
                 app.hideLoading();
                 app.notify('Конспект готов!', 'success');
@@ -263,6 +265,7 @@ window.goBack = goBack;
                 }
                 try {
                     app.showLoading('Создаём конспект из текста...');
+                    showConspectPlaceholder('Готовим конспект на основе текста...');
                     const conspectId = await app.createConspectFromText(textInput.value.trim(), titleInput.value.trim());
                     app.hideLoading();
                     app.notify('Конспект готов!', 'success');
@@ -301,41 +304,32 @@ window.goBack = goBack;
                 });
             });
         }
+
+        showConspectPlaceholder('Здесь появится сгенерированный конспект.');
+        loadLatestConspectForPreview(app);
+    }
+
+
+    async function loadLatestConspectForPreview(app) {
+        try {
+            const data = await app.authFetch('/conspects');
+            if (!data.items?.length) {
+                return;
+            }
+            renderConspectPreview(data.items[0]);
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async function loadConspectDetails(app, conspectId) {
         try {
+
             const conspect = await app.authFetch(`/conspects/${conspectId}`);
-            const container = document.getElementById('conspectResult');
-            const placeholder = document.getElementById('conspectPlaceholder');
-            const quizBtn = document.getElementById('createQuizFromLatest');
-            const shareBtn = document.getElementById('shareConspectBtn');
-
-            if (!container || !placeholder) return;
-
-            placeholder.classList.add('hidden');
-            container.classList.remove('hidden');
-            container.querySelector('.conspect-title').textContent = conspect.title || 'Без названия';
-            container.querySelector('.conspect-summary').textContent = conspect.summary || 'Нет описания';
-
-            const keypointsContainer = container.querySelector('.conspect-keypoints');
-            keypointsContainer.innerHTML = '';
-            (conspect.keywords || []).forEach((point) => {
-                const li = document.createElement('li');
-                li.textContent = point;
-                keypointsContainer.appendChild(li);
-            });
-
-            if (quizBtn) {
-                quizBtn.dataset.latestConspectId = conspect.id;
-            }
-            if (shareBtn) {
-                shareBtn.dataset.latestConspectId = conspect.id;
-            }
-
-            document.dispatchEvent(new CustomEvent('conspect:details', { detail: { conspect } }));
+            renderConspectPreview(conspect);
         } catch (err) {
             console.error(err);
+            showConspectPlaceholder('Не удалось загрузить конспект, попробуйте снова.');
         }
     }
 
@@ -684,6 +678,68 @@ ${keyPoints ? 'Ключевые идеи:\n' + keyPoints : ''}
     }
 
     window.closeConspectModal = closeConspectModal;
+
+    function renderConspectPreview(conspect) {
+        const container = document.getElementById('conspectResult');
+        const placeholder = document.getElementById('conspectPlaceholder');
+        const quizBtn = document.getElementById('createQuizFromLatest');
+        const shareBtn = document.getElementById('shareConspectBtn');
+
+        if (!container || !placeholder) {
+            return;
+        }
+
+        const titleEl = container.querySelector('.conspect-title');
+        const summaryEl = container.querySelector('.conspect-summary');
+        const keypointsContainer = container.querySelector('.conspect-keypoints');
+
+        if (titleEl) {
+            titleEl.textContent = conspect.title || 'Без названия';
+        }
+        if (summaryEl) {
+            summaryEl.textContent = conspect.summary || 'Нет описания';
+        }
+        if (keypointsContainer) {
+            keypointsContainer.innerHTML = '';
+            (conspect.keywords || []).forEach((point) => {
+                const li = document.createElement('li');
+                li.textContent = point;
+                keypointsContainer.appendChild(li);
+            });
+        }
+
+        if (quizBtn) {
+            quizBtn.dataset.latestConspectId = conspect.id;
+        }
+        if (shareBtn) {
+            shareBtn.dataset.latestConspectId = conspect.id;
+        }
+
+        placeholder.classList.add('hidden');
+        container.classList.remove('hidden');
+
+        document.dispatchEvent(new CustomEvent('conspect:details', { detail: { conspect } }));
+    }
+
+    function showConspectPlaceholder(message) {
+        const placeholder = document.getElementById('conspectPlaceholder');
+        const result = document.getElementById('conspectResult');
+        if (!placeholder || !result) {
+            return;
+        }
+        placeholder.textContent = message;
+        placeholder.classList.remove('hidden');
+        result.classList.add('hidden');
+
+        const quizBtn = document.getElementById('createQuizFromLatest');
+        const shareBtn = document.getElementById('shareConspectBtn');
+        if (quizBtn) {
+            delete quizBtn.dataset.latestConspectId;
+        }
+        if (shareBtn) {
+            delete shareBtn.dataset.latestConspectId;
+        }
+    }
 })();
 
 // Делаем функцию глобально доступной для choose_test.js

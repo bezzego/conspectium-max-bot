@@ -1,4 +1,6 @@
 (() => {
+    let currentQuiz = null;
+
     document.addEventListener('DOMContentLoaded', async () => {
         if (!document.body.classList.contains('page-test')) {
             return;
@@ -58,6 +60,7 @@
 
         try {
             const quiz = await app.authFetch(`/quizzes/${quizId}`);
+            currentQuiz = quiz;
             titleEl.textContent = quiz.title || 'Без названия';
             if (descriptionEl) {
                 descriptionEl.textContent = quiz.description || '';
@@ -105,6 +108,7 @@
                 input.type = 'radio';
                 input.name = `question-${question.id}`;
                 input.value = String(answer.id);
+                input.dataset.questionId = String(question.id);
 
                 const checkmark = document.createElement('span');
                 checkmark.className = 'checkmark';
@@ -118,13 +122,6 @@
                 label.appendChild(text);
                 answersContainer.appendChild(label);
             });
-
-            if (question.explanation) {
-                const info = document.createElement('div');
-                info.className = 'answer-explanation';
-                info.textContent = question.explanation;
-                answersContainer.appendChild(info);
-            }
 
             questionItem.appendChild(answersContainer);
             container.appendChild(questionItem);
@@ -157,19 +154,26 @@
                     question.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 200);
             });
+
+            question.querySelectorAll('input[type="radio"]').forEach((input) => {
+                input.addEventListener('change', () => {
+                    question.classList.remove('expanded');
+                    expanded = null;
+                });
+            });
         });
     }
 
     async function submitQuiz(app, quizId, questions) {
         const answers = [];
-        const missing = [];
+        const selections = {};
 
         questions.forEach((question) => {
             const checked = document.querySelector(`input[name="question-${question.id}"]:checked`);
             if (checked) {
-                answers.push(Number(checked.value));
-            } else {
-                missing.push(question.id);
+                const answerId = Number(checked.value);
+                answers.push(answerId);
+                selections[question.id] = answerId;
             }
         });
 
@@ -206,11 +210,49 @@
             if (submitBtn) {
                 submitBtn.classList.add('hidden');
             }
+
+            highlightAnswers(questions, selections);
         } catch (err) {
             console.error(err);
             app.hideLoading();
             app.notify(err.message || 'Не удалось сохранить результат', 'error');
         }
+    }
+
+    function highlightAnswers(questions, selections) {
+        questions.forEach((question) => {
+            const questionEl = document.querySelector(`.question-item[data-question="${question.id}"]`);
+            if (!questionEl) return;
+
+            questionEl.classList.remove('question-correct', 'question-incorrect');
+            const selectedId = selections[question.id];
+            const correctIds = (question.answers || [])
+                .filter((answer) => answer.is_correct)
+                .map((answer) => answer.id);
+
+            const answerOptions = questionEl.querySelectorAll('.answer-option');
+            answerOptions.forEach((option) => {
+                option.classList.remove('answer-correct', 'answer-incorrect', 'selected-answer');
+                const input = option.querySelector('input[type="radio"]');
+                if (!input) return;
+                const optionId = Number(input.value);
+                if (correctIds.includes(optionId)) {
+                    option.classList.add('answer-correct');
+                }
+                if (optionId === selectedId && !correctIds.includes(optionId)) {
+                    option.classList.add('answer-incorrect');
+                }
+                if (optionId === selectedId) {
+                    option.classList.add('selected-answer');
+                }
+            });
+
+            if (selectedId && correctIds.includes(selectedId)) {
+                questionEl.classList.add('question-correct');
+            } else {
+                questionEl.classList.add('question-incorrect');
+            }
+        });
     }
 
     function showEmptyState(message) {
