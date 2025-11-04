@@ -24,7 +24,7 @@
 
 @media (max-height: 1158px)  {
   .preview {
-    max-height: 500px;
+    max-height: 475px;
   }
 }
 
@@ -92,7 +92,7 @@
 .item-content {
     font-size: 15px;
     line-height: 1.5;
-    color: #444;
+    color: #ffffff;
     text-align: left;
     font-weight: 500;
 }
@@ -191,7 +191,7 @@
 .action-card {
     flex: 0 0 auto;
     width: 140px;
-    height: 110px;
+    height: 120px;
     background: var(--light-gray);
     border-radius: 20px;
     display: flex;
@@ -233,7 +233,7 @@
 
 @media (min-width: 800px) {
     .action-card{
-        width: 150px;
-        height: 120px;
+        width: 160px;
+        height: 140px;
     }
 }

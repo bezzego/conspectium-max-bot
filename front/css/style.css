@@ -18,7 +18,6 @@ body {
     padding: 16px;
 }
 
-
 .top-bar {
     background: var(--yellow);
     color: #000;
@@ -30,11 +29,11 @@ body {
     font-size: clamp(16px, 4vw, 20px);
     margin-bottom: 10px;
     flex-shrink: 0;
-    width: calc(100% - 40px);
     max-width: min(1000px, 90vw);
     margin-left: auto;
     margin-right: auto;
     box-sizing: border-box;
+    height: 75px;
 }
 
 /* Адаптивность для планшетов */
@@ -59,7 +58,6 @@ body {
 /* Адаптивность для очень маленьких экранов */
 @media (max-width: 480px) {
     .top-bar {
-        width: calc(100% - 30px);
         max-width: min(1000px, 95vw);
         padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
         font-size: clamp(14px, 4vw, 18px);
@@ -198,7 +196,7 @@ body {
 .item-content {
     font-size: 15px;
     line-height: 1.5;
-    color: #444;
+    color: #ffffff;
     text-align: left;
     font-weight: 500;
     /* Добавляем свойства для лучших переносов */

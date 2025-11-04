@@ -1,0 +1,767 @@
+/* Стили для хедера в стиле liquid glass */
+.top-bar {
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.377) 0%,     /* Желтый цвет с прозрачностью */
+        rgba(240, 193, 25, 0.295) 50%,    /* Средняя прозрачность */
+        rgba(243, 196, 24, 0.377) 100%    /* Желтый цвет с прозрачностью */
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 24px);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+/* Контейнер для бликов в хедере */
+.top-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 30%, /* Более яркие белые блики */
+        transparent 70%
+    );
+    border-radius: 50px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Эффект градиентной рамки для хедера */
+.top-bar::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2),
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2)
+    );
+    border-radius: 52px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.top-bar:hover::after {
+    opacity: 1;
+}
+
+/* Эффект при наведении на хедер */
+.top-bar:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* Стили для логотипа */
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.logo {
+    margin-top: 2px;
+    height: 50px;
+    width: 250px;
+    object-fit: contain;
+    filter: brightness(0) invert(1); /* Превращает черный логотип в белый */
+    transition: all 0.4s ease;
+}
+
+/* Эффект при наведении на логотип */
+.logo-link:hover .logo {
+    transform: scale(1.05);
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+    .top-bar {
+        width: calc(100%);
+        max-width: min(1000px, 85vw);
+        padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 28px);
+    }
+}
+
+/* Адаптивность для десктопов */
+@media (min-width: 924px) {
+    .top-bar {
+        width: calc(100%);
+        max-width: min(1000px, 80vw);
+        padding: 14px clamp(24px, 4vw, 32px);
+    }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+    .top-bar {
+        max-width: min(1000px, 95vw);
+        padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
+        margin-bottom: 15px;
+    }
+
+}
+
+@media (max-width: 360px) {
+    .top-bar {
+        width: calc(100% - 20px);
+        padding: 8px 12px;
+        margin-bottom: 12px;
+    }
+    
+    .logo {
+        height: 40px;
+        width: 200px;
+    }
+}
+
+.action-card.liquid-glass {
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 15px 20px; /* Уменьшил вертикальный padding */
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Уменьшил расстояние между иконкой и текстом */
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    min-height: 120px; /* Фиксированная минимальная высота для выравнивания */
+}
+
+/* Иконка и текст */
+.action-card.liquid-glass .button-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: brightness(0) invert(1); /* Делает черные иконки белыми */
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 2;
+    margin-top: 5px;
+}
+
+/* Специальные стили для иконки ссылки */
+.action-card.liquid-glass .button-link {
+    width: 35px;
+    height: 35px;
+    filter: brightness(0) invert(1); /* Делает черную иконку белой */
+    transition: all 0.4s ease;
+    margin-bottom: 0;
+}
+
+/* Анимация при наведении для всех иконок */
+/* Анимация при наведении для всех иконок */
+.action-card.liquid-glass:hover .button-icon,
+.action-card.liquid-glass:hover .button-link {
+    transform: scale(1.15) rotate(5deg);
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .action-card.liquid-glass .button-icon {
+        width: 35px;
+        height: 35px;
+        margin-top: 3px;
+    }
+    
+    .action-card.liquid-glass .button-link {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 360px) {
+    .action-card.liquid-glass .button-icon {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .action-card.liquid-glass .button-link {
+        width: 25px;
+        height: 25px;
+    }
+}
+
+.action-card.liquid-glass .button-link {
+    width: 35px;
+    height: 35px;
+    margin-bottom: 0; /* Убрал лишний margin */
+}
+
+.action-card.liquid-glass span {
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px; /* Немного уменьшил размер текста */
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.3; /* Уменьшил межстрочный интервал */
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s ease;
+    margin-bottom: 5px; /* Добавил отступ снизу */
+}
+
+/* Специальные классы для отдельных кнопок */
+.action-card.liquid-glass .margin-span {
+    margin-top: 0; /* Убираем лишние отступы */
+    margin-bottom: 5px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .action-card.liquid-glass {
+        padding: 12px 15px; /* Еще меньше padding на мобильных */
+        gap: 6px; /* Еще меньше расстояние */
+        min-height: 110px; /* Меньшая высота на мобильных */
+    }
+    
+    .action-card.liquid-glass .button-icon {
+        width: 35px;
+        height: 35px;
+        margin-top: 3px;
+    }
+    
+    .action-card.liquid-glass .button-link {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .action-card.liquid-glass span {
+        font-size: 13px;
+        line-height: 1.2;
+        margin-bottom: 3px;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 360px) {
+    .action-card.liquid-glass {
+        padding: 10px 12px;
+        gap: 5px;
+        min-height: 100px;
+    }
+    
+    .action-card.liquid-glass .button-icon {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .action-card.liquid-glass span {
+        font-size: 12px;
+    }
+}
+
+/* Остальные стили остаются без изменений */
+.liquid-reflections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+/* Основной движущийся блик */
+.liquid-reflections::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.1) 75%,
+        transparent 100%
+    );
+    transform: rotate(45deg);
+    transition: transform 0.8s ease;
+}
+
+/* Второй слой бликов */
+.liquid-reflections::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at 30% 20%,
+        rgba(255, 255, 255, 0.15) 0%,
+        transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.action-card.liquid-glass:hover .liquid-reflections {
+    opacity: 1;
+}
+
+.action-card.liquid-glass:hover .liquid-reflections::after {
+    opacity: 1;
+    animation: liquidPulse 3s ease-in-out infinite;
+}
+
+@keyframes liquidShine {
+    0% {
+        transform: rotate(45deg) translateX(-100%) translateY(-100%);
+    }
+    50% {
+        transform: rotate(45deg) translateX(0%) translateY(0%);
+    }
+    100% {
+        transform: rotate(45deg) translateX(100%) translateY(100%);
+    }
+}
+
+@keyframes liquidPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+}
+
+/* Дополнительные статические блики */
+.action-card.liquid-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.05) 30%,
+        transparent 70%
+    );
+    border-radius: 20px;
+    opacity: 0.5;
+}
+
+/* Эффект градиентной рамки */
+.action-card.liquid-glass::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05)
+    );
+    border-radius: 22px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.action-card.liquid-glass:hover::after {
+    opacity: 1;
+}
+
+.action-card.liquid-glass:hover .button-icon {
+    transform: scale(1.15) rotate(5deg);
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+.action-card.liquid-glass:hover span {
+    transform: translateY(-2px);
+    text-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Общие эффекты при наведении */
+.action-card.liquid-glass:hover {
+    transform: scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.15) 100%
+    );
+}
+
+
+/* Стили для секции preview с конспектами */
+.preview {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Контейнер для бликов в preview */
+.preview {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.22) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Контейнер для бликов в preview */
+.preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.12) 30%,
+        transparent 70%
+    );
+    border-radius: 20px;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Эффект градиентной рамки для preview */
+.preview::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.12),
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.12)
+    );
+    border-radius: 22px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.preview:hover::after {
+    opacity: 1;
+}
+
+/* Эффект при наведении - делаем еще светлее */
+.preview:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.25) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Адаптивность для preview */
+@media (max-width: 768px) {
+    .preview {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+}
+
+/* Стили для кнопки загрузки аудио с liquid glass эффектом */
+.upload-btn.liquid-glass {
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.377) 0%,     /* Желтый цвет с прозрачностью */
+        rgba(240, 193, 25, 0.295) 50%,    /* Средняя прозрачность */
+        rgba(243, 196, 24, 0.377) 100%    /* Желтый цвет с прозрачностью */
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 50px;
+    border: 1px solid rgba(245, 216, 110, 0.3); /* Желтая граница */
+    color: #333; /* Темный текст для контраста на желтом */
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 
+        0 8px 32px rgba(245, 216, 110, 0.2), /* Желтые тени */
+        inset 0 1px 0 rgba(255, 255, 255, 0.4), /* Яркие блики */
+        inset 0 -1px 0 rgba(179, 152, 46, 0.2); /* Темно-желтые тени внутри */
+    overflow: hidden;
+    width: calc(100% - 40px);
+    max-width: 760px;
+    padding: clamp(16px, 4vw, 20px);
+    margin: 2px 0;
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+/* Контейнер для бликов в кнопке загрузки */
+.upload-btn.liquid-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 30%, /* Более яркие белые блики */
+        transparent 70%
+    );
+    border-radius: 50px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Эффект градиентной рамки для кнопки загрузки */
+.upload-btn.liquid-glass::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2),
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2)
+    );
+    border-radius: 52px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.upload-btn.liquid-glass:hover::after {
+    opacity: 1;
+}
+
+/* Эффекты при наведении на кнопку загрузки */
+.upload-btn.liquid-glass:hover {
+    transform: translateX(-50%) scale(1.02);
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    border: 1px solid rgba(245, 216, 110, 0.4);
+    box-shadow: 
+        0 12px 40px rgba(245, 216, 110, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.25);
+}
+
+/* Иконка в кнопке загрузки */
+.upload-btn.liquid-glass i {
+    font-size: 30px;
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 2;
+    color: #ffffff; /* Темный цвет иконки */
+}
+
+.upload-btn.liquid-glass:hover i {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+/* Текст в кнопке загрузки */
+.upload-btn.liquid-glass {
+    color: #333;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    position: relative;
+    z-index: 2;
+}
+
+.upload-btn.liquid-glass:hover {
+    color: #222;
+    text-shadow: 
+        0 1px 3px rgba(255, 255, 255, 0.7),
+        0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Текст в кнопке загрузки */
+.upload-btn.liquid-glass {
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 2;
+}
+
+.upload-btn.liquid-glass:hover {
+    color: #fff;
+    text-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Адаптивность для preview */
+@media (max-width: 768px) {
+    .preview {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+}
+
+/* Адаптивность для кнопки загрузки */
+@media (max-width: 480px) {
+    .upload-btn.liquid-glass {
+        width: 100%;
+        padding: clamp(14px, 4vw, 18px);
+        font-size: clamp(16px, 4vw, 17px);
+    }
+
+}
+
+@media (max-width: 360px) {
+    .upload-btn.liquid-glass {
+        width: calc(100% - 20px);
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+    
+    .upload-btn.liquid-glass i {
+        font-size: 16px;
+    }
+}
+
+/* Дополнительные стили для контента внутри preview */
+.conspect-list {
+    position: relative;
+    z-index: 2;
+}
+
+/* Если нужно добавить анимированные блики как у action-card, можно добавить: */
+.preview .liquid-reflections,
+.upload-btn.liquid-glass .liquid-reflections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.preview:hover .liquid-reflections,
+.upload-btn.liquid-glass:hover .liquid-reflections {
+    opacity: 1;
+}
