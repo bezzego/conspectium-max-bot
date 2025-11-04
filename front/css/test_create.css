@@ -132,6 +132,11 @@ body {
     font-size: 28px;
     margin-right: 10px;
     cursor: pointer;
+    color: #ffffff;
+}
+
+.back-btn i{
+    color: #ffffff;
 }
 
 .button-icon{

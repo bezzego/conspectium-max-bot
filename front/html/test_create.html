@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/test_create.css">
     <link rel="stylesheet" href="/front/css/responsive.css">
+    <link rel="stylesheet" href="/front/css/liquid_glass.css">
 </head>
 <body class="page-test-create">
     <div class="container">
@@ -15,11 +16,11 @@
             <button class="back-btn" onclick="goBack()">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <div class="brand">
+                <div class="brand">
                     <a href="/front/html/main.html" class="logo-link">
                         <img class="logo" src="/img/logo_black.png" alt="logo">
                     </a>
-            </div>
+                </div>
             <!-- Пустой элемент для балансировки -->
             <div class="back-btn-placeholder"></div>
         </header>
@@ -32,31 +33,36 @@
 
             <!-- Три кнопки в шахматном порядке -->
             <div class="buttons-container">
-                <button class="creation-btn left-btn" id="createFromConspectBtn">
+                <button class="creation-btn liquid-glass" id="createFromConspectBtn">
                     <i><img class="button-icon-test" src="/img/test.png" alt=""></i>
                     <span>Создать тест<br>по существующему конспекту</span>
+                    <div class="liquid-reflections"></div>
                 </button>
 
-                <button class="creation-btn right-btn" id="openManualConstructor">
+                <button class="creation-btn liquid-glass" id="openManualConstructor">
                     <i><img class="button-icon-tools" src="/img/icon-tools.png" alt=""></i>
                     <span>Создать тест<br>при помощи конструктора</span>
+                    <div class="liquid-reflections"></div>
                 </button>
 
-                <button class="creation-btn left-btn" id="shareQuizBtn">
+                <button class="creation-btn liquid-glass" id="shareQuizBtn">
                     <i><img class="button-icon-test" src="/img/share.png" alt=""></i>
                     <span>Поделиться ссылкой<br>на ранее созданный тест</span>
+                    <div class="liquid-reflections"></div>
                 </button>
             </div>
-
+        </main>
+        
             <input type="file" id="audioUploadInput" accept="audio/*" hidden />
-            <button class="upload-btn" id="uploadAudioButton">
+            <button class="upload-btn liquid-glass" id="uploadAudioButton">
                 <i class="fas fa-microphone"></i>
                 Загрузить аудио...
             </button>
-        </main>
+
     </div>
 
     <script src="/front/js/app.js" defer></script>
     <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/liquid_glass.js" defer></script>
 </body>
 </html>

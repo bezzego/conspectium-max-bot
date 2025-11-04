@@ -1,10 +1,10 @@
-/* Стили для хедера в стиле liquid glass */
+
 .top-bar {
     background: linear-gradient(
         135deg,
-        rgba(243, 194, 17, 0.377) 0%,     /* Желтый цвет с прозрачностью */
-        rgba(240, 193, 25, 0.295) 50%,    /* Средняя прозрачность */
-        rgba(243, 196, 24, 0.377) 100%    /* Желтый цвет с прозрачностью */
+        rgba(243, 194, 17, 0.377) 0%,     
+        rgba(240, 193, 25, 0.295) 50%,   
+        rgba(243, 196, 24, 0.377) 100%    
     );
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
@@ -150,6 +150,8 @@
     }
 }
 
+/* MAIN.HTML */
+
 .action-card.liquid-glass {
     position: relative;
     background: linear-gradient(
@@ -177,6 +179,7 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         inset 0 -1px 0 rgba(0, 0, 0, 0.1);
     min-height: 120px; /* Фиксированная минимальная высота для выравнивания */
+    margin-bottom: 6px;
 }
 
 /* Иконка и текст */
@@ -468,7 +471,7 @@
     -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 20px;
+    /* padding: 20px; */
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
@@ -490,7 +493,7 @@
     -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 20px;
+    padding: 10px;
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
@@ -563,25 +566,27 @@
 /* Адаптивность для preview */
 @media (max-width: 768px) {
     .preview {
-        padding: 15px;
         margin-bottom: 15px;
     }
 }
 
 /* Стили для кнопки загрузки аудио с liquid glass эффектом */
 .upload-btn.liquid-glass {
-    position: relative;
+    position: fixed;
+    bottom: 10px; /* Увеличил отступ от низа */
+    left: 50%;
+    transform: translateX(-50%);
     background: linear-gradient(
         135deg,
-        rgba(243, 194, 17, 0.377) 0%,     /* Желтый цвет с прозрачностью */
-        rgba(240, 193, 25, 0.295) 50%,    /* Средняя прозрачность */
-        rgba(243, 196, 24, 0.377) 100%    /* Желтый цвет с прозрачностью */
+        rgba(243, 194, 17, 0.377) 0%,
+        rgba(240, 193, 25, 0.295) 50%,
+        rgba(243, 196, 24, 0.377) 100%
     );
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-radius: 50px;
-    border: 1px solid rgba(245, 216, 110, 0.3); /* Желтая граница */
-    color: #333; /* Темный текст для контраста на желтом */
+    border: 1px solid rgba(245, 216, 110, 0.3);
+    color: #fff;
     font-family: 'Manrope', sans-serif;
     font-weight: 700;
     cursor: pointer;
@@ -591,20 +596,15 @@
     gap: 10px;
     transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow: 
-        0 8px 32px rgba(245, 216, 110, 0.2), /* Желтые тени */
-        inset 0 1px 0 rgba(255, 255, 255, 0.4), /* Яркие блики */
-        inset 0 -1px 0 rgba(179, 152, 46, 0.2); /* Темно-желтые тени внутри */
+        0 8px 32px rgba(245, 216, 110, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.2);
     overflow: hidden;
     width: calc(100% - 40px);
     max-width: 760px;
     padding: clamp(16px, 4vw, 20px);
-    margin: 2px 0;
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
     box-sizing: border-box;
-    z-index: 100;
+    z-index: 1000; /* Увеличил z-index чтобы была поверх всего */
 }
 
 /* Контейнер для бликов в кнопке загрузки */
@@ -670,11 +670,11 @@
 
 /* Иконка в кнопке загрузки */
 .upload-btn.liquid-glass i {
-    font-size: 30px;
+    font-size: 24px; /* Немного уменьшил размер иконки */
     transition: all 0.4s ease;
     position: relative;
     z-index: 2;
-    color: #ffffff; /* Темный цвет иконки */
+    color: #ffffff;
 }
 
 .upload-btn.liquid-glass:hover i {
@@ -684,24 +684,8 @@
 
 /* Текст в кнопке загрузки */
 .upload-btn.liquid-glass {
-    color: #333;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-    position: relative;
-    z-index: 2;
-}
-
-.upload-btn.liquid-glass:hover {
-    color: #222;
-    text-shadow: 
-        0 1px 3px rgba(255, 255, 255, 0.7),
-        0 0 15px rgba(255, 255, 255, 0.4);
-}
-
-/* Текст в кнопке загрузки */
-.upload-btn.liquid-glass {
     color: #fff;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    position: relative;
     z-index: 2;
 }
 
@@ -712,25 +696,23 @@
         0 0 20px rgba(255, 255, 255, 0.2);
 }
 
-/* Адаптивность для preview */
-@media (max-width: 768px) {
-    .preview {
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-}
-
 /* Адаптивность для кнопки загрузки */
 @media (max-width: 480px) {
+
+    
     .upload-btn.liquid-glass {
-        width: 100%;
+        width: calc(100% - 30px);
         padding: clamp(14px, 4vw, 18px);
         font-size: clamp(16px, 4vw, 17px);
     }
-
+    
+    .upload-btn.liquid-glass i {
+        font-size: 20px;
+    }
 }
 
 @media (max-width: 360px) {
+
     .upload-btn.liquid-glass {
         width: calc(100% - 20px);
         padding: 12px 16px;
@@ -738,7 +720,7 @@
     }
     
     .upload-btn.liquid-glass i {
-        font-size: 16px;
+        font-size: 18px;
     }
 }
 
@@ -764,4 +746,170 @@
 .preview:hover .liquid-reflections,
 .upload-btn.liquid-glass:hover .liquid-reflections {
     opacity: 1;
+}
+
+/* TEST_CREATE.HTML */
+
+/* Контейнер для бликов (оставляем для эффекта следования за мышкой) */
+.creation-btn.liquid-glass .liquid-reflections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+/* УБИРАЕМ диагональный блик полностью */
+.creation-btn.liquid-glass .liquid-reflections::before {
+    display: none; /* Полностью убираем диагональный блик */
+}
+
+/* УБИРАЕМ радиальный пульсирующий блик */
+.creation-btn.liquid-glass .liquid-reflections::after {
+    display: none; /* Полностью убираем радиальный блик */
+}
+
+/* Эффекты при наведении - оставляем только opacity для JavaScript эффектов */
+.creation-btn.liquid-glass:hover .liquid-reflections {
+    opacity: 1; /* Оставляем для JavaScript эффекта следования за мышкой */
+}
+
+/* УБИРАЕМ анимацию pulse */
+/* @keyframes liquidPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+} */
+
+/* УБИРАЕМ статические диагональные блики */
+.creation-btn.liquid-glass::before {
+    display: none; /* Полностью убираем статический диагональный блик */
+}
+
+/* Оставляем градиентную рамку (если она нужна) */
+.creation-btn.liquid-glass::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05)
+    );
+    border-radius: 22px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.creation-btn.liquid-glass:hover::after {
+    opacity: 1;
+}
+
+/* Остальные стили без изменений */
+.creation-btn.liquid-glass {
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 20px;
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    width: 100%;
+    min-height: 140px;
+    box-sizing: border-box;
+}
+
+/* Иконки и текст без изменений */
+.creation-btn.liquid-glass .button-icon-test {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.creation-btn.liquid-glass .button-icon-tools {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.creation-btn.liquid-glass:hover .button-icon-test,
+.creation-btn.liquid-glass:hover .button-icon-tools {
+    transform: scale(1.15) rotate(5deg);
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+.creation-btn.liquid-glass span {
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.4;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s ease;
+}
+
+.creation-btn.liquid-glass:hover span {
+    transform: none;
+    text-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.creation-btn.liquid-glass:hover {
+    transform: scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.15) 100%
+    );
 }

@@ -103,7 +103,6 @@ main {
     flex-direction: column;
 }
 
-
 /* Стили для списка конспектов */
 .preview {
     background: var(--light-gray);
@@ -116,6 +115,24 @@ main {
     margin-bottom: 24px;
     flex-shrink: 0;
     overflow: hidden;
+}
+
+@media (max-height: 1158px)  {
+  .preview {
+    max-height: 680px;
+  }
+}
+
+@media (max-height: 900px)  {
+  .preview {
+    max-height: 600px;
+  }
+}
+
+@media (max-height: 750px)  {
+  .preview {
+    max-height: 410px;
+  }
 }
 
 .conspect-list {
@@ -149,7 +166,7 @@ main {
 .item-content {
     font-size: 15px;
     line-height: 1.5;
-    color: #444;
+    color: #ffffff;
     text-align: left;
     font-weight: 500;
 }

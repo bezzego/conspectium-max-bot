@@ -66,47 +66,215 @@
         showButtons(item);
     }
 
-    function showButtons(item) {
-        if (!item) return;
+function showButtons(item) {
+    if (!item) return;
 
-        const existing = item.querySelector('.item-buttons');
-        if (existing) {
-            existing.remove();
+    const existing = item.querySelector('.item-buttons');
+    if (existing) {
+        existing.remove();
+    }
+
+    const buttons = document.createElement('div');
+    buttons.className = 'item-buttons';
+    buttons.innerHTML = `
+        <button class="action-btn liquid-glass open-conspect-btn">
+            <span>Открыть</span>
+        </button>
+        <button class="action-btn liquid-glass create-test-btn">
+            <span>Создать тест</span>
+        </button>
+    `;
+
+    // Добавляем стили прямо в JavaScript
+    const styles = `
+        .item-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: space-between;
         }
-
-        const buttons = document.createElement('div');
-        buttons.className = 'item-buttons';
-        buttons.innerHTML = `
-            <button class="action-btn open-conspect-btn">Открыть конспект</button>
-            <button class="action-btn create-test-btn">Создать тест</button>
-        `;
-
-        item.appendChild(buttons);
-
-        const openBtn = buttons.querySelector('.open-conspect-btn');
-        const createBtn = buttons.querySelector('.create-test-btn');
-
-       if (openBtn) {
-    openBtn.addEventListener('click', async (event) => {
-        event.stopPropagation();
-        if (!selectedConspectId) return;
         
-        try {
-            const appInstance = app();
-            appInstance.showLoading('Загружаем конспект...');
-            const conspect = await appInstance.authFetch(`/conspects/${selectedConspectId}`);
-            appInstance.hideLoading();
-            
-            // Создаем модальное окно прямо здесь, используя те же стили
-            showConspectModalInChoose(conspect);
-        } catch (err) {
-            console.error(err);
-            const appInstance = app();
-            appInstance.hideLoading();
-            appInstance.notify('Не удалось загрузить конспект', 'error');
+        .action-btn.liquid-glass {
+            position: relative;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.08) 50%,
+                rgba(255, 255, 255, 0.15) 100%
+            );
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-family: 'Manrope', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 12px 16px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: none;
+            flex: 1;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            min-width: 0;
         }
-    });
-}
+        
+        /* Левая кнопка - Открыть */
+        .open-conspect-btn {
+            margin-right: auto;
+        }
+        
+        /* Правая кнопка - Создать тест */
+        .create-test-btn {
+            margin-left: auto;
+        }
+        
+        .action-btn.liquid-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 30%,
+                transparent 70%
+            );
+            border-radius: 12px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .action-btn.liquid-glass::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.15),
+                rgba(255, 255, 255, 0.08),
+                rgba(255, 255, 255, 0.15),
+                rgba(255, 255, 255, 0.08)
+            );
+            border-radius: 13px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .action-btn.liquid-glass:hover::after {
+            opacity: 1;
+        }
+        
+        .action-btn.liquid-glass span {
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .action-btn.liquid-glass:hover {
+            transform: translateY(-2px) scale(1.02);
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(255, 255, 255, 0.12) 50%,
+                rgba(255, 255, 255, 0.2) 100%
+            );
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+        }
+        
+        .action-btn.liquid-glass:hover span {
+            text-shadow: 
+                0 1px 4px rgba(0, 0, 0, 0.4),
+                0 0 12px rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Адаптивность для мобильных */
+        @media (max-width: 480px) {
+            .item-buttons {
+                gap: 8px;
+            }
+            
+            .action-btn.liquid-glass {
+                padding: 10px 12px;
+                font-size: 13px;
+                min-height: 40px;
+            }
+            
+            .action-btn.liquid-glass span {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .action-btn.liquid-glass {
+                padding: 8px 10px;
+                font-size: 12px;
+                min-height: 38px;
+            }
+            
+            .action-btn.liquid-glass span {
+                font-size: 11px;
+            }
+        }
+    `;
+
+    // Добавляем стили только если их еще нет
+    if (!document.getElementById('liquid-glass-buttons-styles')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'liquid-glass-buttons-styles';
+        styleSheet.textContent = styles;
+        document.head.appendChild(styleSheet);
+    }
+
+    item.appendChild(buttons);
+
+    const openBtn = buttons.querySelector('.open-conspect-btn');
+    const createBtn = buttons.querySelector('.create-test-btn');
+
+    if (openBtn) {
+        openBtn.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            if (!selectedConspectId) return;
+            
+            try {
+                const appInstance = app();
+                appInstance.showLoading('Загружаем конспект...');
+                const conspect = await appInstance.authFetch(`/conspects/${selectedConspectId}`);
+                appInstance.hideLoading();
+                
+                showConspectModalInChoose(conspect);
+            } catch (err) {
+                console.error(err);
+                const appInstance = app();
+                appInstance.hideLoading();
+                appInstance.notify('Не удалось загрузить конспект', 'error');
+            }
+        });
+    }
 
         if (createBtn) {
             createBtn.addEventListener('click', async (event) => {

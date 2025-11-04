@@ -167,10 +167,9 @@ main {
 
 
 .item-content {
-    margin-top: 13px;
     font-size: 15px;
     line-height: 1.5;
-    color: #444;
+    color: #ffffff;
     text-align: left;
     font-weight: 500;
     transition: opacity 0.3s ease;

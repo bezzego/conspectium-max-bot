@@ -918,4 +918,3 @@ function copyConspectToClipboard(conspect, variantKey, markdown) {
 })();
 
 // Делаем функцию глобально доступной для choose_test.js
-window.showConspectModal = showConspectModal;

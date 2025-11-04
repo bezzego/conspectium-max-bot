@@ -134,6 +134,21 @@
     setupAccordionBehaviour();
 }
 
+// И в обработчике закрытия через крестик:
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('question-text__close')) {
+        e.stopPropagation();
+        if (expanded) {
+            expanded.classList.remove('expanded');
+            expanded = null;
+            document.body.style.overflow = '';
+            document.body.classList.remove('question-expanded'); // Убираем класс
+            toggleNav(false);
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    }
+});
+
 function setupAccordionBehaviour() {
     let expanded = null;
     
@@ -147,6 +162,8 @@ function setupAccordionBehaviour() {
             expanded = null;
             // Снимаем блокировку скролла
             document.body.style.overflow = '';
+            // Убираем класс, который говорит CSS спрятать шапку/заголовок
+            document.body.classList.remove('question-expanded');
             // Скрываем навигацию
             toggleNav(false);
             // Удаляем обработчик клавиатуры
@@ -278,7 +295,7 @@ function setupAccordionBehaviour() {
         question.appendChild(questionContent);
 
         question.addEventListener('click', (event) => {
-            if (event.target.closest('.answer-option') || event.target.closest('.close-expanded') || event.target.closest('.nav-arrow')) {
+            if (event.target.closest('.answer-option') || event.target.closest('.close-expanded') || event.target.closest('.nav-arrow') || event.target.closest('.question-text__close')) {
                 return;
             }
 
@@ -286,7 +303,8 @@ function setupAccordionBehaviour() {
                 // Закрытие вопроса
                 question.classList.remove('expanded');
                 expanded = null;
-                document.body.style.overflow = ''; // Возвращаем скролл
+                document.body.style.overflow = '';
+                document.body.classList.remove('question-expanded'); // Убираем класс
                 toggleNav(false);
                 document.removeEventListener('keydown', handleKeyDown);
                 return;
@@ -297,10 +315,11 @@ function setupAccordionBehaviour() {
                 expanded.classList.remove('expanded');
             }
 
-            // Открываем новый вопрос
+               // Открываем новый вопрос
             question.classList.add('expanded');
             expanded = question;
-            document.body.style.overflow = 'hidden'; // Блокируем скролл body
+            document.body.style.overflow = 'hidden';
+            document.body.classList.add('question-expanded'); // Добавляем класс
 
             // show nav and set visibility depending on position
             const items = Array.from(document.querySelectorAll('.question-item'));
@@ -322,6 +341,8 @@ function setupAccordionBehaviour() {
             expanded.classList.remove('expanded');
             expanded = null;
             document.body.style.overflow = '';
+            // Убираем признак раскрытого вопроса на body
+            document.body.classList.remove('question-expanded');
             // Also hide navigation/arrows when closing with ESC
             toggleNav(false);
             document.removeEventListener('keydown', handleKeyDown);
@@ -533,3 +554,4 @@ function setupAccordionBehaviour() {
         }
     }
 })();
+
