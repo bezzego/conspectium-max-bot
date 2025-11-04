@@ -175,7 +175,7 @@ window.goBack = goBack;
             try {
                 app.showLoading('Загружаем аудио...');
                 const audio = await app.uploadAudio(file);
-                app.showLoading('Создаём конспект...');
+                app.showLoading('Создаём конспект... Это может занять несколько минут для длинных аудио.');
                 const conspect = await app.createConspectFromAudio(audio.id, file.name);
                 app.hideLoading();
                 app.notify('Конспект готов!', 'success');
@@ -354,7 +354,7 @@ window.goBack = goBack;
                     return;
                 }
                 try {
-                    app.showLoading('Создаём конспект из текста...');
+                    app.showLoading('Создаём конспект... Это может занять пару минут.');
                     const conspect = await app.createConspectFromText(textInput.value.trim(), titleInput.value.trim());
                     app.hideLoading();
                     app.notify('Конспект готов!', 'success');

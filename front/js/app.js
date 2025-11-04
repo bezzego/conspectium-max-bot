@@ -159,9 +159,10 @@
         }
     }
 
-    async function pollJob(jobId, { intervalMs = 2000, timeoutMs = 60000 } = {}) {
+    async function pollJob(jobId, { intervalMs = 2000, timeoutMs = 600000 } = {}) {
         const started = Date.now();
-        while (Date.now() - started < timeoutMs) {
+        const noTimeout = timeoutMs === null || timeoutMs === undefined;
+        while (noTimeout || Date.now() - started < timeoutMs) {
             const data = await authFetch(`/jobs/${jobId}`);
             if (data.status === 'completed') {
                 return data;
@@ -171,7 +172,7 @@
             }
             await new Promise((resolve) => setTimeout(resolve, intervalMs));
         }
-        throw new Error('Превышено время ожидания');
+        throw new Error('Превышено время ожидания. Проверь статус задачи в разделе конспектов чуть позже.');
     }
 
     async function uploadAudio(file) {
@@ -214,7 +215,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
-        const finishedJob = await pollJob(job.id, { timeoutMs: 180000 });
+        const finishedJob = await pollJob(job.id, { intervalMs: 3000, timeoutMs: 30 * 60 * 1000 });
         if (!finishedJob.conspect_id) {
             throw new Error('Не удалось получить идентификатор конспекта');
         }
@@ -231,7 +232,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
-        const finishedJob = await pollJob(job.id, { timeoutMs: 120000 });
+        const finishedJob = await pollJob(job.id, { intervalMs: 3000, timeoutMs: 15 * 60 * 1000 });
         if (!finishedJob.conspect_id) {
             throw new Error('Не удалось получить идентификатор конспекта');
         }
