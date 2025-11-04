@@ -229,12 +229,30 @@ async function createQuiz(conspectId) {
     // Добавляем overlay на страницу
     document.body.appendChild(loadingOverlay);
     
-    // Создаем подпись отдельно
+    // Создаем подпись и добавляем её внутрь оверлея — так её легче гарантировать поверх фона
     const signature = document.createElement('div');
     signature.className = 'hackflow-signature';
     signature.textContent = 'by HackFlow';
     signature.style.opacity = '0';
-    document.body.appendChild(signature);
+    // Переопределяем z-index чтобы подпись точно была поверх контента оверлея
+    signature.style.zIndex = '20001';
+    signature.style.pointerEvents = 'none';
+    // Позиционируем и стилизуем подпись inline, чтобы внешний CSS не мешал отображению
+    signature.style.position = 'fixed';
+    signature.style.bottom = '20px';
+    signature.style.left = '50%';
+    signature.style.transform = 'translateX(-50%)';
+    signature.style.fontFamily = "Manrope, Arial, sans-serif";
+    signature.style.fontSize = '14px';
+    signature.style.color = '#cccccc';
+    signature.style.textAlign = 'center';
+    signature.style.width = '100%';
+    signature.style.userSelect = 'none';
+    signature.style.transition = 'opacity 0.5s ease';
+    // Append inside overlay to ensure stacking context and visibility
+    loadingOverlay.appendChild(signature);
+    // Debug log to help quickly verify in DevTools console
+    try { console.debug('hackflow signature appended to loadingOverlay'); } catch (e) {}
     
     // Блокируем скролл страницы на время анимации (сохраняем предыдущее значение)
     try {
@@ -257,11 +275,12 @@ async function createQuiz(conspectId) {
         signature.style.transition = 'opacity 0.5s ease';
     }, 1000);
     
-    // За 1 секунду до окончания (на 4 секунде) скрываем подпись
+    // За 1 секунду до окончания хотим скрыть подпись так, чтобы она была видна 5 секунд
+    // (показываем на 1s, скрываем на 6s => 5s видимости)
     setTimeout(() => {
         signature.style.opacity = '0';
         signature.style.transition = 'opacity 0.5s ease';
-    }, 4000);
+    }, 6000);
     
     // Сохраняем ссылки на элементы для последующего удаления
     window.wizardElements = {

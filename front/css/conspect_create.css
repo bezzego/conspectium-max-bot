@@ -215,12 +215,26 @@ main {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: 600px;
 }
 
 .input-label {
     font-size: 14px;
     font-weight: 600;
     color: #1c1c1e;
+}
+
+.text-input-title {
+    width: 100%;
+    border: 1px solid #b2b2b3;
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 15px;
+    font-family: 'Manrope', Arial, sans-serif;
+    outline: none;
+    transition: border-color 0.2s ease;
+    background: #ebebeb;
+    height: 70px;
 }
 
 .text-input {
@@ -233,6 +247,7 @@ main {
     outline: none;
     transition: border-color 0.2s ease;
     background: #ebebeb;
+    height: 300px;
 }
 
 .text-input:focus {

@@ -77,8 +77,7 @@ main {
 .preview {
     background: var(--light-gray);
     border-radius: 20px;
-    height: 675px;
-    max-height: 620px;
+    height: 750px;
     display: flex;
     flex-direction: column;
     color: #333;
@@ -86,6 +85,42 @@ main {
     margin-bottom: 24px;
     flex-shrink: 0;
     overflow: hidden;
+}
+
+@media (max-height: 1158px)  {
+  .conspect-list {
+    max-height: 620px;
+  }
+}
+
+@media (max-height: 900px)  {
+  .conspect-list{
+    max-height: 540px;
+  }
+}
+
+@media (max-height: 750px)  {
+  .conspect-list {
+    max-height: 380px;
+  }
+}
+
+@media (max-height: 1158px)  {
+  .preview {
+    max-height: 620px;
+  }
+}
+
+@media (max-height: 900px)  {
+  .preview {
+    max-height: 540px;
+  }
+}
+
+@media (max-height: 750px)  {
+  .preview {
+    max-height: 380px;
+  }
 }
 
 .conspect-list {

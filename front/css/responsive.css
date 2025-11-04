@@ -17,7 +17,6 @@
   body {
     max-width: 800px; /* allow full app width */
     margin: 0 auto;
-    padding: 24px;
     background-position: center;
   }
   
@@ -32,7 +31,6 @@
 
   /* Make conspect list area more spacious */
   .preview { padding: 16px; min-height: 320px; }
-  .conspect-list { padding: 20px 30px; }
 
   /* Modal sizing */
   .conspect-modal { max-width: 900px; }
@@ -52,7 +50,6 @@
   body {
     max-width: 800px; /* allow full app width */
     margin: 0 auto;
-    padding: 24px;
     background-position: center;
   }
 }
