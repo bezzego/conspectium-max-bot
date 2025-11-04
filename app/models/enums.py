@@ -21,6 +21,11 @@ class ConspectStatus(str, Enum):
     FAILED = "failed"
 
 
+class ConspectVariantType(str, Enum):
+    COMPRESSED = "compressed"
+    FULL = "full"
+
+
 class QuizStatus(str, Enum):
     PROCESSING = "processing"
     READY = "ready"

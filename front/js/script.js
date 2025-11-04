@@ -10,6 +10,97 @@ window.goBack = goBack;
 
 (function () {
     const body = document.body;
+    const VARIANT_LABELS = {
+        compressed: 'Сжатый конспект',
+        full: 'Полный конспект',
+    };
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function renderMarkdown(markdown) {
+        if (!markdown) {
+            return '<p>Описание отсутствует.</p>';
+        }
+        const lines = markdown.split(/\r?\n/);
+        const htmlParts = [];
+        let inUnordered = false;
+        let inOrdered = false;
+
+        const closeLists = () => {
+            if (inUnordered) {
+                htmlParts.push('</ul>');
+                inUnordered = false;
+            }
+            if (inOrdered) {
+                htmlParts.push('</ol>');
+                inOrdered = false;
+            }
+        };
+
+        const applyInline = (value) =>
+            escapeHtml(value)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        lines.forEach((originalLine) => {
+            const line = originalLine.trim();
+            if (!line) {
+                closeLists();
+                htmlParts.push('<br>');
+                return;
+            }
+
+            if (/^#{1,6}\s+/.test(line)) {
+                closeLists();
+                const level = line.match(/^#{1,6}/)[0].length;
+                const content = applyInline(line.replace(/^#{1,6}\s+/, ''));
+                htmlParts.push(`<h${level}>${content}</h${level}>`);
+                return;
+            }
+
+            if (/^[-*+]\s+/.test(line)) {
+                if (!inUnordered) {
+                    closeLists();
+                    htmlParts.push('<ul>');
+                    inUnordered = true;
+                }
+                const content = applyInline(line.replace(/^[-*+]\s+/, ''));
+                htmlParts.push(`<li>${content}</li>`);
+                return;
+            }
+
+            if (/^\d+\.\s+/.test(line)) {
+                if (!inOrdered) {
+                    closeLists();
+                    htmlParts.push('<ol>');
+                    inOrdered = true;
+                }
+                const content = applyInline(line.replace(/^\d+\.\s+/, ''));
+                htmlParts.push(`<li>${content}</li>`);
+                return;
+            }
+
+            if (/^>\s?/.test(line)) {
+                closeLists();
+                const content = applyInline(line.replace(/^>\s?/, ''));
+                htmlParts.push(`<blockquote>${content}</blockquote>`);
+                return;
+            }
+
+            closeLists();
+            htmlParts.push(`<p>${applyInline(line)}</p>`);
+        });
+
+        closeLists();
+        return htmlParts.join('\n');
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
         const app = window.ConspectiumApp;
@@ -85,10 +176,11 @@ window.goBack = goBack;
                 app.showLoading('Загружаем аудио...');
                 const audio = await app.uploadAudio(file);
                 app.showLoading('Создаём конспект...');
-                const conspectId = await app.createConspectFromAudio(audio.id, file.name);
+                const conspect = await app.createConspectFromAudio(audio.id, file.name);
                 app.hideLoading();
                 app.notify('Конспект готов!', 'success');
-                refreshConspectData(app, conspectId);
+                refreshConspectData(app, conspect.id);
+                showConspectModal(conspect, { initialVariant: 'compressed' });
             } catch (err) {
                 console.error(err);
                 app.hideLoading();
@@ -263,10 +355,11 @@ window.goBack = goBack;
                 }
                 try {
                     app.showLoading('Создаём конспект из текста...');
-                    const conspectId = await app.createConspectFromText(textInput.value.trim(), titleInput.value.trim());
+                    const conspect = await app.createConspectFromText(textInput.value.trim(), titleInput.value.trim());
                     app.hideLoading();
                     app.notify('Конспект готов!', 'success');
-                    await loadConspectDetails(app, conspectId);
+                    await loadConspectDetails(app, conspect.id);
+                    showConspectModal(conspect, { initialVariant: 'compressed' });
                     textInput.value = '';
                     titleInput.value = '';
                 } catch (err) {
@@ -316,15 +409,21 @@ window.goBack = goBack;
             placeholder.classList.add('hidden');
             container.classList.remove('hidden');
             container.querySelector('.conspect-title').textContent = conspect.title || 'Без названия';
-            container.querySelector('.conspect-summary').textContent = conspect.summary || 'Нет описания';
+            const summaryNode = container.querySelector('.conspect-summary');
+            if (summaryNode) {
+                const preferredMarkdown = conspect.compressed_markdown || conspect.full_markdown;
+                summaryNode.innerHTML = renderMarkdown(preferredMarkdown || conspect.summary || '');
+            }
 
             const keypointsContainer = container.querySelector('.conspect-keypoints');
-            keypointsContainer.innerHTML = '';
-            (conspect.keywords || []).forEach((point) => {
-                const li = document.createElement('li');
-                li.textContent = point;
-                keypointsContainer.appendChild(li);
-            });
+            if (keypointsContainer) {
+                keypointsContainer.innerHTML = '';
+                (conspect.keywords || []).forEach((point) => {
+                    const li = document.createElement('li');
+                    li.textContent = point;
+                    keypointsContainer.appendChild(li);
+                });
+            }
 
             if (quizBtn) {
                 quizBtn.dataset.latestConspectId = conspect.id;
@@ -394,38 +493,38 @@ window.goBack = goBack;
     let conspectModalOverlay = null;
     let modalEscHandler = null;
 
-function showConspectModal(conspect) {
+
+function showConspectModal(conspect, options = {}) {
     closeConspectModal();
 
-    // Стили для модального окна
     const modalStyles = `
         .conspect-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); display: flex; align-items: center; 
-            justify-content: center; z-index: 10000; opacity: 0; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; align-items: center;
+            justify-content: center; z-index: 10000; opacity: 0;
             transition: opacity 0.3s ease; padding: 20px;
         }
         .conspect-modal-overlay.visible { opacity: 1; }
         .conspect-modal {
-            background: #dddcdc; border-radius: 20px; width: 100%; 
-            max-width: 600px; max-height: 80vh; display: flex; 
-            flex-direction: column; overflow: hidden; transform: translateY(20px); 
-            transition: transform 0.3s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            background: #dddcdc; border-radius: 20px; width: 100%;
+            max-width: 600px; max-height: 80vh; display: flex;
+            flex-direction: column; overflow: hidden; transform: translateY(20px);
+            transition: transform 0.3s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             position: relative;
         }
         .conspect-modal-overlay.visible .conspect-modal { transform: translateY(0); }
         .modal-header {
-            background: #ebeaea; padding: 20px 30px 15px; 
+            background: #ebeaea; padding: 20px 30px 15px;
             border-bottom: 1px solid #7e7d7d; position: relative;
         }
-        .modal-header-content { 
-            padding-right: 50px; 
+        .modal-header-content {
+            padding-right: 50px;
         }
-        .modal-header h2 { 
-            color: #333; 
-            font-size: 18px; 
-            font-weight: 700; 
-            margin: 0 0 8px 0; 
+        .modal-header h2 {
+            color: #333;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
             line-height: 1.3;
         }
         .modal-meta-row {
@@ -433,6 +532,7 @@ function showConspectModal(conspect) {
             align-items: center;
             gap: 10px;
             margin-bottom: 8px;
+            flex-wrap: wrap;
         }
         .modal-meta {
             color: #6c6c70;
@@ -453,6 +553,9 @@ function showConspectModal(conspect) {
         .meta-copy-btn:hover {
             color: #b9b9b5ff;
             background: rgba(0,0,0,0.05);
+        }
+        .meta-copy-btn.copied {
+            color: #2f8f2f;
         }
         .conspect-badge {
             display: inline-block;
@@ -525,13 +628,76 @@ function showConspectModal(conspect) {
         .modal-keypoints li::before {
             content: '•';
             color: #f5d86e;
-            font-size: 16px;
             position: absolute;
             left: 0;
-            top: 0;
+            font-weight: 700;
         }
-        
-        /* Адаптивность */
+        .modal-variant-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .variant-btn {
+            border: 1px solid #b1b1b1;
+            background: #f5f5f5;
+            color: #333;
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .variant-btn:hover {
+            background: #ffffff;
+            border-color: #8f8f8f;
+        }
+        .variant-btn.active {
+            background: #333333;
+            color: #f5f5f5;
+            border-color: #333333;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .markdown-viewer {
+            color: #2f2f2f;
+            font-size: 15px;
+            line-height: 1.55;
+        }
+        .markdown-viewer h1,
+        .markdown-viewer h2,
+        .markdown-viewer h3 {
+            font-weight: 700;
+            margin: 20px 0 12px;
+            line-height: 1.25;
+        }
+        .markdown-viewer h1 { font-size: 22px; }
+        .markdown-viewer h2 { font-size: 19px; }
+        .markdown-viewer h3 { font-size: 17px; }
+        .markdown-viewer p {
+            margin: 0 0 12px;
+        }
+        .markdown-viewer ul,
+        .markdown-viewer ol {
+            padding-left: 22px;
+            margin: 0 0 16px;
+        }
+        .markdown-viewer li {
+            margin-bottom: 6px;
+        }
+        .markdown-viewer blockquote {
+            border-left: 3px solid #f5d86e;
+            padding-left: 12px;
+            margin: 12px 0;
+            color: #4a4a4a;
+            font-style: italic;
+        }
+        .markdown-viewer code {
+            background: rgba(0,0,0,0.08);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
         @media (max-width: 768px) {
             .conspect-modal-overlay { padding: 15px; }
             .modal-header { padding: 15px 20px 12px; }
@@ -539,7 +705,6 @@ function showConspectModal(conspect) {
             .modal-actions { top: 12px; right: 12px; }
             .modal-header-content { padding-right: 45px; }
         }
-        
         @media (max-width: 480px) {
             .conspect-modal-overlay { padding: 10px; }
             .modal-header { padding: 12px 15px 10px; }
@@ -549,41 +714,69 @@ function showConspectModal(conspect) {
             .modal-summary { font-size: 15px; }
         }
     `;
-    
-    // Добавляем стили в head если их еще нет
-    if (!document.getElementById('modal-styles')) {
+
+    const existingStyles = document.getElementById('modal-styles');
+    if (existingStyles) {
+        existingStyles.textContent = modalStyles;
+    } else {
         const styleEl = document.createElement('style');
         styleEl.id = 'modal-styles';
         styleEl.textContent = modalStyles;
         document.head.appendChild(styleEl);
     }
 
-    const createdAt = conspect.created_at
-        ? new Date(conspect.created_at).toLocaleString('ru-RU')
-        : '';
+    const createdAtSource = conspect.generated_at || conspect.updated_at || conspect.created_at;
+    const createdAt = createdAtSource ? new Date(createdAtSource).toLocaleString('ru-RU') : '';
 
-    const keyPoints = (conspect.keywords || []).map((point) => `<li>${point}</li>`).join('');
-    const meta = conspect.raw_response && conspect.raw_response.mode === 'offline'
-        ? '<div class="conspect-badge">Офлайн черновик</div>'
-        : '';
+    const variantData = {};
+    if (conspect.compressed_markdown) {
+        variantData.compressed = {
+            markdown: conspect.compressed_markdown,
+            label: VARIANT_LABELS.compressed,
+        };
+    }
+    if (conspect.full_markdown) {
+        variantData.full = {
+            markdown: conspect.full_markdown,
+            label: VARIANT_LABELS.full,
+        };
+    }
+    const variantKeys = Object.keys(variantData);
+    let defaultVariant = options.initialVariant && variantData[options.initialVariant]
+        ? options.initialVariant
+        : null;
+    if (!defaultVariant && variantData.compressed) {
+        defaultVariant = 'compressed';
+    }
+    if (!defaultVariant && variantData.full) {
+        defaultVariant = 'full';
+    }
+    if (!defaultVariant) {
+        defaultVariant = 'summary';
+    }
+
+    const keyPoints = (conspect.keywords || []).map((point) => `<li>${escapeHtml(point)}</li>`).join('');
+    const isOffline = conspect.model_used === 'offline-fallback';
 
     conspectModalOverlay = document.createElement('div');
     conspectModalOverlay.className = 'conspect-modal-overlay';
+
+    const variantButtonsMarkup = variantKeys
+        .map((key) => `<button class="variant-btn" data-variant="${key}">${escapeHtml(variantData[key].label)}</button>`)
+        .join('');
 
     conspectModalOverlay.innerHTML = `
         <div class="conspect-modal">
             <div class="modal-header">
                 <div class="modal-header-content">
-                    <h2>${conspect.title || 'Без названия'}</h2>
-                    ${createdAt ? `
-                        <div class="modal-meta-row">
-                            <p class="modal-meta">Создан: ${createdAt}</p>
-                            <button class="meta-copy-btn" title="Копировать конспект">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                    ` : ''}
-                    ${meta}
+                    <h2>${escapeHtml(conspect.title || 'Без названия')}</h2>
+                    <div class="modal-meta-row">
+                        ${createdAt ? `<p class="modal-meta">Создан: ${escapeHtml(createdAt)}</p>` : ''}
+                        <button class="meta-copy-btn" title="Копировать конспект">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    ${isOffline ? '<div class="conspect-badge">Офлайн черновик</div>' : ''}
                 </div>
                 <div class="modal-actions">
                     <button class="modal-btn close-btn" aria-label="Закрыть">
@@ -592,7 +785,12 @@ function showConspectModal(conspect) {
                 </div>
             </div>
             <div class="modal-body">
-                <p class="modal-summary">${conspect.summary || 'Описание отсутствует.'}</p>
+                ${variantKeys.length ? `
+                    <div class="modal-variant-toggle">
+                        ${variantButtonsMarkup}
+                    </div>
+                ` : ''}
+                <div class="modal-summary markdown-viewer"></div>
                 ${keyPoints ? `
                     <h3>Ключевые идеи</h3>
                     <ul class="modal-keypoints">${keyPoints}</ul>
@@ -606,15 +804,69 @@ function showConspectModal(conspect) {
         conspectModalOverlay.classList.add('visible');
     });
 
-    // Обработчик кнопки закрытия
-    const closeButton = conspectModalOverlay.querySelector('.close-btn');
-    closeButton?.addEventListener('click', closeConspectModal);
-    
-
+    const summaryContainer = conspectModalOverlay.querySelector('.modal-summary');
+    const variantButtons = Array.from(conspectModalOverlay.querySelectorAll('.variant-btn'));
     const copyButton = conspectModalOverlay.querySelector('.meta-copy-btn');
-    copyButton?.addEventListener('click', () => {
-        copyConspectToClipboard(conspect);
-    });
+    const originalCopyHtml = copyButton ? copyButton.innerHTML : '';
+    let currentVariantKey = defaultVariant;
+    let currentVariantMarkdown =
+        variantData[currentVariantKey]?.markdown || (currentVariantKey === 'summary' ? conspect.summary : '');
+
+    const updateVariant = (key) => {
+        currentVariantKey = key;
+        currentVariantMarkdown = variantData[key]?.markdown || (key === 'summary' ? conspect.summary : '');
+        variantButtons.forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.variant === key);
+        });
+        if (!summaryContainer) {
+            return;
+        }
+        if (variantData[key] && variantData[key].markdown) {
+            summaryContainer.innerHTML = renderMarkdown(variantData[key].markdown);
+        } else if (key === 'summary') {
+            summaryContainer.innerHTML = renderMarkdown(conspect.summary || '');
+        } else {
+            summaryContainer.innerHTML = '<p>Конспект пока отсутствует.</p>';
+        }
+    };
+
+    if (variantButtons.length) {
+        variantButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                updateVariant(button.dataset.variant);
+            });
+        });
+    }
+
+    updateVariant(defaultVariant);
+
+    const closeButton = conspectModalOverlay.querySelector('.close-btn');
+    if (closeButton) {
+        closeButton.addEventListener('click', closeConspectModal);
+    }
+
+    if (copyButton) {
+        copyButton.addEventListener('click', () => {
+            copyConspectToClipboard(conspect, currentVariantKey, currentVariantMarkdown)
+                .then(() => {
+                    if (window.ConspectiumApp) {
+                        window.ConspectiumApp.notify('Конспект скопирован в буфер обмена', 'success');
+                    }
+                    copyButton.innerHTML = '<i class="fas fa-check"></i>';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalCopyHtml;
+                        copyButton.classList.remove('copied');
+                    }, 2000);
+                })
+                .catch((err) => {
+                    console.error('Ошибка копирования: ', err);
+                    if (window.ConspectiumApp) {
+                        window.ConspectiumApp.notify('Не удалось скопировать конспект', 'error');
+                    }
+                });
+        });
+    }
 
     conspectModalOverlay.addEventListener('click', (event) => {
         if (event.target === conspectModalOverlay) {
@@ -630,43 +882,22 @@ function showConspectModal(conspect) {
     document.addEventListener('keydown', modalEscHandler);
 }
 
-function copyConspectToClipboard(conspect) {
-    const keyPoints = conspect.keywords ? conspect.keywords.map(point => `• ${point}`).join('\n') : '';
-    
-    const textToCopy = `
-${conspect.title || 'Без названия'}
-
-${conspect.summary || 'Описание отсутствует.'}
-
-${keyPoints ? 'Ключевые идеи:\n' + keyPoints : ''}
-    `.trim();
-
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        // Используем window.ConspectiumApp напрямую для избежания ошибок
-        if (window.ConspectiumApp) {
-            window.ConspectiumApp.notify('Конспект скопирован в буфер обмена', 'success');
-        }
-        
-        // Визуальная обратная связь на кнопке
-        const copyBtn = document.querySelector('.meta-copy-btn');
-        if (copyBtn) {
-            const originalHTML = copyBtn.innerHTML;
-            copyBtn.innerHTML = '<i class="fas fa-check"></i>';
-            copyBtn.style.color = '#b9b9b5ff;';
-            
-            setTimeout(() => {
-                copyBtn.innerHTML = originalHTML;
-                copyBtn.style.color = '';
-            }, 2000);
-        }
-    }).catch(err => {
-        console.error('Ошибка копирования: ', err);
-        // Используем window.ConspectiumApp напрямую для избежания ошибок
-        if (window.ConspectiumApp) {
-            window.ConspectiumApp.notify('Не удалось скопировать конспект', 'error');
-        }
-    });
+function copyConspectToClipboard(conspect, variantKey, markdown) {
+    const lines = [];
+    lines.push(conspect.title || 'Без названия');
+    const content = markdown || conspect.summary || '';
+    if (content) {
+        lines.push('', content);
+    }
+    if (Array.isArray(conspect.keywords) && conspect.keywords.length) {
+        lines.push('', 'Ключевые идеи:');
+        conspect.keywords.forEach((point) => {
+            lines.push(`• ${point}`);
+        });
+    }
+    return navigator.clipboard.writeText(lines.join('\n').trim());
 }
+
 
 
     function closeConspectModal() {

@@ -215,7 +215,10 @@
             body: JSON.stringify(payload),
         });
         const finishedJob = await pollJob(job.id, { timeoutMs: 180000 });
-        return finishedJob.conspect_id;
+        if (!finishedJob.conspect_id) {
+            throw new Error('Не удалось получить идентификатор конспекта');
+        }
+        return authFetch(`/conspects/${finishedJob.conspect_id}`);
     }
 
     async function createConspectFromText(text, title) {
@@ -229,7 +232,10 @@
             body: JSON.stringify(payload),
         });
         const finishedJob = await pollJob(job.id, { timeoutMs: 120000 });
-        return finishedJob.conspect_id;
+        if (!finishedJob.conspect_id) {
+            throw new Error('Не удалось получить идентификатор конспекта');
+        }
+        return authFetch(`/conspects/${finishedJob.conspect_id}`);
     }
 
     async function createQuizFromConspect(conspectId) {

@@ -11,6 +11,8 @@ class ConspectBase(BaseModel):
     user_id: int
     title: Optional[str] = None
     summary: Optional[str] = None
+    compressed_markdown: Optional[str] = None
+    full_markdown: Optional[str] = None
     keywords: Optional[List[str]] = None
     status: ConspectStatus
     model_used: Optional[str] = None

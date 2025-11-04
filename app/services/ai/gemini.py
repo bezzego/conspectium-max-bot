@@ -8,6 +8,7 @@ import google.generativeai as genai
 from fastapi import HTTPException, status
 
 from app.core.config import settings
+from app.models.enums import ConspectVariantType
 
 
 class GeminiClient:
@@ -55,17 +56,52 @@ class GeminiClient:
         )
         return self._generate_json(prompt, contents=[uploaded_file])
 
-    def generate_conspect(self, transcript: str) -> Dict[str, Any]:
-        prompt = (
-            "На основе расшифровки лекции создай структурированный конспект на русском языке. "
-            "Сфокусируйся на кратком изложении ключевых идей и списке основных тезисов. "
-            "Верни JSON вида: {"
-            '"title": "строка", '
-            '"summary": "3-4 абзаца по сути", '
-            '"key_points": ["пул основных мыслей"]'
-            "}"
+    def _conspect_prompt(self, variant: ConspectVariantType) -> str:
+        base_prompt = (
+            "You will receive a text in Russian that was transcribed from audio.\n\n"
+            "Your task: create a structured summary (конспект) of this text in Russian.\n\n"
+            "Use Markdown formatting:\n"
+            "- Include clear headings, subheadings, and bullet points\n"
+            "- Divide content into logical sections (e.g., Introduction, Main Ideas, Key Points, Conclusion)\n"
+            "- Add a final summary or conclusion\n\n"
+            "Keep the tone clear, logical, and easy to read. The output should be ready for display in a chat interface."
         )
+        if variant == ConspectVariantType.FULL:
+            variant_prompt = (
+                "Produce a detailed version that keeps full context, expands key ideas, and highlights supporting "
+                "details. Use multiple paragraphs and subsections where suitable."
+            )
+        else:
+            variant_prompt = (
+                "Produce a concise version that focuses on the essential ideas only. Limit the length to the core "
+                "theses, avoid repetition, and keep the result easy to skim."
+            )
+        format_prompt = (
+            "Return a JSON object with the following structure:\n"
+            '{\n'
+            '  "title": "short descriptive title in Russian",\n'
+            '  "markdown": "the full Markdown summary",\n'
+            '  "key_points": ["list of 3-6 key bullet points in Russian"]\n'
+            '}\n'
+            "Ensure the JSON is valid and do not include any extra text outside of the JSON object."
+        )
+        return f"{base_prompt}\n\nVariant: {variant.value}.\n{variant_prompt}\n\n{format_prompt}"
+
+    def generate_conspect_variant(
+        self,
+        transcript: str,
+        variant: ConspectVariantType,
+    ) -> Dict[str, Any]:
+        prompt = self._conspect_prompt(variant)
         return self._generate_json(prompt, contents=[{"text": transcript}])
+
+    def generate_conspect(self, transcript: str) -> Dict[str, Dict[str, Any]]:
+        return {
+            ConspectVariantType.FULL.value: self.generate_conspect_variant(transcript, ConspectVariantType.FULL),
+            ConspectVariantType.COMPRESSED.value: self.generate_conspect_variant(
+                transcript, ConspectVariantType.COMPRESSED
+            ),
+        }
 
     def generate_quiz(self, conspect_summary: str) -> Dict[str, Any]:
         prompt = (

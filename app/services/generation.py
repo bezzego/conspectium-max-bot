@@ -15,6 +15,7 @@ from app.models.conspect import Conspect
 from app.models.enums import (
     AudioProcessingStatus,
     ConspectStatus,
+    ConspectVariantType,
     GenerationJobStatus,
     GenerationJobType,
     QuizStatus,
@@ -84,18 +85,51 @@ class GenerationService:
             transcript_text = self._obtain_transcript(session, job)
             audio_source = session.get(AudioSource, job.audio_source_id) if job.audio_source_id else None
             try:
-                response = self.ai_client.generate_conspect(transcript_text)
+                variant_payloads: dict[str, dict] = {}
+                for variant in (ConspectVariantType.COMPRESSED, ConspectVariantType.FULL):
+                    variant_payloads[variant.value] = self.ai_client.generate_conspect_variant(
+                        transcript_text, variant
+                    )
+                response = {"variants": variant_payloads}
             except Exception as exc:  # noqa: BLE001
                 logging.exception("Conspect generation via AI failed: %s", exc)
                 if settings.environment != "production":
                     response = self._build_local_conspect(conspect, transcript_text, exc, audio_source)
+                    variant_payloads = response.get("variants", {})
                 else:
                     raise
 
-            conspect.summary = response.get("summary")
-            conspect.title = response.get("title") or conspect.title or "Конспект"
-            conspect.keywords = response.get("key_points")
-            conspect.model_used = self.ai_client.model_name
+            compressed_variant = variant_payloads.get(ConspectVariantType.COMPRESSED.value, {})
+            full_variant = variant_payloads.get(ConspectVariantType.FULL.value, {})
+
+            if "mode" not in response:
+                response["mode"] = "online"
+
+            conspect.title = (
+                compressed_variant.get("title")
+                or full_variant.get("title")
+                or conspect.title
+                or "Конспект"
+            )
+            conspect.compressed_markdown = compressed_variant.get("markdown")
+            conspect.full_markdown = full_variant.get("markdown")
+            conspect.summary = self._markdown_to_plain(conspect.compressed_markdown or "")
+            if not conspect.summary and full_variant.get("markdown"):
+                conspect.summary = self._markdown_to_plain(full_variant.get("markdown"))
+            if not conspect.summary and transcript_text:
+                conspect.summary = transcript_text[:200].strip()
+            conspect.keywords = (
+                compressed_variant.get("key_points")
+                or full_variant.get("key_points")
+                or conspect.keywords
+            )
+            if conspect.keywords:
+                conspect.keywords = [str(point) for point in conspect.keywords if str(point).strip()]
+
+            generation_mode = response.get("mode", "online")
+            conspect.model_used = (
+                self.ai_client.model_name if generation_mode != "offline" else "offline-fallback"
+            )
             conspect.raw_response = response
             conspect.status = ConspectStatus.READY
             conspect.generated_at = datetime.utcnow()
@@ -305,6 +339,24 @@ class GenerationService:
                 audio_source.status = AudioProcessingStatus.FAILED
         session.commit()
 
+    def _markdown_to_plain(self, text: str, max_length: int = 400) -> str:
+        if not text:
+            return ""
+        cleaned = re.sub(r"```.*?```", "", text, flags=re.S)
+        cleaned = re.sub(r"`([^`]*)`", r"\1", cleaned)
+        cleaned = re.sub(r"!\[[^\]]*\]\([^)]+\)", "", cleaned)
+        cleaned = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", cleaned)
+        cleaned = re.sub(r"^#+\s*", "", cleaned, flags=re.M)
+        cleaned = re.sub(r"[*_~`]", "", cleaned)
+        cleaned = re.sub(r"^\s*[-*+]\s*", "", cleaned, flags=re.M)
+        cleaned = re.sub(r"\s{2,}", " ", cleaned)
+        cleaned = re.sub(r"\n{2,}", "\n", cleaned)
+        cleaned = cleaned.strip()
+        if max_length and len(cleaned) > max_length:
+            truncated = cleaned[:max_length].rsplit(" ", 1)[0].strip()
+            cleaned = f"{truncated}…"
+        return cleaned
+
     def _build_local_conspect(
         self,
         conspect: Conspect,
@@ -322,19 +374,49 @@ class GenerationService:
             )
             key_points = [
                 "Аудиозапись сохранена и будет доступна для повторной обработки.",
-                "Проблема: " + str(error),
+                f"Проблема: {error}",
                 "Вы можете вставить текст лекции вручную на странице создания конспекта.",
             ]
         else:
-            summary = " ".join(sentences[:3])
-            key_points = sentences[3:8] or sentences[:3]
+            summary = " ".join(sentences[:5])
+            key_points = sentences[5:10] or sentences[:5]
             key_points = [point[:200] for point in key_points if point]
 
         conspect_title = title if isinstance(title, str) else "Черновик конспекта"
+
+        compressed_md_parts = [
+            f"# {conspect_title}",
+            "",
+            "## Основные тезисы",
+        ]
+        if key_points:
+            compressed_md_parts.extend(f"- {point}" for point in key_points)
+        else:
+            compressed_md_parts.append(summary)
+
+        full_md_parts = [
+            f"# {conspect_title}",
+            "",
+            "## Краткое содержание",
+            summary,
+        ]
+        if key_points:
+            full_md_parts.extend(["", "## Ключевые идеи"])
+            full_md_parts.extend(f"- {point}" for point in key_points)
+
         return {
-            "title": conspect_title,
-            "summary": summary,
-            "key_points": key_points,
+            "variants": {
+                ConspectVariantType.COMPRESSED.value: {
+                    "title": conspect_title,
+                    "markdown": "\n".join(compressed_md_parts),
+                    "key_points": key_points,
+                },
+                ConspectVariantType.FULL.value: {
+                    "title": conspect_title,
+                    "markdown": "\n".join(full_md_parts),
+                    "key_points": key_points,
+                },
+            },
             "mode": "offline",
             "error": str(error),
         }

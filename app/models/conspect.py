@@ -17,6 +17,8 @@ class Conspect(Base):
 
     title = Column(String(255), nullable=True)
     summary = Column(Text, nullable=True)
+    compressed_markdown = Column(Text, nullable=True)
+    full_markdown = Column(Text, nullable=True)
     keywords = Column(JSONB, nullable=True)
     status = Column(
         SqlEnum(

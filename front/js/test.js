@@ -99,6 +99,9 @@
         (question.answers || []).forEach((answer) => {
             const label = document.createElement('label');
             label.className = 'answer-option';
+            label.dataset.answerId = String(answer.id);
+            label.dataset.questionId = String(question.id);
+            label.dataset.correct = answer.is_correct ? 'true' : 'false';
 
             const input = document.createElement('input');
             input.type = 'radio';
@@ -121,6 +124,9 @@
         // Сначала добавляем все элементы в вопрос
         questionItem.appendChild(questionText);
         questionItem.appendChild(answersContainer);
+        const feedback = document.createElement('div');
+        feedback.className = 'answer-feedback';
+        questionItem.appendChild(feedback);
 
         container.appendChild(questionItem);
     });
@@ -442,6 +448,8 @@ function setupAccordionBehaviour() {
             resultEl.classList.remove('hidden');
         }
 
+        displayAnswerFeedback(questions);
+
         // Показываем уведомление о результате
         app.notify(`Тест завершен! Результат: ${result.score ?? 0}%`, 'success');
 
@@ -451,6 +459,62 @@ function setupAccordionBehaviour() {
         app.notify(err.message || 'Не удалось сохранить результат', 'error');
     }
 }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function displayAnswerFeedback(questions) {
+        questions.forEach((question) => {
+            const item = document.querySelector(`.question-item[data-question="${question.id}"]`);
+            if (!item) return;
+
+            const answers = question.answers || [];
+            const selectedInput = item.querySelector(`input[name="question-${question.id}"]:checked`);
+            const selectedAnswerId = selectedInput ? Number(selectedInput.value) : null;
+            const correctAnswer = answers.find((answer) => answer.is_correct);
+
+            const answerOptions = Array.from(item.querySelectorAll('.answer-option'));
+            answerOptions.forEach((option) => {
+                option.classList.add('answer-option--locked');
+                const input = option.querySelector('input[type="radio"]');
+                if (input) {
+                    input.disabled = true;
+                }
+                option.classList.remove('answer-option--correct', 'answer-option--wrong', 'answer-option--selected');
+                const optionAnswerId = Number(option.dataset.answerId);
+                if (optionAnswerId === selectedAnswerId) {
+                    option.classList.add('answer-option--selected');
+                }
+                if (option.dataset.correct === 'true') {
+                    option.classList.add('answer-option--correct');
+                }
+            });
+
+            if (selectedAnswerId !== null && correctAnswer && selectedAnswerId !== correctAnswer.id) {
+                const selectedOption = item.querySelector(`.answer-option[data-answer-id="${selectedAnswerId}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('answer-option--wrong');
+                }
+            }
+
+            const feedback = item.querySelector('.answer-feedback');
+            if (feedback && correctAnswer) {
+                const isCorrect = selectedAnswerId !== null && !!correctAnswer && selectedAnswerId === correctAnswer.id;
+                const labelText = isCorrect ? 'Отлично! Правильный ответ:' : 'Правильный ответ:';
+                feedback.innerHTML = `<span class="answer-feedback__label">${labelText}</span> <span class="answer-feedback__text">${escapeHtml(correctAnswer.text)}</span>`;
+                feedback.classList.remove('answer-feedback--success', 'answer-feedback--error');
+                feedback.classList.add('answer-feedback--visible');
+                feedback.classList.add(isCorrect ? 'answer-feedback--success' : 'answer-feedback--error');
+            }
+        });
+    }
 
     function showEmptyState(message) {
         const empty = document.getElementById('quizEmptyState');
