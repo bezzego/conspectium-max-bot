@@ -263,7 +263,12 @@ class GenerationService:
                     ai_response = self._build_local_quiz(conspect, exc)
                 else:
                     raise
-            quiz.title = ai_response.get("title") or f"Тест по '{conspect.title or 'конспекту'}'"
+            fallback_title = "Новый тест"
+            if conspect.title:
+                fallback_title = f"Тест по «{conspect.title}»"
+            elif conspect.input_prompt:
+                fallback_title = "Тест по конспекту"
+            quiz.title = (ai_response.get("title") or fallback_title).strip() or "Новый тест"
             quiz.description = ai_response.get("description")
             quiz.instructions = ai_response.get("instructions")
             quiz.model_used = self.ai_client.model_name

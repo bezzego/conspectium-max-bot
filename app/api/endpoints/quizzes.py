@@ -11,6 +11,8 @@ from app.schemas.quiz import (
     QuizRead,
     QuizResultCreate,
     QuizResultRead,
+    QuizSummaryRead,
+    QuizUpdateRequest,
 )
 from app.services.generation import generation_service
 
@@ -41,11 +43,10 @@ def list_quizzes(
     quizzes = (
         db.query(Quiz)
         .filter(Quiz.user_id == user.id)
-        .options(selectinload(Quiz.questions).selectinload(QuizQuestion.answers))
         .order_by(Quiz.created_at.desc())
         .all()
     )
-    return QuizListResponse(items=[QuizRead.model_validate(q) for q in quizzes])
+    return QuizListResponse(items=[QuizSummaryRead.model_validate(q) for q in quizzes])
 
 
 @router.get("/{quiz_id}", response_model=QuizRead)
@@ -63,6 +64,38 @@ def get_quiz(
     if quiz is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тест не найден")
     return QuizRead.model_validate(quiz)
+
+
+@router.patch("/{quiz_id}", response_model=QuizSummaryRead)
+def update_quiz(
+    quiz_id: int,
+    payload: QuizUpdateRequest,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> QuizSummaryRead:
+    if payload.title is None and payload.description is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Укажите новое название или описание",
+        )
+
+    quiz = (
+        db.query(Quiz)
+        .filter(Quiz.id == quiz_id, Quiz.user_id == user.id)
+        .one_or_none()
+    )
+    if quiz is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тест не найден")
+
+    if payload.title is not None:
+        quiz.title = (payload.title or "").strip() or "Новый тест"
+    if payload.description is not None:
+        quiz.description = payload.description.strip() if payload.description else None
+
+    db.add(quiz)
+    db.commit()
+    db.refresh(quiz)
+    return QuizSummaryRead.model_validate(quiz)
 
 
 @router.post("/{quiz_id}/results", response_model=QuizResultRead, status_code=status.HTTP_201_CREATED)

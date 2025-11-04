@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.enums import QuizStatus
 
@@ -25,27 +25,35 @@ class QuizQuestionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class QuizRead(BaseModel):
+class QuizSummaryRead(BaseModel):
     id: int
     user_id: int
     conspect_id: Optional[int] = None
     title: Optional[str] = None
     description: Optional[str] = None
     status: QuizStatus
-    instructions: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    questions: List[QuizQuestionRead] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class QuizRead(QuizSummaryRead):
+    instructions: Optional[str] = None
+    questions: List[QuizQuestionRead] = []
 
 
 class QuizCreateFromConspectRequest(BaseModel):
     conspect_id: int
 
 
+class QuizUpdateRequest(BaseModel):
+    title: Optional[str] = Field(default=None, description="Новое название теста")
+    description: Optional[str] = Field(default=None, description="Описание теста")
+
+
 class QuizListResponse(BaseModel):
-    items: List[QuizRead]
+    items: List[QuizSummaryRead]
 
 
 class QuizResultCreate(BaseModel):

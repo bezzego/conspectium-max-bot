@@ -1,0 +1,214 @@
+.test-list-wrapper {
+    background: var(--light-gray);
+    border-radius: 20px;
+    padding: 24px 20px;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    color: #333;
+}
+
+.test-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.test-item {
+    background: #ebeaea;
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.test-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+.test-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.test-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2c2c2c;
+    word-break: break-word;
+}
+
+.test-meta {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c6c70;
+}
+
+.test-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #4b4b4b;
+    word-break: break-word;
+}
+
+.test-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.test-actions .action-btn {
+    flex: 1 1 150px;
+    border-radius: 30px;
+    border: none;
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.test-actions .action-btn.launch {
+    background: var(--yellow);
+    color: #000;
+}
+
+.test-actions .action-btn.launch:hover {
+    background: #f8e082;
+}
+
+.test-actions .action-btn.rename {
+    background: #fff;
+    color: #333;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.test-actions .action-btn.rename:hover {
+    border-color: rgba(0, 0, 0, 0.25);
+}
+
+.rename-form {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.04);
+    animation: fadeIn 0.2s ease;
+}
+
+.rename-form.visible {
+    display: flex;
+}
+
+.rename-form label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3a3a3a;
+}
+
+.rename-form input {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 15px;
+    width: 100%;
+}
+
+.rename-form input:focus {
+    outline: none;
+    border-color: #333;
+    box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.1);
+}
+
+.rename-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.rename-actions button {
+    flex: 1 1 120px;
+    border-radius: 30px;
+    border: none;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.rename-actions .save-btn {
+    background: #333;
+    color: #fff;
+}
+
+.rename-actions .save-btn:hover {
+    background: #111;
+}
+
+.rename-actions .cancel-btn {
+    background: #fff;
+    color: #333;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.rename-actions .cancel-btn:hover {
+    border-color: rgba(0, 0, 0, 0.25);
+}
+
+.loading-state,
+.empty-state {
+    text-align: center;
+    color: #6c6c70;
+    font-size: 15px;
+    padding: 18px 10px;
+}
+
+.create-btn {
+    margin-top: 18px;
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (min-width: 768px) {
+    .test-item {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .rename-form {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .rename-form label {
+        width: 140px;
+    }
+
+    .rename-form input {
+        flex: 1;
+    }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Список тестов — Конспектиум</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/test_list.css">
+    <link rel="stylesheet" href="/front/css/loading.css">
+    <link rel="stylesheet" href="/front/css/responsive.css">
+</head>
+<body class="page-test-list">
+    <div class="container">
+        <header class="top-bar">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="brand">
+                <a href="/front/html/main.html" class="logo-link">
+                    <img class="logo" src="/img/logo_black.png" alt="logo">
+                </a>
+            </div>
+            <div class="back-btn-placeholder"></div>
+        </header>
+
+        <main>
+            <h1 class="title">Мои тесты</h1>
+            <p class="subtitle">Запускай, переименовывай и возвращайся, чтобы проходить их снова</p>
+
+            <section class="test-list-wrapper">
+                <div id="testList" class="test-list"></div>
+            </section>
+
+            <button class="upload-btn create-btn" id="createNewTestBtn">
+                <i class="fas fa-plus"></i>
+                Создать новый тест
+            </button>
+        </main>
+    </div>
+
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/test_list.js" defer></script>
+</body>
+</html>
