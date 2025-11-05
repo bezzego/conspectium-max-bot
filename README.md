@@ -38,6 +38,7 @@ poetry run uvicorn app.main:app --reload
 - `app/schemas` — Pydantic-схемы запросов/ответов.
 - `app/api` — роуты FastAPI.
 - `app/services` — сервисы (Telegram auth, генерация с Gemini, работа с файлами).
+- `app/services/max_bot.py` — интеграция с MAX Bot API (отправка приветствия и кнопки входа в мини-приложение).
 - `alembic/` — миграции базы данных.
 
 ### Полезные команды
@@ -55,3 +56,41 @@ poetry run uvicorn app.main:app --reload
   - `test_list.html` — список сохранённых тестов с быстрым запуском и переименованием.
   - `choose_test.html` — выбор конспекта и запуск генерации нового теста.
   - `test.html?quizId=<id>` — прохождение реального теста из базы.
+
+### Интеграция с MAX Bot
+
+1. Добавьте в `.env` значения:
+   ```
+   MAX_BOT_TOKEN=f9LHodD0cOKVvL6Os8H-RlGnfxOkJIqBaRi2lAeLjJO2nDiIg97mfJgbjAd8azQrbz2N-KcbwMk6BebSF7pf
+   MAX_MINI_APP_URL=https://<ваш-домен>/front/html/main.html
+   MAX_WELCOME_MESSAGE=Привет! Я бот Конспектиума. Нажми кнопку ниже, чтобы открыть мини-приложение.
+   MAX_WELCOME_BUTTON_TEXT=Открыть Конспектиум
+   ```
+   (при желании отредактируйте текст сообщения; в нём поддерживается плейсхолдер `{first_name}`).
+
+2. Запустите backend и откройте его наружу (например, `ngrok http 8000`) — вебхук MAX должен быть доступен по HTTPS.
+
+3. В кабинете MAX для партнёров:
+   - укажите URL мини-приложения (тот же, что в `MAX_MINI_APP_URL`);
+   - настройте вебхук бота на `https://<публичный-домен>/api/max/webhook`.
+
+4. Для проверки отправьте себе сообщение из бота или введите `/start`: API `POST https://platform-api.max.ru/messages/send` принимает payload вида
+   ```json
+   {
+     "chat_id": 123456,
+     "text": "Привет!",
+     "reply_markup": {
+       "inline_keyboard": [
+         [
+           {
+             "text": "Открыть мини-приложение",
+             "url": "https://max.ru/<botName>?startapp"
+           }
+         ]
+       ]
+     }
+   }
+   ```
+   где `<botName>` — ник бота в MAX. Указывайте токен в заголовке `Authorization`.
+
+> Если MAX использует другие конечные точки или формат сообщений — скорректируйте их в `app/services/max_bot.py`; структура сервиса позволяет легко поменять URL и JSON-пейлоад согласно официальной документации.
