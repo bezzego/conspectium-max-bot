@@ -1,3 +1,4 @@
+from sqlalchemy import and_, func
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 
@@ -42,13 +43,45 @@ def list_quizzes(
     db: Session = Depends(deps.get_db_session),
     user: User = Depends(deps.get_current_user),
 ) -> QuizListResponse:
+    latest_subquery = (
+        db.query(
+            QuizResult.quiz_id,
+            func.max(QuizResult.created_at).label("last_created"),
+        )
+        .filter(QuizResult.user_id == user.id)
+        .group_by(QuizResult.quiz_id)
+        .subquery()
+    )
+
+    latest_results = (
+        db.query(QuizResult)
+        .join(
+            latest_subquery,
+            and_(
+                QuizResult.quiz_id == latest_subquery.c.quiz_id,
+                QuizResult.created_at == latest_subquery.c.last_created,
+            ),
+        )
+        .all()
+    )
+    latest_map = {result.quiz_id: result for result in latest_results}
+
     quizzes = (
         db.query(Quiz)
         .filter(Quiz.user_id == user.id)
         .order_by(Quiz.created_at.desc())
         .all()
     )
-    return QuizListResponse(items=[QuizSummaryRead.model_validate(q) for q in quizzes])
+    items = []
+    for quiz in quizzes:
+        summary = QuizSummaryRead.model_validate(quiz)
+        latest = latest_map.get(quiz.id)
+        if latest:
+            summary = summary.model_copy(
+                update={"latest_result": QuizResultRead.model_validate(latest)}
+            )
+        items.append(summary)
+    return QuizListResponse(items=items)
 
 
 @router.get("/{quiz_id}", response_model=QuizRead)
@@ -65,7 +98,22 @@ def get_quiz(
     )
     if quiz is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тест не найден")
-    return QuizRead.model_validate(quiz)
+    result_rows = (
+        db.query(QuizResult)
+        .filter(QuizResult.quiz_id == quiz_id, QuizResult.user_id == user.id)
+        .order_by(QuizResult.created_at.desc())
+        .limit(20)
+        .all()
+    )
+    result_models = [QuizResultRead.model_validate(row) for row in result_rows]
+    latest_result = result_models[0] if result_models else None
+    quiz_read = QuizRead.model_validate(quiz)
+    return quiz_read.model_copy(
+        update={
+            "results": result_models,
+            "latest_result": latest_result,
+        }
+    )
 
 
 @router.patch("/{quiz_id}", response_model=QuizSummaryRead)
@@ -97,7 +145,19 @@ def update_quiz(
     db.add(quiz)
     db.commit()
     db.refresh(quiz)
-    return QuizSummaryRead.model_validate(quiz)
+
+    latest_result = (
+        db.query(QuizResult)
+        .filter(QuizResult.quiz_id == quiz.id, QuizResult.user_id == user.id)
+        .order_by(QuizResult.created_at.desc())
+        .first()
+    )
+    summary = QuizSummaryRead.model_validate(quiz)
+    if latest_result:
+        summary = summary.model_copy(
+            update={"latest_result": QuizResultRead.model_validate(latest_result)}
+        )
+    return summary
 
 
 @router.post("/{quiz_id}/results", response_model=QuizResultRead, status_code=status.HTTP_201_CREATED)

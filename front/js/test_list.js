@@ -75,6 +75,7 @@
             item.appendChild(description);
         }
 
+        item.appendChild(buildResultSummary(quiz));
         item.appendChild(buildActions(quiz));
         item.appendChild(buildRenameForm(quiz));
         return item;
@@ -92,13 +93,70 @@
         meta.className = 'test-meta';
         const updatedAt = quiz.updated_at || quiz.created_at;
         const date = updatedAt ? new Date(updatedAt) : null;
-        meta.textContent = date
-            ? `Обновлён ${formatDate(date)}`
-            : 'Дата неизвестна';
+        const updatedNode = document.createElement('span');
+        updatedNode.className = 'test-updated';
+        updatedNode.textContent = date ? `Обновлён ${formatDate(date)}` : 'Дата неизвестна';
+        meta.appendChild(updatedNode);
+
+        if (quiz.latest_result) {
+            const scoreNode = document.createElement('span');
+            scoreNode.className = 'test-score';
+            const { scoreText, breakdown } = buildScoreText(quiz.latest_result);
+            scoreNode.innerHTML = `<i class="fas fa-chart-line"></i>${scoreText}`;
+            if (breakdown) {
+                scoreNode.dataset.breakdown = breakdown;
+                scoreNode.title = breakdown;
+            }
+            const createdAt = quiz.latest_result.created_at ? new Date(quiz.latest_result.created_at) : null;
+            if (createdAt) {
+                scoreNode.title = `${breakdown ? `${breakdown} • ` : ''}${formatDate(createdAt)}`;
+            }
+            meta.appendChild(scoreNode);
+        }
 
         header.appendChild(title);
         header.appendChild(meta);
         return header;
+    }
+
+    function buildResultSummary(quiz) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'test-result';
+
+        if (!quiz.latest_result) {
+            wrapper.classList.add('test-result--empty');
+            wrapper.textContent = 'Пока нет результатов — пройди тест, чтобы увидеть прогресс.';
+            return wrapper;
+        }
+
+        const { scoreText, breakdown } = buildScoreText(quiz.latest_result);
+        const createdAt = quiz.latest_result.created_at ? new Date(quiz.latest_result.created_at) : null;
+
+        const label = document.createElement('span');
+        label.className = 'test-result__label';
+        label.textContent = 'Последняя попытка:';
+
+        const score = document.createElement('span');
+        score.className = 'test-result__score';
+        score.textContent = scoreText;
+
+        const extra = document.createElement('span');
+        extra.className = 'test-result__details';
+        const parts = [];
+        if (breakdown) {
+            parts.push(breakdown);
+        }
+        if (createdAt) {
+            parts.push(formatDate(createdAt));
+        }
+        extra.textContent = parts.join(' • ');
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(score);
+        if (parts.length) {
+            wrapper.appendChild(extra);
+        }
+        return wrapper;
     }
 
     function buildActions(quiz) {
@@ -208,11 +266,11 @@
 
         app.showLoading('Сохраняем новое название...');
         try {
-            const updated = await app.authFetch(`/quizzes/${quizId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: newTitle }),
-            });
+        const updated = await app.authFetch(`/quizzes/${quizId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: newTitle }),
+        });
 
             const index = state.tests.findIndex((quiz) => quiz.id === quizId);
             if (index !== -1) {
@@ -238,5 +296,19 @@
             hour: '2-digit',
             minute: '2-digit',
         });
+    }
+
+    function buildScoreText(result) {
+        const scoreValue = typeof result.score === 'number' ? Math.round(result.score) : null;
+        const total = typeof result.total_questions === 'number' ? result.total_questions : null;
+        let correct = null;
+        if (scoreValue !== null && total) {
+            correct = Math.round((scoreValue / 100) * total);
+        }
+        const scoreText = scoreValue !== null ? `${scoreValue}%` : '—';
+        const breakdown = correct !== null && total
+            ? `${correct}/${total} правильных`
+            : null;
+        return { scoreText, breakdown };
     }
 })();

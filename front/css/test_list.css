@@ -1,38 +1,60 @@
-.test-list-wrapper {
-    background: var(--light-gray);
-    border-radius: 20px;
-    padding: 24px 20px;
-    min-height: 480px;
+.page-test-list .container {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
     gap: 16px;
-    color: #333;
+}
+
+.page-test-list main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 32px;
+}
+
+.tests-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tests-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .test-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 
 .test-item {
-    background: #ebeaea;
-    border-radius: 18px;
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.35) 0%,
+        rgba(0, 0, 0, 0.25) 55%,
+        rgba(0, 0, 0, 0.4) 100%
+    );
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
     padding: 18px 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid transparent;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .test-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(245, 216, 110, 0.35);
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.36);
 }
 
-.test-header {
+.test-item__head {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -41,68 +63,126 @@
 }
 
 .test-title {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
-    color: #2c2c2c;
+    color: rgba(255, 255, 255, 0.95);
     word-break: break-word;
 }
 
 .test-meta {
-    font-size: 14px;
-    font-weight: 500;
-    color: #6c6c70;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.test-meta .test-updated {
+    white-space: nowrap;
+}
+
+.test-meta .test-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(245, 216, 110, 0.18);
+    color: rgba(245, 216, 110, 0.95);
+    font-weight: 600;
 }
 
 .test-description {
     font-size: 14px;
     line-height: 1.5;
-    color: #4b4b4b;
-    word-break: break-word;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.test-result {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: baseline;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.test-result__label {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.test-result__score {
+    font-weight: 700;
+    color: rgba(245, 216, 110, 0.95);
+}
+
+.test-result__details {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.test-result--empty {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .test-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
 .test-actions .action-btn {
-    flex: 1 1 150px;
-    border-radius: 30px;
+    flex: 1 1 160px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 16px;
     border: none;
     padding: 12px 18px;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .test-actions .action-btn.launch {
-    background: var(--yellow);
-    color: #000;
+    background: linear-gradient(
+        135deg,
+        rgba(245, 216, 110, 0.95) 0%,
+        rgba(240, 213, 124, 0.95) 45%,
+        rgba(245, 216, 110, 0.9) 100%
+    );
+    color: #1f1f1f;
+    box-shadow: 0 14px 30px rgba(245, 216, 110, 0.35);
 }
 
 .test-actions .action-btn.launch:hover {
-    background: #f8e082;
+    transform: translateY(-1px);
+    box-shadow: 0 18px 36px rgba(245, 216, 110, 0.45);
 }
 
 .test-actions .action-btn.rename {
-    background: #fff;
-    color: #333;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .test-actions .action-btn.rename:hover {
-    border-color: rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
 }
 
 .rename-form {
     display: none;
     flex-direction: column;
     gap: 12px;
-    padding: 14px 16px;
-    border-radius: 14px;
-    background: rgba(0, 0, 0, 0.04);
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     animation: fadeIn 0.2s ease;
 }
 
@@ -111,23 +191,24 @@
 }
 
 .rename-form label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: #3a3a3a;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .rename-form input {
     padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
     font-size: 15px;
-    width: 100%;
 }
 
 .rename-form input:focus {
     outline: none;
-    border-color: #333;
-    box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.1);
+    border-color: rgba(245, 216, 110, 0.8);
+    box-shadow: 0 0 0 3px rgba(245, 216, 110, 0.2);
 }
 
 .rename-actions {
@@ -138,48 +219,46 @@
 
 .rename-actions button {
     flex: 1 1 120px;
-    border-radius: 30px;
+    border-radius: 14px;
     border: none;
     padding: 10px 16px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .rename-actions .save-btn {
-    background: #333;
-    color: #fff;
+    background: rgba(245, 216, 110, 0.85);
+    color: #1f1f1f;
+    box-shadow: 0 10px 24px rgba(245, 216, 110, 0.3);
 }
 
 .rename-actions .save-btn:hover {
-    background: #111;
+    box-shadow: 0 14px 30px rgba(245, 216, 110, 0.38);
 }
 
 .rename-actions .cancel-btn {
-    background: #fff;
-    color: #333;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .rename-actions .cancel-btn:hover {
-    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
 }
 
 .loading-state,
 .empty-state {
     text-align: center;
-    color: #6c6c70;
-    font-size: 15px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
     padding: 18px 10px;
 }
 
-.create-btn {
-    margin-top: 18px;
-    position: static;
-    transform: none;
+.accent-btn.full-width {
     width: 100%;
-    max-width: 100%;
+    justify-content: center;
 }
 
 @keyframes fadeIn {
@@ -193,22 +272,12 @@
     }
 }
 
-@media (min-width: 768px) {
+@media (max-width: 480px) {
     .test-item {
-        flex-direction: row;
-        align-items: center;
+        padding: 16px;
     }
 
-    .rename-form {
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .rename-form label {
-        width: 140px;
-    }
-
-    .rename-form input {
-        flex: 1;
+    .test-actions .action-btn {
+        flex: 1 1 100%;
     }
 }

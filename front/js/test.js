@@ -1,4 +1,9 @@
 (() => {
+    const quizState = {
+        id: null,
+        questions: [],
+        results: [],
+    };
     document.addEventListener('DOMContentLoaded', async () => {
         if (!document.body.classList.contains('page-test')) {
             return;
@@ -58,16 +63,25 @@
 
         try {
             const quiz = await app.authFetch(`/quizzes/${quizId}`);
+            quizState.id = quiz.id;
+            quizState.questions = Array.isArray(quiz.questions) ? quiz.questions : [];
+            quizState.results = Array.isArray(quiz.results) ? quiz.results : [];
+
             titleEl.textContent = quiz.title || 'Без названия';
             if (descriptionEl) {
                 descriptionEl.textContent = quiz.description || '';
             }
 
-            renderQuestions(quiz.questions || []);
+            renderQuestions(quizState.questions);
+            renderHistory(quizState.results);
+            renderLatestResultPanel();
 
-            submitBtn.addEventListener('click', async () => {
-                await submitQuiz(app, quizId, quiz.questions || []);
-            });
+            if (submitBtn) {
+                submitBtn.style.display = '';
+                submitBtn.onclick = async () => {
+                    await submitQuiz(app, quizId);
+                };
+            }
         } catch (err) {
             console.error(err);
             showEmptyState('Не удалось загрузить тест. Попробуй создать новый.');
@@ -415,71 +429,171 @@ function setupAccordionBehaviour() {
         }
     }
 
-   async function submitQuiz(app, quizId, questions) {
-    const answers = [];
-    const missing = [];
-
-    questions.forEach((question) => {
-        const checked = document.querySelector(`input[name="question-${question.id}"]:checked`);
-        if (checked) {
-            answers.push(Number(checked.value));
-        } else {
-            missing.push(question.id);
+    async function submitQuiz(app, quizId) {
+        const questions = quizState.questions;
+        if (!questions.length) {
+            app.notify('В этом тесте пока нет вопросов', 'info');
+            return;
         }
-    });
 
-    if (!answers.length) {
-        app.notify('Выбери ответы к вопросам', 'info');
-        return;
+        const answers = [];
+
+        questions.forEach((question) => {
+            const checked = document.querySelector(`input[name="question-${question.id}"]:checked`);
+            if (checked) {
+                answers.push(Number(checked.value));
+            }
+        });
+
+        if (!answers.length) {
+            app.notify('Выбери ответы к вопросам', 'info');
+            return;
+        }
+
+        try {
+            app.showLoading('Считаем результат...');
+            const [result] = await Promise.all([
+                app.authFetch(`/quizzes/${quizId}/results`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answers }),
+                }),
+                new Promise((resolve) => setTimeout(resolve, 4000)),
+            ]);
+
+            app.hideLoading();
+
+            const submitBtn = document.getElementById('submitQuizBtn');
+            if (submitBtn) {
+                submitBtn.style.display = 'none';
+            }
+
+            quizState.results = [
+                result,
+                ...quizState.results.filter((item) => item.id !== result.id),
+            ].slice(0, 20);
+
+            renderLatestResultPanel();
+            renderHistory(quizState.results);
+            displayAnswerFeedback(questions);
+
+            const scoreValue = typeof result.score === 'number' ? Math.round(result.score) : 0;
+            app.notify(`Тест завершён! Результат: ${scoreValue}%`, 'success');
+        } catch (err) {
+            console.error(err);
+            app.hideLoading();
+            app.notify(err.message || 'Не удалось сохранить результат', 'error');
+        }
     }
 
-    try {
-        app.showLoading('Считаем результат...');
-        
-        // Имитируем задержку в 4 секунды перед показом результата
-        const [result] = await Promise.all([
-            app.authFetch(`/quizzes/${quizId}/results`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ answers }),
-            }),
-            new Promise(resolve => setTimeout(resolve, 4000)) // Задержка 4 секунды
-        ]);
-        
-        app.hideLoading();
-
-        // Скрываем кнопку "Завершить тест"
-        const submitBtn = document.getElementById('submitQuizBtn');
-        if (submitBtn) {
-            submitBtn.style.display = 'none';
-        }
-
-        // Показываем блок с результатами
+    function renderLatestResultPanel() {
         const resultEl = document.getElementById('quizResult');
-        if (resultEl) {
-            const score = result.score ?? 0;
-            const totalQuestions = result.total_questions ?? questions.length;
-            const correctAnswers = Math.round((score / 100) * totalQuestions);
-            
-            resultEl.innerHTML = `
-                <i class="fas fa-chart-bar"></i>
-                Результат: ${correctAnswers}/${totalQuestions} (${score}%)
-            `;
-            resultEl.classList.add('show');
-            resultEl.classList.remove('hidden');
+        if (!resultEl) return;
+
+        const latest = quizState.results[0];
+        if (!latest) {
+            resultEl.classList.add('hidden');
+            resultEl.classList.remove('show');
+            resultEl.innerHTML = '';
+            return;
         }
 
-        displayAnswerFeedback(questions);
+        const stats = calculateResultStats(latest);
+        let summaryText = '—';
+        if (stats.correct !== null && stats.total !== null) {
+            summaryText = `${stats.correct}/${stats.total}`;
+            if (stats.score !== null) {
+                summaryText += ` (${stats.score}%)`;
+            }
+        } else if (stats.score !== null) {
+            summaryText = `${stats.score}%`;
+        }
 
-        // Показываем уведомление о результате
-        app.notify(`Тест завершен! Результат: ${result.score ?? 0}%`, 'success');
-
-    } catch (err) {
-        console.error(err);
-        app.hideLoading();
-        app.notify(err.message || 'Не удалось сохранить результат', 'error');
+        const formattedDate = latest.created_at ? formatDateTime(latest.created_at) : '';
+        resultEl.innerHTML = `
+            <i class="fas fa-chart-bar"></i>
+            Результат: ${summaryText}${formattedDate ? `<span class="result-date">${formattedDate}</span>` : ''}
+        `;
+        resultEl.classList.add('show');
+        resultEl.classList.remove('hidden');
     }
-}
+
+    function renderHistory(results) {
+        const container = document.getElementById('quizHistory');
+        if (!container) return;
+
+        if (!results.length) {
+            container.innerHTML = '<p class="history-empty">Пока нет сохранённых попыток. Пройди тест, чтобы увидеть прогресс.</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        results.forEach((result, index) => {
+            container.appendChild(createHistoryItem(result, index));
+        });
+    }
+
+    function createHistoryItem(result, index) {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        if (index === 0) {
+            item.classList.add('history-item--latest');
+        }
+
+        const badge = document.createElement('span');
+        badge.className = 'history-index';
+        badge.textContent = `#${index + 1}`;
+
+        const body = document.createElement('div');
+        body.className = 'history-content';
+
+        const stats = calculateResultStats(result);
+
+        const scoreLine = document.createElement('div');
+        scoreLine.className = 'history-score';
+        const scoreParts = [];
+        if (stats.score !== null) {
+            scoreParts.push(`${stats.score}%`);
+        }
+        if (stats.correct !== null && stats.total !== null) {
+            scoreParts.push(`${stats.correct}/${stats.total} правильных`);
+        }
+        scoreLine.textContent = scoreParts.join(' • ') || '—';
+
+        const timeLine = document.createElement('div');
+        timeLine.className = 'history-time';
+        timeLine.textContent = result.created_at ? formatDateTime(result.created_at) : '';
+
+        body.appendChild(scoreLine);
+        body.appendChild(timeLine);
+
+        item.appendChild(badge);
+        item.appendChild(body);
+        return item;
+    }
+
+    function calculateResultStats(result) {
+        const score = typeof result.score === 'number' ? Math.round(result.score) : null;
+        const total = typeof result.total_questions === 'number'
+            ? result.total_questions
+            : (quizState.questions.length || null);
+        const correct = score !== null && total ? Math.round((score / 100) * total) : null;
+        return { score, total, correct };
+    }
+
+    function formatDateTime(value) {
+        const date = value instanceof Date ? value : new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        return date.toLocaleString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
 
     function escapeHtml(str) {
         if (!str) return '';

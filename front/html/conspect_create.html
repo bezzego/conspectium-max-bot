@@ -6,6 +6,7 @@
     <title>Конспектиум</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/liquid_glass.css">
     <link rel="stylesheet" href="/front/css/conspect_create.css">
     <link rel="stylesheet" href="/front/css/responsive.css">
 </head>
@@ -28,38 +29,61 @@
             <h1 class="title">Создай конспект!</h1>
             <p class="subtitle">Загрузи аудио или вставь текст — мы соберём структуру и ключевые тезисы</p>
 
-            <div class="manual-create">
-                <h2 class="title-h2">Конспект из текста</h2>
-                <label class="input-label" for="conspectTitleInput">Название (необязательно)</label>
-                <input id="conspectTitleInput" type="text" class="text-input-title" placeholder="Например, Макроэкономика: инфляция и ставки" />
-                <label class="input-label" for="conspectTextInput">Исходный текст</label>
-                <textarea id="conspectTextInput" class="text-input" rows="8" placeholder="Вставь сюда заметки или расшифровку аудио..."></textarea>
-                <button id="createFromTextBtn" class="primary-btn">Сгенерировать конспект</button>
-            </div>
+            <section class="card-grid">
+                <article class="glass-card manual-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Конспект из текста</h2>
+                        <p class="card-subtitle">Вставь заметки или расшифровку лекции — мы преобразуем их в готовую структуру</p>
+                    </div>
+                    <div class="field-group">
+                        <label class="input-label" for="conspectTitleInput">Название (необязательно)</label>
+                        <input id="conspectTitleInput" type="text" class="text-input-title" placeholder="Например, Макроэкономика: инфляция и ставки" />
+                    </div>
+                    <div class="field-group">
+                        <label class="input-label" for="conspectTextInput">Исходный текст</label>
+                        <textarea id="conspectTextInput" class="text-input" rows="8" placeholder="Вставь сюда заметки или расшифровку аудио..."></textarea>
+                    </div>
+                    <button id="createFromTextBtn" class="accent-btn">
+                        <span>Сгенерировать конспект</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </article>
 
-            <div class="action-row">
-                <button class="square-btn" id="createQuizFromLatest">
+                <article class="glass-card audio-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Конспект из аудио</h2>
+                        <p class="card-subtitle">Загрузи голосовое сообщение или лекцию — мы расшифруем и соберём ключевые идеи</p>
+                    </div>
+                    <button class="accent-btn secondary" id="uploadAudioButton">
+                        <i class="fas fa-microphone"></i>
+                        <span>Загрузить аудио</span>
+                    </button>
+                    <p class="helper-text">Поддерживаются форматы MP3, M4A, WAV. Максимум 50 МБ.</p>
+                </article>
+            </section>
+
+            <section class="quick-actions">
+                <button class="quick-action liquid-glass" id="createQuizFromLatest">
                     <i><img class="button-icon-test" src="/img/test.png" alt=""></i>
                     <span>Создай тест,<br>закрепи знания</span>
+                    <div class="liquid-reflections"></div>
                 </button>
 
-                <button class="square-btn" id="shareConspectBtn">
+                <button class="quick-action liquid-glass" id="shareConspectBtn">
                     <i><img class="button-icon-test" src="/img/share.png" alt=""></i>
                     <span>Поделись ссылкой<br>на конспект</span>
+                    <div class="liquid-reflections"></div>
                 </button>
-            </div>
+            </section>
 
             <input type="file" id="audioUploadInput" accept="audio/*" hidden />
-            <button class="upload-btn" id="uploadAudioButton">
-                <i class="fas fa-microphone"></i>
-                Загрузить аудио...
-            </button>
         </main>
     </div>
 
     <script src="/front/js/app.js" defer></script>
     <script src="/front/js/script.js" defer></script>
     <script src="/front/js/conspect_create.js" defer></script>
+    <script src="/front/js/liquid_glass.js" defer></script>
 
 </body>
 </html>

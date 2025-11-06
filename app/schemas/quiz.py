@@ -34,6 +34,7 @@ class QuizSummaryRead(BaseModel):
     status: QuizStatus
     created_at: datetime
     updated_at: datetime
+    latest_result: Optional["QuizResultRead"] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -41,6 +42,7 @@ class QuizSummaryRead(BaseModel):
 class QuizRead(QuizSummaryRead):
     instructions: Optional[str] = None
     questions: List[QuizQuestionRead] = []
+    results: List["QuizResultRead"] = []
 
 
 class QuizCreateFromConspectRequest(BaseModel):
@@ -69,6 +71,10 @@ class QuizResultRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+QuizSummaryRead.model_rebuild()
+QuizRead.model_rebuild()
 
 
 class QuizManualAnswerCreate(BaseModel):
