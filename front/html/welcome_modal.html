@@ -1,42 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добро пожаловать - Conspectium</title>
-    <link rel="stylesheet" href="/front/css/welcome_modal.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Онбординг — профиль</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/welcome_modal.css">
 </head>
 <body>
-    <!-- Модальное окно приветствия - ВИДИМО ВСЕГДА -->
-    <div id="welcome-modal" class="welcome-modal-overlay visible">
-        <div class="welcome-modal">
-            <!-- Заголовок -->
-            <div class="welcome-header">
-                <h2>Привет! Введи свои данные</h2>
-                <p>Они нужны для дальнейшего использования</p>
-            </div>
 
-            <!-- Карусель аватарок -->
-            <div class="avatar-section">
-                <div class="avatar-carousel-container">
-                    <div class="avatar-center-indicator"></div>
-                    <div class="avatar-track">
-                        <!-- Аватарки будут добавлены через JavaScript -->
-                    </div>
-                </div>
-                <div class="avatar-dots">
-                    <!-- Точки навигации будут добавлены через JavaScript -->
-                </div>
-            </div>
+<main>
+    <div class="page-card">
+        <h2>Демо: Основной экран (за модальным окном)</h2>
+        <p>Контент страницы под модальным окном</p>
+    </div>
+</main>
 
-            <!-- Поле для имени -->
+<!-- Modal -->
+<div class="welcome-modal-overlay">
+    <div class="welcome-modal">
+        <div class="welcome-header">
+            <h2>Привет! Введи свои данные</h2>
+            <p>Они нужны для дальнейшего использования</p>
+        </div>
+
+        <div class="avatar-section">
+            <div class="avatar-carousel-container">
+                <div class="avatar-track" id="avatarTrack"></div>
+                <div class="avatar-center-indicator"></div>
+            </div>
+            <div class="avatar-dots" id="dots"></div>
+        </div>
+
+        <div class="form">
             <div class="input-group">
-                <input type="text" id="username-input" placeholder="Введи своё имя" maxlength="20">
+                <input id="username-input" type="text" placeholder="Введи своё имя" maxlength="20">
                 <i class="fas fa-user input-icon"></i>
             </div>
 
-            <!-- Выбор пола -->
             <div class="gender-selection">
                 <div class="gender-option">
                     <input type="radio" id="gender-male" name="gender" value="male">
@@ -54,14 +59,15 @@
                 </div>
             </div>
 
-            <!-- Кнопка подтверждения -->
-            <button id="confirm-btn" class="confirm-btn liquid-glass" disabled>
+            <button id="confirmBtn" class="confirm-btn" disabled>
                 <i class="fas fa-check"></i>
                 <span>Подтвердить</span>
             </button>
         </div>
     </div>
+</div>
 
-    <script src="/front/js/welcome_modal.js"></script>
+<script src="/front/js/script.js"></script>
+<script src="/front/js/welcome_modal.js"></script>
 </body>
 </html>

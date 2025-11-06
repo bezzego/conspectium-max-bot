@@ -1,295 +1,305 @@
-// Карусель аватарок
-class AvatarCarousel {
-    constructor() {
-        this.container = document.querySelector('.avatar-carousel-container');
-        this.track = document.querySelector('.avatar-track');
-        this.dotsContainer = document.querySelector('.avatar-dots');
-        this.avatars = [
-            { id: 1, type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Mason&radius=50&backgroundColor=d1d4f9' },
-            { id: 2, type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Kingston&radius=50&backgroundColor=b6e3f4' },
-            { id: 3, type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Avery&radius=50&backgroundColor=b6e3f4' },
-            { id: 4, type: 'robot', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Oliver&radius=50&backgroundColor=b6e3f4' },
-            { id: 5, type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Vivian&radius=50&backgroundColor=ffdfbf' },
-            { id: 6, type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jocelyn&radius=50&backgroundColor=ffd5dc,c0aede' },
-            { id: 7, type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Vivian&radius=50&backgroundColor=ffdfbf' }
-        ];
-        this.currentIndex = 3;
-        this.isDragging = false;
-        this.startX = 0;
-        this.currentTranslate = 0;
-        this.prevTranslate = 0;
-        this.animationId = null;
-        this.velocity = 0;
-        this.lastX = 0;
-        this.lastTime = 0;
-        
-        this.init();
-    }
+// Данные аватарок
+const ALL_AVATARS = [
+    { id: 'm1', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Mason&radius=50&backgroundColor=d1d4f9' },
+    { id: 'm2', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Oliver&radius=50&backgroundColor=b6e3f4' },
+    { id: 'm3', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jocelyn&backgroundColor=d1d4f9,b6e3f4' },
+    { id: 'robot', type: 'robot', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jessica&skinColor=f2d3b1&backgroundColor=c0aede' },
+    { id: 'f1', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Vivian&radius=50&backgroundColor=ffdfbf' },
+    { id: 'f2', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Avery&backgroundColor=ffdfbf' },
+    { id: 'f3', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jude&hair=long06&hairColor=0e0e0e,3eac2c,562306,592454,6a4e35,85c2c6,ab2a18,ac6511,afafaf,b9a05f,cb6820,dba3be,e5d7a3&backgroundColor=ffdfbf' }
+];
 
-    init() {
-        this.renderAvatars();
-        this.createDots();
-        this.setupEventListeners();
-        this.updatePositions();
-        this.animate();
-    }
+// Элементы DOM
+const avatarTrack = document.getElementById('avatarTrack');
+const dotsWrap = document.getElementById('dots');
+const nameInput = document.getElementById('username-input');
+const confirmBtn = document.getElementById('confirmBtn');
+const genderInputs = document.querySelectorAll('input[name="gender"]');
 
-    renderAvatars() {
-        this.track.innerHTML = '';
-        
-        this.avatars.forEach((avatar, index) => {
-            const avatarEl = document.createElement('div');
-            avatarEl.className = 'avatar-item';
-            avatarEl.innerHTML = `<img src="${avatar.url}" alt="Аватар ${index + 1}" loading="lazy">`;
-            avatarEl.dataset.index = index;
-            
-            avatarEl.addEventListener('click', (e) => {
-                if (!this.isDragging) {
-                    this.snapToIndex(index);
-                }
-            });
-            
-            this.track.appendChild(avatarEl);
-        });
-    }
+// Состояние
+let avatars = ALL_AVATARS.slice();
+let currentIndex = 3; // Робот по центру
+let selectedGender = null;
+let selectedAvatarId = 'robot';
+let isDragging = false;
+let startX = 0;
+let currentTranslate = 0;
+let prevTranslate = 0;
+let velocity = 0;
+let lastX = 0;
+let lastTime = 0;
+const ITEM_SPACING = 145;
 
-    createDots() {
-        this.dotsContainer.innerHTML = '';
+// Рендер аватарок
+function renderAvatars() {
+    avatarTrack.innerHTML = '';
+    
+    avatars.forEach((avatar, index) => {
+        const avatarEl = document.createElement('div');
+        avatarEl.className = 'avatar-item';
+        avatarEl.dataset.index = index;
+        avatarEl.dataset.avatarId = avatar.id;
+        avatarEl.innerHTML = `<img src="${avatar.url}" alt="Аватар ${index + 1}" loading="lazy">`;
         
-        this.avatars.forEach((_, index) => {
-            const dot = document.createElement('div');
-            dot.className = `avatar-dot ${index === this.currentIndex ? 'active' : ''}`;
-            dot.dataset.index = index;
-            
-            dot.addEventListener('click', () => {
-                this.snapToIndex(index);
-            });
-            
-            this.dotsContainer.appendChild(dot);
-        });
-    }
-
-    setupEventListeners() {
-        // Мышь
-        this.container.addEventListener('mousedown', this.dragStart.bind(this));
-        document.addEventListener('mousemove', this.drag.bind(this));
-        document.addEventListener('mouseup', this.dragEnd.bind(this));
-        
-        // Тач
-        this.container.addEventListener('touchstart', this.dragStart.bind(this));
-        document.addEventListener('touchmove', this.drag.bind(this));
-        document.addEventListener('touchend', this.dragEnd.bind(this));
-        
-        // Предотвращаем контекстное меню
-        this.container.addEventListener('contextmenu', (e) => e.preventDefault());
-    }
-
-    dragStart(e) {
-        if (e.type === 'touchstart') {
-            this.startX = e.touches[0].clientX;
-        } else {
-            this.startX = e.clientX;
-        }
-        
-        this.isDragging = true;
-        this.container.style.cursor = 'grabbing';
-        this.track.style.transition = 'none';
-        
-        this.lastX = this.startX;
-        this.lastTime = Date.now();
-        this.velocity = 0;
-        
-        cancelAnimationFrame(this.animationId);
-    }
-
-    drag(e) {
-        if (!this.isDragging) return;
-        
-        let currentX;
-        if (e.type === 'touchmove') {
-            currentX = e.touches[0].clientX;
-        } else {
-            currentX = e.clientX;
-        }
-        
-        const currentTime = Date.now();
-        const deltaTime = currentTime - this.lastTime;
-        
-        if (deltaTime > 0) {
-            const deltaX = currentX - this.lastX;
-            this.velocity = deltaX / deltaTime;
-            this.lastX = currentX;
-            this.lastTime = currentTime;
-        }
-        
-        const diff = currentX - this.startX;
-        this.currentTranslate = this.prevTranslate + diff;
-        
-        this.updatePositions();
-    }
-
-    dragEnd() {
-        if (!this.isDragging) return;
-        
-        this.isDragging = false;
-        this.container.style.cursor = 'grab';
-        this.track.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
-        
-        // Добавляем инерцию
-        const inertia = this.velocity * 80;
-        this.currentTranslate += inertia;
-        
-        // Находим ближайший индекс для snap
-        const itemWidth = 140;
-        const targetIndex = Math.round(-this.currentTranslate / itemWidth);
-        const clampedIndex = Math.max(0, Math.min(this.avatars.length - 1, targetIndex));
-        
-        this.snapToIndex(clampedIndex);
-    }
-
-    snapToIndex(index) {
-        this.currentIndex = index;
-        this.currentTranslate = -index * 140;
-        this.prevTranslate = this.currentTranslate;
-        this.velocity = 0;
-        
-        this.updatePositions();
-        this.updateDots();
-        this.onChange?.(this.avatars[index]);
-    }
-
-    updatePositions() {
-        const avatars = this.track.querySelectorAll('.avatar-item');
-        
-        avatars.forEach((avatar, index) => {
-            const position = (index - this.currentIndex) * 140 + this.currentTranslate;
-            const distance = Math.abs(position);
-            
-            // Убираем все классы
-            avatar.classList.remove('active', 'adjacent', 'far', 'hidden');
-            
-            // Добавляем классы в зависимости от расстояния
-            if (distance < 70) {
-                avatar.classList.add('active');
-            } else if (distance < 180) {
-                avatar.classList.add('adjacent');
-            } else if (distance < 280) {
-                avatar.classList.add('far');
-            } else {
-                avatar.classList.add('hidden');
+        avatarEl.addEventListener('click', () => {
+            if (!isDragging) {
+                selectedAvatarId = avatar.id;
+                snapToIndex(index);
             }
-            
-            // Позиционируем
-            avatar.style.transform = `translateX(${position}px) translateY(-50%)`;
         });
         
-        this.track.style.transform = `translateX(${this.currentTranslate}px)`;
-    }
-
-    updateDots() {
-        const dots = document.querySelectorAll('.avatar-dot');
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.currentIndex);
-        });
-    }
-
-    animate() {
-        if (!this.isDragging && Math.abs(this.velocity) > 0.01) {
-            // Плавное замедление
-            this.currentTranslate += this.velocity * 15;
-            this.velocity *= 0.85;
-            
-            this.updatePositions();
-        }
-        
-        this.animationId = requestAnimationFrame(this.animate.bind(this));
-    }
-
-    onChange(callback) {
-        this.onChange = callback;
-    }
+        avatarTrack.appendChild(avatarEl);
+    });
+    
+    renderDots();
+    updatePositions();
 }
 
-// Модальное окно
-class WelcomeModal {
-    constructor() {
-        this.modal = document.getElementById('welcome-modal');
-        this.carousel = null;
-        this.init();
-    }
-
-    init() {
-        this.setupEventListeners();
-        this.initCarousel();
-    }
-
-    initCarousel() {
-        this.carousel = new AvatarCarousel();
-        this.carousel.onChange(() => {
-            this.validateForm();
-        });
-    }
-
-    setupEventListeners() {
-        const usernameInput = document.getElementById('username-input');
-        const genderInputs = document.querySelectorAll('input[name="gender"]');
-        const confirmBtn = document.getElementById('confirm-btn');
-
-        usernameInput.addEventListener('input', () => {
-            this.validateForm();
-        });
-
-        genderInputs.forEach(radio => {
-            radio.addEventListener('change', () => {
-                this.validateForm();
-            });
-        });
-
-        confirmBtn.addEventListener('click', () => {
-            this.saveUserData();
-        });
-    }
-
-    validateForm() {
-        const username = document.getElementById('username-input').value.trim();
-        const genderSelected = document.querySelector('input[name="gender"]:checked');
-        const confirmBtn = document.getElementById('confirm-btn');
-
-        const isValid = username && genderSelected;
-        confirmBtn.disabled = !isValid;
+// Рендер точек
+function renderDots() {
+    dotsWrap.innerHTML = '';
+    
+    avatars.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'avatar-dot';
+        dot.dataset.index = index;
         
-        return isValid;
-    }
+        dot.addEventListener('click', () => {
+            selectedAvatarId = avatars[index].id;
+            snapToIndex(index);
+        });
+        
+        dotsWrap.appendChild(dot);
+    });
+}
 
-    saveUserData() {
-        if (!this.validateForm()) {
-            alert('Пожалуйста, заполните все поля');
-            return;
+// Обновление позиций
+function updatePositions() {
+    const items = Array.from(avatarTrack.children);
+    
+    items.forEach((item, index) => {
+        const offsetIndex = index - currentIndex;
+        const baseX = offsetIndex * ITEM_SPACING + currentTranslate;
+        
+        item.style.transform = `translate(-50%, -50%) translateX(${baseX}px)`;
+        
+        const abs = Math.abs(baseX);
+        item.classList.remove('active', 'adjacent', 'far', 'hidden');
+        
+        if (abs < 50) {
+            item.classList.add('active');
+        } else if (abs < 140) {
+            item.classList.add('adjacent');
+        } else if (abs < 280) {
+            item.classList.add('far');
+        } else {
+            item.classList.add('hidden');
         }
+    });
+    
+    // Обновляем точки
+    const dots = Array.from(dotsWrap.children);
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+    });
+}
 
+// Snap к индексу
+function snapToIndex(index) {
+    currentIndex = Math.max(0, Math.min(avatars.length - 1, index));
+    currentTranslate = 0;
+    prevTranslate = 0;
+    
+    const items = Array.from(avatarTrack.children);
+    items.forEach(item => {
+        item.style.transition = 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
+    });
+    
+    updatePositions();
+    validateForm();
+    
+    setTimeout(() => {
+        items.forEach(item => {
+            item.style.transition = '';
+        });
+    }, 500);
+}
+
+// Drag события
+function onDragStart(clientX) {
+    isDragging = true;
+    startX = clientX;
+    lastX = clientX;
+    lastTime = performance.now();
+    velocity = 0;
+    
+    const items = Array.from(avatarTrack.children);
+    items.forEach(item => {
+        item.style.transition = 'none';
+    });
+}
+
+function onDragMove(clientX) {
+    if (!isDragging) return;
+    
+    const dx = clientX - startX;
+    currentTranslate = dx;
+    
+    const now = performance.now();
+    const dt = now - lastTime || 16;
+    const dv = (clientX - lastX) / dt;
+    velocity = dv;
+    lastX = clientX;
+    lastTime = now;
+    
+    updatePositions();
+}
+
+function onDragEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    const inertia = velocity * 100;
+    const raw = -(currentTranslate + inertia) / ITEM_SPACING;
+    let target = Math.round(raw) + currentIndex;
+    target = Math.max(0, Math.min(avatars.length - 1, target));
+    
+    selectedAvatarId = avatars[target].id;
+    snapToIndex(target);
+}
+
+// Применение фильтра по полу
+function applyFilter() {
+    if (!selectedGender) {
+        avatars = ALL_AVATARS.slice();
+        const savedIndex = avatars.findIndex(a => a.id === selectedAvatarId);
+        currentIndex = savedIndex !== -1 ? savedIndex : 3;
+    } else {
+        const sameGender = ALL_AVATARS.filter(a => a.type === selectedGender).slice(0, 3);
+        const mid = Math.floor((sameGender.length + 1) / 2);
+        const leftCount = Math.floor(sameGender.length / 2);
+        const left = sameGender.slice(0, leftCount);
+        const right = sameGender.slice(leftCount);
+        
+        const newAvatars = [];
+        newAvatars.push(...left);
+        newAvatars.push(ALL_AVATARS.find(a => a.type === 'robot'));
+        newAvatars.push(...right);
+        avatars = newAvatars;
+        
+        const savedIndex = avatars.findIndex(a => a.id === selectedAvatarId);
+        currentIndex = savedIndex !== -1 ? savedIndex : avatars.findIndex(a => a.type === 'robot');
+    }
+    
+    renderAvatars();
+}
+
+// Валидация имени
+function isNameValid(name) {
+    const trimmed = name.trim();
+    if (trimmed.length < 2 || trimmed.length > 20) return false;
+    const re = /^[A-Za-z\u0400-\u04FF\s\-]+$/u;
+    return re.test(trimmed);
+}
+
+// Валидация формы
+function validateForm() {
+    const name = nameInput.value || '';
+    const nameOK = isNameValid(name);
+    const genderOK = Boolean(selectedGender);
+    confirmBtn.disabled = !(nameOK && genderOK);
+    return !confirmBtn.disabled;
+}
+
+// События
+function setupEventListeners() {
+    // Drag события для карусели
+    avatarTrack.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        onDragStart(e.clientX);
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) onDragMove(e.clientX);
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (isDragging) onDragEnd();
+    });
+    
+    // Touch события
+    avatarTrack.addEventListener('touchstart', (e) => {
+        onDragStart(e.touches[0].clientX);
+    }, { passive: true });
+    
+    avatarTrack.addEventListener('touchmove', (e) => {
+        onDragMove(e.touches[0].clientX);
+    }, { passive: true });
+    
+    avatarTrack.addEventListener('touchend', () => {
+        onDragEnd();
+    });
+    
+    // Ввод имени
+    nameInput.addEventListener('input', validateForm);
+    
+    // Выбор пола
+    genderInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+            selectedGender = e.target.value;
+            applyFilter();
+            validateForm();
+        });
+    });
+    
+    // Кнопка подтверждения
+    confirmBtn.addEventListener('click', () => {
+        if (!validateForm()) return;
+        
         const userData = {
-            username: document.getElementById('username-input').value.trim(),
-            gender: document.querySelector('input[name="gender"]:checked').value,
-            avatar: this.carousel.avatars[this.carousel.currentIndex],
-            firstVisit: false,
+            name: nameInput.value.trim(),
+            gender: selectedGender,
+            avatar: avatars[currentIndex],
             timestamp: new Date().toISOString()
         };
-
+        
         try {
             localStorage.setItem('userData', JSON.stringify(userData));
-            
-            // Редирект на главную страницу после сохранения
-            window.location.href = '/front/html/main.html';
-            
         } catch (error) {
-            console.error('Ошибка сохранения данных:', error);
-            alert('Ошибка сохранения данных');
+            console.error('Ошибка сохранения:', error);
         }
-    }
+        
+        // Анимация закрытия
+        const modal = document.querySelector('.welcome-modal-overlay');
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.5s ease';
+        
+        setTimeout(() => {
+            modal.remove();
+            console.log('Данные сохранены:', userData);
+            // window.location.href = '/main.html'; // Раскомментируй для редиректа
+        }, 500);
+    });
+    
+    // Клавиши для навигации
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            selectedAvatarId = avatars[(currentIndex - 1 + avatars.length) % avatars.length].id;
+            snapToIndex(currentIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+            selectedAvatarId = avatars[(currentIndex + 1) % avatars.length].id;
+            snapToIndex(currentIndex + 1);
+        }
+    });
 }
 
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', () => {
-    window.welcomeModal = new WelcomeModal();
-    console.log('Модальное окно инициализировано и видимо');
-});
+// Инициализация
+function init() {
+    renderAvatars();
+    setupEventListeners();
+    currentTranslate = 0;
+    prevTranslate = 0;
+}
+
+// Запуск
+document.addEventListener('DOMContentLoaded', init);
