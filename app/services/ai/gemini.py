@@ -125,3 +125,8 @@ class GeminiClient:
 
 
 gemini_client = GeminiClient(settings.google_api_key, settings.google_model)
+
+if settings.google_api_key_text and settings.google_api_key_text != settings.google_api_key:
+    gemini_text_client = GeminiClient(settings.google_api_key_text, settings.google_model)
+else:
+    gemini_text_client = gemini_client

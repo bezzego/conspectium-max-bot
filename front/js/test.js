@@ -501,6 +501,7 @@ function setupAccordionBehaviour() {
             const selectedAnswerId = selectedInput ? Number(selectedInput.value) : null;
             const correctAnswer = answers.find((answer) => answer.is_correct);
 
+            item.classList.remove('question-item--correct', 'question-item--wrong', 'question-item--skipped');
             const answerOptions = Array.from(item.querySelectorAll('.answer-option'));
             answerOptions.forEach((option) => {
                 option.classList.add('answer-option--locked');
@@ -518,6 +519,9 @@ function setupAccordionBehaviour() {
                 }
             });
 
+            const isCorrectSelection =
+                selectedAnswerId !== null && correctAnswer && selectedAnswerId === correctAnswer.id;
+
             if (selectedAnswerId !== null && correctAnswer && selectedAnswerId !== correctAnswer.id) {
                 const selectedOption = item.querySelector(`.answer-option[data-answer-id="${selectedAnswerId}"]`);
                 if (selectedOption) {
@@ -525,14 +529,21 @@ function setupAccordionBehaviour() {
                 }
             }
 
+            if (selectedAnswerId === null) {
+                item.classList.add('question-item--skipped');
+            } else if (isCorrectSelection) {
+                item.classList.add('question-item--correct');
+            } else if (correctAnswer) {
+                item.classList.add('question-item--wrong');
+            }
+
             const feedback = item.querySelector('.answer-feedback');
             if (feedback && correctAnswer) {
-                const isCorrect = selectedAnswerId !== null && !!correctAnswer && selectedAnswerId === correctAnswer.id;
-                const labelText = isCorrect ? 'Отлично! Правильный ответ:' : 'Правильный ответ:';
+                const labelText = isCorrectSelection ? 'Отлично! Правильный ответ:' : 'Правильный ответ:';
                 feedback.innerHTML = `<span class="answer-feedback__label">${labelText}</span> <span class="answer-feedback__text">${escapeHtml(correctAnswer.text)}</span>`;
                 feedback.classList.remove('answer-feedback--success', 'answer-feedback--error');
                 feedback.classList.add('answer-feedback--visible');
-                feedback.classList.add(isCorrect ? 'answer-feedback--success' : 'answer-feedback--error');
+                feedback.classList.add(isCorrectSelection ? 'answer-feedback--success' : 'answer-feedback--error');
             }
         });
     }
@@ -554,4 +565,3 @@ function setupAccordionBehaviour() {
         }
     }
 })();
-

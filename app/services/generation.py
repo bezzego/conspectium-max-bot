@@ -25,14 +25,20 @@ from app.models.quiz import Quiz, QuizAnswer, QuizQuestion
 from app.models.user import User
 from app.schemas.conspect import ConspectCreateRequest
 from app.schemas.quiz import QuizCreateFromConspectRequest
-from app.services.ai.gemini import GeminiClient, gemini_client
+from app.services.ai.gemini import GeminiClient, gemini_client, gemini_text_client
 from app.services.storage import audio_storage
 
 
 class GenerationService:
-    def __init__(self, session_factory: sessionmaker[Session], ai_client: GeminiClient) -> None:
+    def __init__(
+        self,
+        session_factory: sessionmaker[Session],
+        ai_client: GeminiClient,
+        text_ai_client: GeminiClient | None = None,
+    ) -> None:
         self.session_factory = session_factory
         self.ai_client = ai_client
+        self.text_ai_client = text_ai_client or ai_client
 
     # Conspect pipeline -------------------------------------------------
     def create_conspect_job(
@@ -85,11 +91,10 @@ class GenerationService:
             transcript_text = self._obtain_transcript(session, job)
             audio_source = session.get(AudioSource, job.audio_source_id) if job.audio_source_id else None
             try:
+                ai_client = self.ai_client if job.audio_source_id else self.text_ai_client
                 variant_payloads: dict[str, dict] = {}
                 for variant in (ConspectVariantType.COMPRESSED, ConspectVariantType.FULL):
-                    variant_payloads[variant.value] = self.ai_client.generate_conspect_variant(
-                        transcript_text, variant
-                    )
+                    variant_payloads[variant.value] = ai_client.generate_conspect_variant(transcript_text, variant)
                 response = {"variants": variant_payloads}
             except Exception as exc:  # noqa: BLE001
                 logging.exception("Conspect generation via AI failed: %s", exc)
@@ -128,7 +133,7 @@ class GenerationService:
 
             generation_mode = response.get("mode", "online")
             conspect.model_used = (
-                self.ai_client.model_name if generation_mode != "offline" else "offline-fallback"
+                ai_client.model_name if generation_mode != "offline" else "offline-fallback"
             )
             conspect.raw_response = response
             conspect.status = ConspectStatus.READY
@@ -465,4 +470,4 @@ class GenerationService:
         }
 
 
-generation_service = GenerationService(SessionLocal, gemini_client)
+generation_service = GenerationService(SessionLocal, gemini_client, text_ai_client=gemini_text_client)

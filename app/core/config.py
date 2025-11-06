@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Any, List
+from typing import Any, List, Optional
 
 from pydantic import Field, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -18,6 +18,13 @@ class Settings(BaseSettings):
 
     google_api_key: str
     google_model: str = "gemini-2.5-flash"
+    google_api_key_text: Optional[str] = None
+
+    max_api_base_url: str = "https://platform-api.max.ru"
+    max_bot_token: Optional[str] = None
+    max_mini_app_url: Optional[str] = None
+    max_welcome_message: str = "Привет! Я бот Конспектиума. Нажми кнопку ниже, чтобы открыть мини-приложение."
+    max_welcome_button_text: str = "Открыть Конспектиум"
 
     audio_storage_dir: str = "var/audio"
     max_upload_size_mb: int = 50
