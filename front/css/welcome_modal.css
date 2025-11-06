@@ -1,0 +1,559 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+
+/* Стили для модального окна приветствия */
+.welcome-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    opacity: 1;
+    visibility: visible;
+}
+
+.welcome-modal {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.15) 100%
+    );
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 35px 30px 30px 30px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.4),
+        0 12px 40px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Блики для модального окна */
+.welcome-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.06) 20%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.06) 80%,
+        transparent 100%
+    );
+    border-radius: 28px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Заголовок */
+.welcome-header {
+    text-align: center;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 2;
+}
+
+.welcome-header h2 {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    letter-spacing: -0.2px;
+}
+
+.welcome-header p {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 15px;
+    line-height: 1.4;
+    margin: 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    font-weight: 500;
+}
+
+/* Секция аватарок */
+.avatar-section {
+    margin: 32px 0;
+    position: relative;
+    padding: 0 10px;
+}
+
+.avatar-carousel-container {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.avatar-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform;
+}
+
+.avatar-item {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.06) 50%,
+        rgba(255, 255, 255, 0.12) 100%
+    );
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: pointer;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 50%;
+    margin-top: -50px;
+}
+
+.avatar-item img {
+    border-radius: 50%;
+    object-fit: cover;
+    transition: all 0.4s ease;
+    display: block;
+}
+
+/* Активная аватарка (центр) */
+.avatar-item.active {
+    width: 130px;
+    height: 130px;
+    border-color: rgba(245, 216, 110, 0.9);
+    box-shadow: 
+        0 0 0 3px rgba(245, 216, 110, 0.4),
+        0 18px 45px rgba(245, 216, 110, 0.35);
+    z-index: 10;
+    transform: translateX(-50%) scale(1);
+}
+
+.avatar-item.active img {
+    width: 118px;
+    height: 118px;
+}
+
+/* Ближайшие аватарки */
+.avatar-item.adjacent {
+    width: 95px;
+    height: 95px;
+    opacity: 0.75;
+    z-index: 5;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.avatar-item.adjacent img {
+    width: 85px;
+    height: 85px;
+}
+
+/* Дальние аватарки */
+.avatar-item.far {
+    width: 75px;
+    height: 75px;
+    opacity: 0.5;
+    z-index: 3;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.avatar-item.far img {
+    width: 65px;
+    height: 65px;
+}
+
+/* Самые дальние аватарки */
+.avatar-item.hidden {
+    width: 60px;
+    height: 60px;
+    opacity: 0.3;
+    z-index: 1;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.avatar-item.hidden img {
+    width: 50px;
+    height: 50px;
+}
+
+/* Индикатор центра */
+.avatar-center-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    border: 2px solid rgba(245, 216, 110, 0.3);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 8;
+    opacity: 0.4;
+}
+
+/* Навигационные точки */
+.avatar-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.avatar-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.avatar-dot.active {
+    background: rgba(245, 216, 110, 0.9);
+    transform: scale(1.2);
+    box-shadow: 0 0 8px rgba(245, 216, 110, 0.5);
+}
+
+.avatar-dot:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Поле ввода имени */
+.input-group {
+    position: relative;
+    margin-bottom: 22px;
+}
+
+#username-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 16px 48px 16px 18px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    font-family: 'Manrope', sans-serif;
+}
+
+#username-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+}
+
+#username-input:focus {
+    outline: none;
+    border-color: rgba(245, 216, 110, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(245, 216, 110, 0.15);
+    transform: translateY(-1px);
+}
+
+.input-icon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+#username-input:focus + .input-icon {
+    color: rgba(245, 216, 110, 0.8);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Выбор пола */
+.gender-selection {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.gender-option {
+    flex: 1;
+}
+
+.gender-option input[type="radio"] {
+    display: none;
+}
+
+.gender-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.gender-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gender-btn i {
+    font-size: 22px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.gender-btn span {
+    font-size: 14px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+.gender-option input[type="radio"]:checked + .gender-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 216, 110, 0.25) 0%,
+        rgba(240, 213, 124, 0.35) 100%
+    );
+    border-color: rgba(245, 216, 110, 0.6);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(245, 216, 110, 0.25);
+    transform: translateY(-2px);
+}
+
+.gender-option input[type="radio"]:checked + .gender-btn i {
+    transform: scale(1.15);
+    color: #fff;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.gender-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.gender-btn:hover::before {
+    opacity: 1;
+}
+
+/* Кнопка подтверждения */
+.confirm-btn {
+    width: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(245, 216, 110, 0.8) 0%,
+        rgba(240, 213, 124, 0.9) 100%
+    );
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(245, 216, 110, 0.5);
+    border-radius: 18px;
+    padding: 18px 24px;
+    color: #1f1f1f;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 
+        0 10px 30px rgba(245, 216, 110, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.confirm-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.confirm-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 15px 40px rgba(245, 216, 110, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.confirm-btn:hover:not(:disabled)::before {
+    left: 100%;
+}
+
+.confirm-btn:active:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.confirm-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 5px 15px rgba(245, 216, 110, 0.2);
+}
+
+.confirm-btn i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.confirm-btn:hover:not(:disabled) i {
+    transform: scale(1.1);
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .welcome-modal-overlay {
+        padding: 15px;
+    }
+    
+    .welcome-modal {
+        padding: 25px 20px 20px 20px;
+        max-width: 100%;
+        border-radius: 24px;
+    }
+    
+    .welcome-header h2 {
+        font-size: 22px;
+    }
+    
+    .welcome-header p {
+        font-size: 14px;
+    }
+    
+    .avatar-section {
+        margin: 28px 0;
+    }
+    
+    .avatar-carousel-container {
+        height: 140px;
+    }
+    
+    .avatar-item.active {
+        width: 110px;
+        height: 110px;
+    }
+    
+    .avatar-item.active img {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .avatar-item.adjacent {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .avatar-item.adjacent img {
+        width: 72px;
+        height: 72px;
+    }
+    
+    .avatar-item.far {
+        width: 65px;
+        height: 65px;
+    }
+    
+    .avatar-item.far img {
+        width: 57px;
+        height: 57px;
+    }
+    
+    .avatar-item.hidden {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .avatar-item.hidden img {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .avatar-center-indicator {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .gender-selection {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .confirm-btn {
+        padding: 16px 20px;
+        font-size: 15px;
+    }
+}
+
+/* Стили для body */
+body {
+    margin: 0;
+    padding: 0;
+    background: #1a1a1a;
+    font-family: 'Manrope', sans-serif;
+    overflow: hidden;
+}

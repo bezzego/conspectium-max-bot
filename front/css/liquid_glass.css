@@ -1,4 +1,4 @@
-
+/* Стили для хедера */
 .top-bar {
     background: linear-gradient(
         135deg,
@@ -12,7 +12,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /* Изменено с space-between на center */
     padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 24px);
     margin-bottom: 20px;
     position: relative;
@@ -26,7 +26,55 @@
     box-sizing: border-box;
 }
 
-/* Контейнер для бликов в хедере */
+/* Стили для кнопки назад */
+.back-btn {
+    position: absolute;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+    font-size: 30px;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Скрываем плейсхолдер на всех страницах */
+.back-btn-placeholder {
+    display: none;
+}
+
+/* Стили для логотипа */
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.logo {
+    margin-top: 5px;
+    height: 50px;
+    width: 250px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    transition: all 0.4s ease;
+}
+
+/* Эффект при наведении на логотип */
+.logo-link:hover .logo {
+    transform: scale(1.05);
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+/* Остальные стили хедера остаются без изменений */
 .top-bar::before {
     content: '';
     position: absolute;
@@ -37,7 +85,7 @@
     background: linear-gradient(
         135deg,
         transparent 0%,
-        rgba(255, 255, 255, 0.3) 30%, /* Более яркие белые блики */
+        rgba(255, 255, 255, 0.3) 30%,
         transparent 70%
     );
     border-radius: 50px;
@@ -45,7 +93,6 @@
     pointer-events: none;
 }
 
-/* Эффект градиентной рамки для хедера */
 .top-bar::after {
     content: '';
     position: absolute;
@@ -71,7 +118,6 @@
     opacity: 1;
 }
 
-/* Эффект при наведении на хедер */
 .top-bar:hover {
     background: linear-gradient(
         135deg,
@@ -92,15 +138,6 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-}
-
-.logo {
-    margin-top: 2px;
-    height: 50px;
-    width: 250px;
-    object-fit: contain;
-    filter: brightness(0) invert(1); /* Превращает черный логотип в белый */
-    transition: all 0.4s ease;
 }
 
 /* Эффект при наведении на логотип */
@@ -145,7 +182,7 @@
     }
     
     .logo {
-        height: 40px;
+        height: 45px;
         width: 200px;
     }
 }

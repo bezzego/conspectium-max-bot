@@ -498,221 +498,462 @@ function showConspectModal(conspect, options = {}) {
     closeConspectModal();
 
     const modalStyles = `
-        .conspect-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); display: flex; align-items: center;
-            justify-content: center; z-index: 10000; opacity: 0;
-            transition: opacity 0.3s ease; padding: 20px;
-        }
-        .conspect-modal-overlay.visible { opacity: 1; }
-        .conspect-modal {
-            background: #dddcdc; border-radius: 20px; width: 100%;
-            max-width: 600px; max-height: 80vh; display: flex;
-            flex-direction: column; overflow: hidden; transform: translateY(20px);
-            transition: transform 0.3s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            position: relative;
-        }
-        .conspect-modal-overlay.visible .conspect-modal { transform: translateY(0); }
-        .modal-header {
-            background: #ebeaea; padding: 20px 30px 15px;
-            border-bottom: 1px solid #7e7d7d; position: relative;
-        }
-        .modal-header-content {
-            padding-right: 50px;
-        }
-        .modal-header h2 {
-            color: #333;
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            line-height: 1.3;
-        }
-        .modal-meta-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-        }
-        .modal-meta {
-            color: #6c6c70;
-            font-size: 15px;
-            font-weight: 500;
-            margin: 0;
-        }
-        .meta-copy-btn {
-            background: transparent;
-            border: none;
-            color: #6c6c70;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            font-size: 13px;
-        }
-        .meta-copy-btn:hover {
-            color: #b9b9b5ff;
-            background: rgba(0,0,0,0.05);
-        }
-        .meta-copy-btn.copied {
-            color: #2f8f2f;
-        }
-        .conspect-badge {
-            display: inline-block;
-            background: #f5d86e;
-            color: #333;
-            padding: 3px 10px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .modal-actions {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 8px;
-        }
-        .modal-btn {
-            background: transparent;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 15px;
-            color: #333;
-        }
-        .modal-btn:hover {
-            background: rgba(0,0,0,0.1);
-            transform: scale(1.1);
-        }
-        .modal-btn.close-btn:hover {
-            transform: rotate(90deg) scale(1.1);
-        }
-        .modal-body {
-            padding: 20px 30px;
-            overflow-y: auto;
-            flex: 1;
-        }
-        .modal-summary {
-            color: #333;
-            font-size: 15px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        .modal-body h3 {
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-        .modal-keypoints {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .modal-keypoints li {
-            color: #333;
-            font-size: 15px;
-            line-height: 1.5;
-            margin-bottom: 8px;
-            padding-left: 16px;
-            position: relative;
-            font-weight: 500;
-        }
-        .modal-keypoints li::before {
-            content: '•';
-            color: #f5d86e;
-            position: absolute;
-            left: 0;
-            font-weight: 700;
-        }
-        .modal-variant-toggle {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-        .variant-btn {
-            border: 1px solid #b1b1b1;
-            background: #f5f5f5;
-            color: #333;
-            border-radius: 999px;
-            padding: 6px 14px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .variant-btn:hover {
-            background: #ffffff;
-            border-color: #8f8f8f;
-        }
-        .variant-btn.active {
-            background: #333333;
-            color: #f5f5f5;
-            border-color: #333333;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        .markdown-viewer {
-            color: #2f2f2f;
-            font-size: 15px;
-            line-height: 1.55;
-        }
-        .markdown-viewer h1,
-        .markdown-viewer h2,
-        .markdown-viewer h3 {
-            font-weight: 700;
-            margin: 20px 0 12px;
-            line-height: 1.25;
-        }
-        .markdown-viewer h1 { font-size: 22px; }
-        .markdown-viewer h2 { font-size: 19px; }
-        .markdown-viewer h3 { font-size: 17px; }
-        .markdown-viewer p {
-            margin: 0 0 12px;
-        }
-        .markdown-viewer ul,
-        .markdown-viewer ol {
-            padding-left: 22px;
-            margin: 0 0 16px;
-        }
-        .markdown-viewer li {
-            margin-bottom: 6px;
-        }
-        .markdown-viewer blockquote {
-            border-left: 3px solid #f5d86e;
-            padding-left: 12px;
-            margin: 12px 0;
-            color: #4a4a4a;
-            font-style: italic;
-        }
-        .markdown-viewer code {
-            background: rgba(0,0,0,0.08);
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        @media (max-width: 768px) {
-            .conspect-modal-overlay { padding: 15px; }
-            .modal-header { padding: 15px 20px 12px; }
-            .modal-body { padding: 15px 20px; }
-            .modal-actions { top: 12px; right: 12px; }
-            .modal-header-content { padding-right: 45px; }
-        }
-        @media (max-width: 480px) {
-            .conspect-modal-overlay { padding: 10px; }
-            .modal-header { padding: 12px 15px 10px; }
-            .modal-body { padding: 12px 15px; }
-            .modal-header h2 { font-size: 16px; }
-            .modal-meta { font-size: 14px; }
-            .modal-summary { font-size: 15px; }
-        }
+        /* Liquid Glass стили для модального окна - минимальные блики */
+.conspect-modal-overlay {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.7); 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    z-index: 10000; 
+    opacity: 0;
+    transition: opacity 0.3s ease; 
+    padding: 20px;
+    backdrop-filter: blur(3px);
+}
+.conspect-modal-overlay.visible { 
+    opacity: 1; 
+}
+
+.conspect-modal {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.18) 100%
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    max-width: 600px; 
+    max-height: 80vh; 
+    display: flex;
+    flex-direction: column; 
+    overflow: hidden; 
+    transform: translateY(20px);
+    transition: transform 0.3s ease; 
+    box-shadow: 
+        0 15px 30px rgba(0,0,0,0.25),
+        0 6px 20px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+/* Минимальные блики в модальном окне */
+.conspect-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 25%,
+        transparent 60%
+    );
+    border-radius: 20px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Слабый эффект градиентной рамки */
+.conspect-modal::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.15)
+    );
+    border-radius: 21px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.conspect-modal:hover::after {
+    opacity: 0.3;
+}
+
+.conspect-modal-overlay.visible .conspect-modal { 
+    transform: translateY(0); 
+}
+
+.modal-header {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.2) 100%
+    );
+    backdrop-filter: blur(8px);
+    padding: 20px 30px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+}
+
+.modal-header-content {
+    padding-right: 50px;
+}
+
+.modal-header h2 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.modal-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.modal-meta {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.meta-copy-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.meta-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.meta-copy-btn.copied {
+    background: rgba(76, 175, 80, 0.25);
+    color: #fff;
+}
+
+.conspect-badge {
+    display: inline-block;
+    background: linear-gradient(
+        135deg,
+        rgba(245, 216, 110, 0.7) 0%,
+        rgba(240, 213, 124, 0.8) 100%
+    );
+    color: #1f1f1f;
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 8px rgba(245, 216, 110, 0.2);
+}
+
+.modal-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+}
+
+.modal-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    color: #fff;
+}
+
+.modal-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+.modal-btn.close-btn:hover {
+    transform: rotate(90deg) scale(1.05);
+}
+
+.modal-body {
+    padding: 20px 30px;
+    overflow-y: auto;
+    flex: 1;
+    background: transparent;
+    
+    /* Стилизация скроллбара для Webkit браузеров */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* Для Webkit браузеров (Chrome, Safari, Edge) */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Для Firefox */
+.modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* Адаптивность для мобильных - можно оставить скроллбар тонким */
+@media (max-width: 768px) {
+    .modal-body { 
+        padding: 15px 20px; 
+    }
+    
+    .modal-body::-webkit-scrollbar {
+        width: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-body { 
+        padding: 12px 15px; 
+    }
+}
+
+.modal-summary {
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.modal-body h3 {
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.modal-keypoints {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modal-keypoints li {
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    padding-left: 16px;
+    position: relative;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.modal-keypoints li::before {
+    content: '•';
+    color: #f5d86e;
+    position: absolute;
+    left: 0;
+    font-weight: 700;
+}
+
+.modal-variant-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.variant-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.variant-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.variant-btn.active {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 216, 110, 0.7) 0%,
+        rgba(240, 213, 124, 0.8) 100%
+    );
+    color: #1f1f1f;
+    border-color: rgba(245, 216, 110, 0.4);
+    box-shadow: 0 2px 10px rgba(245, 216, 110, 0.2);
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.markdown-viewer {
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.55;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.markdown-viewer h1,
+.markdown-viewer h2,
+.markdown-viewer h3 {
+    font-weight: 700;
+    margin: 20px 0 12px;
+    line-height: 1.25;
+    color: #fff;
+}
+
+.markdown-viewer h1 { 
+    font-size: 22px; 
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+.markdown-viewer h2 { 
+    font-size: 19px; 
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+.markdown-viewer h3 { 
+    font-size: 17px; 
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.markdown-viewer p {
+    margin: 0 0 12px;
+}
+
+.markdown-viewer ul,
+.markdown-viewer ol {
+    padding-left: 22px;
+    margin: 0 0 16px;
+}
+
+.markdown-viewer li {
+    margin-bottom: 6px;
+}
+
+.markdown-viewer blockquote {
+    border-left: 2px solid #f5d86e;
+    padding-left: 12px;
+    margin: 12px 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+}
+
+.markdown-viewer code {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Убраны liquid reflections */
+
+@media (max-width: 768px) {
+    .conspect-modal-overlay { 
+        padding: 15px; 
+    }
+    .modal-header { 
+        padding: 15px 20px 12px; 
+    }
+    .modal-body { 
+        padding: 15px 20px; 
+    }
+    .modal-actions { 
+        top: 12px; 
+        right: 12px; 
+    }
+    .modal-header-content { 
+        padding-right: 45px; 
+    }
+}
+
+@media (max-width: 480px) {
+    .conspect-modal-overlay { 
+        padding: 10px; 
+    }
+    .modal-header { 
+        padding: 12px 15px 10px; 
+    }
+    .modal-body { 
+        padding: 12px 15px; 
+    }
+    .modal-header h2 { 
+        font-size: 16px; 
+    }
+    .modal-meta { 
+        font-size: 14px; 
+    }
+    .modal-summary { 
+        font-size: 15px; 
+    }
+    .variant-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+}
     `;
 
     const existingStyles = document.getElementById('modal-styles');

@@ -1,8 +1,134 @@
-.page-test-constructor .container {
+.top-bar {
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.377) 0%,     
+        rgba(240, 193, 25, 0.295) 50%,   
+        rgba(243, 196, 24, 0.377) 100%    
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 24px);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+/* Контейнер для бликов в хедере */
+.top-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 30%, /* Более яркие белые блики */
+        transparent 70%
+    );
+    border-radius: 50px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Эффект градиентной рамки для хедера */
+.top-bar::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2),
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2)
+    );
+    border-radius: 52px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.top-bar:hover::after {
+    opacity: 1;
+}
+
+/* Эффект при наведении на хедер */
+.top-bar:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+    .top-bar {
+        width: calc(100%);
+        max-width: min(1000px, 85vw);
+        padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 28px);
+    }
+}
+
+/* Адаптивность для десктопов */
+@media (min-width: 924px) {
+    .top-bar {
+        width: calc(100%);
+        max-width: min(1000px, 80vw);
+        padding: 14px clamp(24px, 4vw, 32px);
+    }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+    .top-bar {
+        max-width: min(1000px, 95vw);
+        padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
+        margin-bottom: 15px;
+    }
+
+}
+
+@media (max-width: 360px) {
+    .top-bar {
+        width: calc(100% - 20px);
+        padding: 8px 12px;
+        margin-bottom: 12px;
+    }
+    
+    .logo {
+        height: 40px;
+        width: 200px;
+    }
+}
+
+.page-test-constructor .container {
     flex-direction: column;
     min-height: 100vh;
-    gap: 16px;
 }
 
 .back-btn-placeholder {
@@ -14,7 +140,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
     padding-bottom: 120px;
 }
 
@@ -186,6 +312,7 @@
     transition: all 0.3s ease;
 }
 
+
 .icon-btn:hover {
     border-color: rgba(235, 87, 87, 0.8);
     color: #ff9b9b;
@@ -347,22 +474,105 @@
     cursor: pointer;
     background: linear-gradient(
         135deg,
-        rgba(245, 216, 110, 0.9) 0%,
-        rgba(240, 213, 124, 0.95) 50%,
-        rgba(245, 216, 110, 0.9) 100%
+        rgba(243, 194, 17, 0.377) 0%,
+        rgba(240, 193, 25, 0.295) 50%,
+        rgba(243, 196, 24, 0.377) 100%
     );
-    color: #1f1f1f;
-    box-shadow: 0 14px 32px rgba(245, 216, 110, 0.35);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: #ffffff;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 
+        0 8px 32px rgba(245, 216, 110, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
+/* Эффект жидкого стекла - градиентная рамка */
+.constructor-primary-btn::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2),
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2)
+    );
+    border-radius: 20px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.constructor-primary-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 30%, /* Более яркие белые блики */
+        transparent 70%
+    );
+    border-radius: 50px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.constructor-primary-btn:hover::after {
+    opacity: 1;
+}
+
+/* Эффекты при наведении с liquid glass */
 .constructor-primary-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 18px 36px rgba(245, 216, 110, 0.45);
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    box-shadow: 
+        0 12px 40px rgba(245, 216, 110, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.25);
 }
 
 .constructor-primary-btn:active {
     transform: translateY(1px);
+}
+
+/* Эффект для иконки внутри кнопки */
+.constructor-primary-btn i {
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.constructor-primary-btn:hover i {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+}
+
+/* Улучшенный текст с тенями */
+.constructor-primary-btn {
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.constructor-primary-btn:hover {
+    text-shadow: 
+        0 1px 2px rgba(255, 255, 255, 0.5),
+        0 0 15px rgba(255, 255, 255, 0.3);
 }
 
 .input-error {

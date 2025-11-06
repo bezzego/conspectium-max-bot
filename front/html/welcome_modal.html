@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добро пожаловать - Conspectium</title>
+    <link rel="stylesheet" href="/front/css/welcome_modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Модальное окно приветствия - ВИДИМО ВСЕГДА -->
+    <div id="welcome-modal" class="welcome-modal-overlay visible">
+        <div class="welcome-modal">
+            <!-- Заголовок -->
+            <div class="welcome-header">
+                <h2>Привет! Введи свои данные</h2>
+                <p>Они нужны для дальнейшего использования</p>
+            </div>
+
+            <!-- Карусель аватарок -->
+            <div class="avatar-section">
+                <div class="avatar-carousel-container">
+                    <div class="avatar-center-indicator"></div>
+                    <div class="avatar-track">
+                        <!-- Аватарки будут добавлены через JavaScript -->
+                    </div>
+                </div>
+                <div class="avatar-dots">
+                    <!-- Точки навигации будут добавлены через JavaScript -->
+                </div>
+            </div>
+
+            <!-- Поле для имени -->
+            <div class="input-group">
+                <input type="text" id="username-input" placeholder="Введи своё имя" maxlength="20">
+                <i class="fas fa-user input-icon"></i>
+            </div>
+
+            <!-- Выбор пола -->
+            <div class="gender-selection">
+                <div class="gender-option">
+                    <input type="radio" id="gender-male" name="gender" value="male">
+                    <label for="gender-male" class="gender-btn">
+                        <i class="fas fa-mars"></i>
+                        <span>Мужской</span>
+                    </label>
+                </div>
+                <div class="gender-option">
+                    <input type="radio" id="gender-female" name="gender" value="female">
+                    <label for="gender-female" class="gender-btn">
+                        <i class="fas fa-venus"></i>
+                        <span>Женский</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Кнопка подтверждения -->
+            <button id="confirm-btn" class="confirm-btn liquid-glass" disabled>
+                <i class="fas fa-check"></i>
+                <span>Подтвердить</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="/front/js/welcome_modal.js"></script>
+</body>
+</html>

@@ -512,7 +512,7 @@ function setupAccordionBehaviour() {
         const formattedDate = latest.created_at ? formatDateTime(latest.created_at) : '';
         resultEl.innerHTML = `
             <i class="fas fa-chart-bar"></i>
-            Результат: ${summaryText}${formattedDate ? `<span class="result-date">${formattedDate}</span>` : ''}
+            Последний <br> результат: ${summaryText}${formattedDate ? `<span class="result-date">${formattedDate}</span>` : ''}
         `;
         resultEl.classList.add('show');
         resultEl.classList.remove('hidden');

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Конспектиум</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/main.css">
+    <link rel="stylesheet" href="/front/css/liquid_glass.css">
+    <!-- Иконка для вкладки -->
+    <link rel="icon" type="image/png" href="/img/short_icon_white.png">
+    <link rel="stylesheet" href="/front/css/responsive.css">
+</head>
+<body class="page-main">
+
+    <header class="top-bar">
+        <div class="brand">
+            <a href="/front/html/main.html" class="logo-link">
+                <img class="logo" src="/img/logo_black.png" alt="logo">
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="title">Настройки аккаунта</h1>
+        <p class="subtitle">Создай конспект из аудио файла. Изучи тему. <br> Закрепи знания, пройдя тест</p>
+
+        <section class="preview">
+            <div class="conspect-list"></div>
+        </section>
+
+        <!-- Горизонтальный скролл блоков -->
+        <div class="actions-scroll-container">
+            <div class="actions-scroll">
+                <a href="/front/html/test_create.html" class="action-card liquid-glass">
+                    <i><img class="button-icon" src="/img/test.png" alt="test"></i>
+                    <span>Создай тест,<br>закрепи знания</span>
+                    <div class="liquid-reflections"></div>
+                </a>
+                
+                <a href="conspect_create.html" class="action-card liquid-glass">
+                    <i><img class="button-icon" src="/img/icon-add.png" alt="add"></i>
+                    <span style="margin-top: 3px;">Создай<br>конспект</span>
+                    <div class="liquid-reflections"></div>
+                </a>
+                
+                <a href="/front/html/test_list.html" class="action-card liquid-glass">
+                    <i><img class="button-icon" src="/img/icon-checklist.png" alt=""></i>
+                    <span class="margin-span">Список моих<br>тестов</span>
+                    <div class="liquid-reflections"></div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/popup.js" defer></script>
+    <script src="/front/js/liquid_glass.js" defer></script>
+
+</body>
+</html>
