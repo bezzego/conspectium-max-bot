@@ -57,8 +57,10 @@ body {
 }
 
 .accent-btn {
+    width: 100%;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     border-radius: 18px;
     border: none;
@@ -68,13 +70,16 @@ body {
     cursor: pointer;
     background: linear-gradient(
         135deg,
-        rgba(245, 216, 110, 0.95) 0%,
-        rgba(240, 213, 124, 0.95) 45%,
-        rgba(245, 216, 110, 0.9) 100%
+        rgba(243, 194, 17, 0.377) 0%,
+        rgba(240, 193, 25, 0.295) 50%,
+        rgba(243, 196, 24, 0.377) 100%
     );
-    color: #1f1f1f;
-    box-shadow: 0 16px 32px rgba(245, 216, 110, 0.35);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: #ffffff;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 
+        0 8px 32px rgba(245, 216, 110, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.2);
 }
 
 .accent-btn i {
@@ -83,7 +88,17 @@ body {
 
 .accent-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 20px 40px rgba(245, 216, 110, 0.45);
+    box-shadow: 0 18px 36px rgba(245, 216, 110, 0.45);
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    box-shadow: 
+        0 12px 40px rgba(245, 216, 110, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.25);
 }
 
 .accent-btn.secondary {
@@ -216,6 +231,15 @@ body {
 
 .upload-btn i {
     font-size: 25px;
+}
+
+.quick-action .button-icon-test {
+    filter: brightness(0) invert(1); /* Делает черные иконки белыми */
+    transition: filter 0.3s ease;
+}
+
+.quick-action:hover .button-icon-test {
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
 }
 
 

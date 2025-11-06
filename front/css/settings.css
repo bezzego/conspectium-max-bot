@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+    --yellow: #f5d86e;
+    --bg-dark: #333;
+    --light-gray: #d3d3d3;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Стили для списка конспектов */
+.preview {
+    background: var(--light-gray);
+    border-radius: 20px;
+    height: 700px;
+    display: flex;
+    flex-direction: column;
+    color: #333;
+    padding: 0;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+@media (max-height: 1158px)  {
+  .preview {
+    max-height: 475px;
+  }
+}
+
+@media (max-height: 900px)  {
+  .preview {
+    max-height: 400px;
+  }
+}
+
+@media (max-height: 750px)  {
+  .preview {
+    max-height: 200px;
+  }
+}
+
+.conspect-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px 20px;
+}
+
+.conspect-item {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    position: relative;
+}
+
+.conspect-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.conspect-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(333px, 90vw); /* Максимум 333px, но не более 90% ширины экрана */
+    height: 1px;
+    background: #7e7d7d;
+}
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+    .conspect-item:not(:last-child)::after {
+        width: min(500px, 55vw); /* Увеличиваем максимальную ширину на планшетах */
+    }
+}
+
+
+
+.conspect-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(280px, 80vw, 650px); /* Минимум 280px, адаптивно до 800px */
+    height: 1px;
+    background: #7e7d7d;
+}
+
+
+.item-content {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #ffffff;
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Стили для скроллбара */
+.conspect-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conspect-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.conspect-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.conspect-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 480px) {
+    .conspect-list {
+        padding: 20px 15px;
+    }
+    
+    .item-content {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 360px) {
+    .conspect-item:not(:last-child)::after {
+        width: 250px;
+    }
+}
+
+.action-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 12px;
+}
+
+ .square-btn {
+    background: var(--light-gray);
+    color: #000;
+    flex: 1;
+    min-width: 140px;
+    padding: clamp(12px, 3vw, 16px);
+    border-radius: 20px;
+    font-size: clamp(12px, 3vw, 14px);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.2s;
+}
+
+.square-btn:hover {
+    transform: translateY(-2px);
+}
+
+.square-btn i {
+    font-size: clamp(20px, 5vw, 24px);
+    margin-bottom: 4px;
+}
+
+.actions-scroll-container {
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.actions-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 10px 16px 20px 16px;
+    margin: -10px -16px -20px -16px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.actions-scroll::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+.action-card {
+    flex: 0 0 auto;
+    width: 124px;
+    height: 120px;
+    background: var(--light-gray);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #000;
+    transition: all 0.3s ease;
+    padding: 15px 10px;
+    text-align: center;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    background: #e8e8e8;
+}
+
+.action-card i {
+    font-size: 28px;
+    margin-bottom: 1px;
+    color: #333;
+}
+
+ .margin-span{
+    margin-top: 1px;
+}
+
+.action-card span {
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 600;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (min-width: 800px) {
+    .action-card{
+        width: 160px;
+        height: 140px;
+    }
+}
