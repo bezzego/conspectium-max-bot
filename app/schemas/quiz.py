@@ -69,3 +69,21 @@ class QuizResultRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class QuizManualAnswerCreate(BaseModel):
+    text: str = Field(min_length=1, max_length=500)
+    is_correct: bool = False
+
+
+class QuizManualQuestionCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=2000)
+    explanation: Optional[str] = Field(default=None, max_length=2000)
+    answers: List[QuizManualAnswerCreate] = Field(min_length=2)
+
+
+class QuizManualCreateRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=2000)
+    instructions: Optional[str] = Field(default=None, max_length=5000)
+    questions: List[QuizManualQuestionCreate] = Field(min_length=1, max_length=50)

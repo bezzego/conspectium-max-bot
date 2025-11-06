@@ -249,6 +249,17 @@
         return finishedJob.quiz_id;
     }
 
+    async function createManualQuiz(payload) {
+        if (!payload || !Array.isArray(payload.questions) || !payload.questions.length) {
+            throw new Error('Добавь хотя бы один вопрос');
+        }
+        return authFetch('/quizzes/manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+    }
+
     function notify(message, type = 'info') {
         const containerClass = 'app-toast-container';
         let container = document.querySelector(`.${containerClass}`);
@@ -287,6 +298,7 @@
         createConspectFromAudio,
         createConspectFromText,
         createQuizFromConspect,
+        createManualQuiz,
         notify,
         state,
     };

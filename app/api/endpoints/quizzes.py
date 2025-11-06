@@ -2,12 +2,14 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 
 from app.api import deps
+from app.models.enums import QuizStatus
 from app.models.quiz import Quiz, QuizAnswer, QuizQuestion, QuizResult
 from app.models.user import User
 from app.schemas.job import JobRead
 from app.schemas.quiz import (
     QuizCreateFromConspectRequest,
     QuizListResponse,
+    QuizManualCreateRequest,
     QuizRead,
     QuizResultCreate,
     QuizResultRead,
@@ -135,3 +137,87 @@ def submit_quiz_result(
     db.commit()
     db.refresh(result)
     return QuizResultRead.model_validate(result)
+
+
+@router.post("/manual", response_model=QuizRead, status_code=status.HTTP_201_CREATED)
+def create_quiz_manual(
+    payload: QuizManualCreateRequest,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> QuizRead:
+    if not payload.questions:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Добавь хотя бы один вопрос")
+
+    for idx, question in enumerate(payload.questions, start=1):
+        if not question.answers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Добавь варианты ответа в вопросе №{idx}",
+            )
+        if not any(answer.is_correct for answer in question.answers):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Отметь правильный ответ в вопросе №{idx}",
+            )
+
+    title = payload.title.strip()
+    if not title:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Название теста не может быть пустым")
+
+    quiz = Quiz(
+        user_id=user.id,
+        title=title,
+        description=payload.description.strip() if payload.description and payload.description.strip() else None,
+        instructions=payload.instructions.strip() if payload.instructions and payload.instructions.strip() else None,
+        status=QuizStatus.READY,
+        model_used="manual",
+        raw_response={"mode": "manual"},
+    )
+    db.add(quiz)
+    db.flush()
+
+    for position, question_payload in enumerate(payload.questions):
+        question_title = question_payload.title.strip()
+        if not question_title:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Текст вопроса №{position + 1} не может быть пустым",
+            )
+        explanation = (
+            question_payload.explanation.strip()
+            if question_payload.explanation and question_payload.explanation.strip()
+            else None
+        )
+        question = QuizQuestion(
+            quiz_id=quiz.id,
+            title=question_title,
+            explanation=explanation,
+            position=position,
+        )
+        db.add(question)
+        db.flush()
+
+        for answer_position, answer_payload in enumerate(question_payload.answers):
+            answer_text = answer_payload.text.strip()
+            if not answer_text:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Ответ №{answer_position + 1} в вопросе №{position + 1} не может быть пустым",
+                )
+            answer = QuizAnswer(
+                question_id=question.id,
+                text=answer_text,
+                is_correct=answer_payload.is_correct,
+                position=answer_position,
+            )
+            db.add(answer)
+
+    db.commit()
+
+    created_quiz = (
+        db.query(Quiz)
+        .filter(Quiz.id == quiz.id, Quiz.user_id == user.id)
+        .options(selectinload(Quiz.questions).selectinload(QuizQuestion.answers))
+        .one()
+    )
+    return QuizRead.model_validate(created_quiz)

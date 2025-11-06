@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Конструктор теста — Конспектиум</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/main.css">
+    <link rel="stylesheet" href="/front/css/liquid_glass.css">
+    <link rel="stylesheet" href="/front/css/test_constructor.css">
+    <link rel="stylesheet" href="/front/css/responsive.css">
+</head>
+<body class="page-test-constructor">
+    <div class="container">
+        <header class="top-bar">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="brand">
+                <a href="/front/html/main.html" class="logo-link">
+                    <img class="logo" src="/img/logo_black.png" alt="logo">
+                </a>
+            </div>
+            <div class="back-btn-placeholder"></div>
+        </header>
+
+        <main>
+            <h1 class="title">Собери тест вручную</h1>
+            <p class="subtitle constructor-subtitle">
+                Добавь вопросы, отметь правильные ответы и поделись тестом с учениками.
+            </p>
+
+            <section class="constructor-card">
+                <div class="field-group">
+                    <label for="quizTitleInput">Название теста</label>
+                    <input type="text" id="quizTitleInput" class="constructor-input" placeholder="Например, Контрольная по биологии" />
+                    <p class="field-hint">Видно ученикам и в списке твоих тестов</p>
+                </div>
+                <div class="field-group">
+                    <label for="quizDescriptionInput">Описание (необязательно)</label>
+                    <textarea id="quizDescriptionInput" class="constructor-textarea" rows="2" placeholder="Расскажи, что проверяет тест или как его проходить"></textarea>
+                </div>
+                <div class="field-group">
+                    <label for="quizInstructionsInput">Инструкции для участников (необязательно)</label>
+                    <textarea id="quizInstructionsInput" class="constructor-textarea" rows="3" placeholder="Например: отвечаем без подсказок, время на прохождение — 10 минут"></textarea>
+                </div>
+            </section>
+
+            <section class="questions-section">
+                <div class="section-header">
+                    <h2 class="section-title">Вопросы</h2>
+                </div>
+                <div id="constructorQuestions" class="questions-list"></div>
+                <div class="add-question-row">
+                    <button id="addQuestionBtn" class="ghost-btn">
+                        <i class="fas fa-plus"></i>
+                        Добавить вопрос
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="constructor-footer">
+            <div class="footer-meta">
+                <span id="questionsCountLabel">1 вопрос</span>
+                <span class="dot-divider">•</span>
+                <span>Проверим на наличие ответов перед сохранением</span>
+            </div>
+            <button id="saveQuizBtn" class="constructor-primary-btn">
+                <i class="fas fa-check"></i>
+                Сохранить тест
+            </button>
+        </footer>
+    </div>
+
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/test_constructor.js" defer></script>
+    <script src="/front/js/liquid_glass.js" defer></script>
+</body>
+</html>

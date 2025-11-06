@@ -451,7 +451,7 @@ window.goBack = goBack;
         const constructorBtn = document.getElementById('openManualConstructor');
         if (constructorBtn) {
             constructorBtn.addEventListener('click', () => {
-                window.ConspectiumApp.notify('Конструктор появится в следующей версии', 'info');
+                window.location.href = 'test_constructor.html';
             });
         }
 
