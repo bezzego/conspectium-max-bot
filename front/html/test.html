@@ -17,10 +17,11 @@
                 <i class="fas fa-arrow-left"></i>
             </button>
             <div class="brand">
-                <a href="/front/html/main.html" class="logo-link">
-                    <img class="logo" src="/img/logo_black.png" alt="logo">
-                </a>
+                    <a href="/front/html/main.html" class="logo-link">
+                        <img class="logo" src="/img/logo_black.png" alt="logo">
+                    </a>
             </div>
+            <!-- Пустой элемент для балансировки -->
             <div class="back-btn-placeholder"></div>
         </header>
 
@@ -33,7 +34,9 @@
                     <p id="quizDescription" class="quiz-description"></p>
                 </article>
 
-                <div class="questions-container" id="quizQuestions"></div>
+                <div class="questions-container" id="quizQuestions">
+                    
+                </div>
 
                 <div class="empty-state hidden" id="quizEmptyState">
                     <p>Не удалось загрузить тест. Попробуй снова или создай новый в разделе «Создать тест».</p>
@@ -48,7 +51,7 @@
             <!-- Блок результатов (изначально скрыт) -->
             <div class="quiz-result glass-card hidden" id="quizResult"></div>
 
-            <section class="glass-card quiz-history">
+            <section style="margin-bottom: 70px;" class="glass-card quiz-history">
                 <div class="history-header">
                     <h2 class="card-title">История прохождений</h2>
                     <p class="card-subtitle">Мы сохраняем до 20 последних попыток по каждому тесту</p>

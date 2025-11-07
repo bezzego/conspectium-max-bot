@@ -4,6 +4,12 @@
         questions: [],
         results: [],
     };
+    
+    let expanded = null;
+    let closeBtn = null;
+    let prevBtn = null;
+    let nextBtn = null;
+
     document.addEventListener('DOMContentLoaded', async () => {
         if (!document.body.classList.contains('page-test')) {
             return;
@@ -35,6 +41,9 @@
         }
 
         await loadQuiz(app, quizId);
+        
+        // Создаем элементы навигации после загрузки DOM
+        createNavigationElements();
     });
 
     async function fetchLatestQuiz(app) {
@@ -88,7 +97,7 @@
         }
     }
 
-    function renderQuestions(questions) {
+function renderQuestions(questions) {
     const container = document.getElementById('quizQuestions');
     if (!container) return;
 
@@ -106,6 +115,8 @@
         const questionText = document.createElement('div');
         questionText.className = 'question-text';
         questionText.textContent = `${index + 1}. ${question.title}`;
+
+        // УБИРАЕМ создание крестика здесь - он будет создаваться только при открытии вопроса
 
         const answersContainer = document.createElement('div');
         answersContainer.className = 'answers-container';
@@ -135,297 +146,228 @@
             answersContainer.appendChild(label);
         });
 
-        // Сначала добавляем все элементы в вопрос
-        questionItem.appendChild(questionText);
-        questionItem.appendChild(answersContainer);
+        // Создаем контейнер для контента
+        const questionContent = document.createElement('div');
+        questionContent.className = 'question-content';
+        
+        // Добавляем элементы в контент
+        questionContent.appendChild(questionText);
+        questionContent.appendChild(answersContainer);
+        
+        // Создаем блок обратной связи
         const feedback = document.createElement('div');
         feedback.className = 'answer-feedback';
-        questionItem.appendChild(feedback);
+        questionContent.appendChild(feedback);
 
+        // Добавляем контент в вопрос
+        questionItem.appendChild(questionContent);
         container.appendChild(questionItem);
     });
 
-    setupAccordionBehaviour();
+    setupQuestionInteractions();
 }
 
-// И в обработчике закрытия через крестик:
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('question-text__close')) {
-        e.stopPropagation();
-        if (expanded) {
-            expanded.classList.remove('expanded');
-            expanded = null;
-            document.body.style.overflow = '';
-            document.body.classList.remove('question-expanded'); // Убираем класс
-            toggleNav(false);
-            document.removeEventListener('keydown', handleKeyDown);
-        }
-    }
-});
+function createNavigationElements() {
+    // Удаляем старые стрелки если они есть
+    const oldArrows = document.querySelectorAll('.nav-arrow');
+    oldArrows.forEach(arrow => arrow.remove());
 
-function setupAccordionBehaviour() {
-    let expanded = null;
-    
-    // Создаем кнопку закрытия и навигационные стрелки
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'close-expanded';
-    closeBtn.innerHTML = '✕';
-    closeBtn.addEventListener('click', () => {
-        if (expanded) {
-            expanded.classList.remove('expanded');
-            expanded = null;
-            // Снимаем блокировку скролла
-            document.body.style.overflow = '';
-            // Убираем класс, который говорит CSS спрятать шапку/заголовок
-            document.body.classList.remove('question-expanded');
-            // Скрываем навигацию
-            toggleNav(false);
-            // Удаляем обработчик клавиатуры
-            document.removeEventListener('keydown', handleKeyDown);
-        }
-    });
-
-    const prevBtn = document.createElement('button');
+    // Создаем стрелки навигации
+    prevBtn = document.createElement('button');
     prevBtn.className = 'nav-arrow prev';
     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); navigate(-1); });
+    prevBtn.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        navigateQuestions(-1); 
+    });
 
-    const nextBtn = document.createElement('button');
+    nextBtn = document.createElement('button');
     nextBtn.className = 'nav-arrow next';
     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
+    nextBtn.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        navigateQuestions(1); 
+    });
 
-    const questionsContainer = document.querySelector('.questions-container');
-    if (questionsContainer) {
-        questionsContainer.appendChild(closeBtn);
-        // append arrows to body so they are outside container scroll
+    // Добавляем стрелки в контейнер preview
+    const previewContainer = document.querySelector('.preview');
+    if (previewContainer) {
+        previewContainer.appendChild(prevBtn);
+        previewContainer.appendChild(nextBtn);
+    } else {
+        // Fallback - добавляем в body
         document.body.appendChild(prevBtn);
         document.body.appendChild(nextBtn);
     }
+}
 
-    // Функция навигации
-    function navigate(delta) {
-        const items = Array.from(document.querySelectorAll('.question-item'));
+    function setupQuestionInteractions() {
+        document.querySelectorAll('.question-item').forEach((question) => {
+            question.addEventListener('click', (event) => {
+                // Игнорируем клики по ответам, крестикам и стрелкам
+                if (event.target.closest('.answer-option') || 
+                    event.target.closest('.nav-arrow') || 
+                    event.target.closest('.question-text__close')) {
+                    return;
+                }
+
+                if (question.classList.contains('expanded')) {
+                    closeExpandedQuestion();
+                    return;
+                }
+
+                openExpandedQuestion(question);
+            });
+        });
+
+        // Закрытие по ESC
+        document.addEventListener('keydown', handleKeyDown);
+    }
+
+function openExpandedQuestion(question) {
+    // Закрываем предыдущий открытый вопрос
+    if (expanded && expanded !== question) {
+        closeExpandedQuestion();
+    }
+
+    // Открываем новый вопрос
+    question.classList.add('expanded');
+    expanded = question;
+    document.body.classList.add('question-expanded');
+
+    // Добавляем крестик
+    const questionText = question.querySelector('.question-text');
+    if (questionText && !questionText.querySelector('.question-text__close')) {
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'question-text__close';
+        closeBtn.innerHTML = '✕';
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeExpandedQuestion();
+        });
+        questionText.appendChild(closeBtn);
+    }
+
+    // Показываем навигацию
+    showNavigation();
+
+    // Прокручиваем к верху
+    window.scrollTo(0, 0);
+}
+
+    function closeExpandedQuestion() {
+        if (expanded) {
+            // Удаляем крестик
+            const closeBtn = expanded.querySelector('.question-text__close');
+            if (closeBtn) {
+                closeBtn.remove();
+            }
+            
+            expanded.classList.remove('expanded');
+            expanded = null;
+            document.body.classList.remove('question-expanded');
+            hideNavigation();
+        }
+    }
+
+
+    function navigateQuestions(delta) {
         if (!expanded) return;
-        const idx = items.indexOf(expanded);
-        if (idx === -1) return;
-        const targetIndex = idx + delta;
+        
+        const items = Array.from(document.querySelectorAll('.question-item'));
+        const currentIndex = items.indexOf(expanded);
+        if (currentIndex === -1) return;
+        
+        const targetIndex = currentIndex + delta;
         if (targetIndex < 0 || targetIndex >= items.length) return;
 
-        // switch expanded
+        // Переключаем вопрос
         expanded.classList.remove('expanded');
-        const target = items[targetIndex];
-        target.classList.add('expanded');
-        expanded = target;
+        const targetQuestion = items[targetIndex];
+        targetQuestion.classList.add('expanded');
+        expanded = targetQuestion;
 
-        // keep body overflow hidden
-        document.body.style.overflow = 'hidden';
-
-        // update nav visibility with smooth transitions
-        updateNavButtons(targetIndex, items.length);
-
-        // ensure the new expanded question content is visible
-        setTimeout(() => { ensureVisible(expanded); }, 120);
+        // Обновляем навигацию
+        showNavigation();
     }
 
-    // Функция обновления состояния стрелочек с плавной анимацией
-    function updateNavButtons(currentIndex, totalItems) {
-        // Плавно скрываем/показываем стрелочки в зависимости от позиции
-        if (currentIndex === 0) {
-            // Первый вопрос - скрываем левую стрелку
-            prevBtn.classList.remove('show');
-            prevBtn.classList.add('hidden');
-            nextBtn.classList.remove('hidden');
-            nextBtn.classList.add('show');
-        } else if (currentIndex === totalItems - 1) {
-            // Последний вопрос - скрываем правую стрелку
-            prevBtn.classList.remove('hidden');
-            prevBtn.classList.add('show');
-            nextBtn.classList.remove('show');
-            nextBtn.classList.add('hidden');
-        } else {
-            // Средние вопросы - показываем обе стрелочки
-            prevBtn.classList.remove('hidden');
-            prevBtn.classList.add('show');
-            nextBtn.classList.remove('hidden');
-            nextBtn.classList.add('show');
+  function showNavigation() {
+    if (!expanded) return;
+
+    const items = Array.from(document.querySelectorAll('.question-item'));
+    const currentIndex = items.indexOf(expanded);
+    
+    // Показываем стрелки
+    prevBtn.style.opacity = '1';
+    prevBtn.style.visibility = 'visible';
+    nextBtn.style.opacity = '1';
+    nextBtn.style.visibility = 'visible';
+    
+    // В полноэкранном режиме позиционируем стрелки фиксированно
+    if (expanded.classList.contains('expanded')) {
+        prevBtn.style.position = 'fixed';
+        prevBtn.style.bottom = '20px';
+        prevBtn.style.left = '20px';
+        nextBtn.style.position = 'fixed';
+        nextBtn.style.bottom = '20px';
+        nextBtn.style.right = '20px';
+    } else {
+        prevBtn.style.position = 'absolute';
+        prevBtn.style.bottom = '20px';
+        prevBtn.style.left = '20px';
+        nextBtn.style.position = 'absolute';
+        nextBtn.style.bottom = '20px';
+        nextBtn.style.right = '20px';
+    }
+    
+    // Скрываем левую стрелку на первом вопросе
+    if (currentIndex === 0) {
+        prevBtn.style.opacity = '0';
+        prevBtn.style.visibility = 'hidden';
+    }
+    
+    // Скрываем правую стрелку на последнем вопросе
+    if (currentIndex === items.length - 1) {
+        nextBtn.style.opacity = '0';
+        nextBtn.style.visibility = 'hidden';
+    }
+}
+
+    function hideNavigation() {
+        if (prevBtn) {
+            prevBtn.style.opacity = '0';
+            prevBtn.style.visibility = 'hidden';
+            // Возвращаем обычное позиционирование когда не в полноэкранном режиме
+            prevBtn.style.position = 'absolute';
+            prevBtn.style.bottom = '20px';
+            prevBtn.style.left = '20px';
+        }
+        if (nextBtn) {
+            nextBtn.style.opacity = '0';
+            nextBtn.style.visibility = 'hidden';
+            nextBtn.style.position = 'absolute';
+            nextBtn.style.bottom = '20px';
+            nextBtn.style.right = '20px';
         }
     }
 
-    // Функция показа/скрытия навигации
-    function toggleNav(show) {
-        if (show) {
-            // Показываем кнопку закрытия с задержкой
-            setTimeout(() => {
-                closeBtn.classList.add('show');
-            }, 100);
-            
-            // Обновляем состояние стрелочек
-            const items = Array.from(document.querySelectorAll('.question-item'));
-            const idx = items.indexOf(expanded);
-            if (idx !== -1) {
-                updateNavButtons(idx, items.length);
-            }
-        } else {
-            // Плавно скрываем все элементы навигации
-            closeBtn.classList.remove('show');
-            prevBtn.classList.remove('show');
-            prevBtn.classList.add('hidden');
-            nextBtn.classList.remove('show');
-            nextBtn.classList.add('hidden');
-        }
-    }
-
-    // Обработчик клавиатуры
     function handleKeyDown(e) {
         if (!expanded) return;
         
         switch(e.key) {
             case 'Escape':
-                closeBtn.click();
+                closeExpandedQuestion();
                 break;
             case 'ArrowLeft':
                 if (!prevBtn.classList.contains('hidden')) {
-                    navigate(-1);
+                    navigateQuestions(-1);
                 }
                 break;
             case 'ArrowRight':
                 if (!nextBtn.classList.contains('hidden')) {
-                    navigate(1);
+                    navigateQuestions(1);
                 }
                 break;
-        }
-    }
-
-    document.querySelectorAll('.question-item').forEach((question) => {
-        // Создаем контейнер для контента
-        const questionContent = document.createElement('div');
-        questionContent.className = 'question-content';
-        
-        // Перемещаем существующий контент в новый контейнер
-        while (question.firstChild) {
-            questionContent.appendChild(question.firstChild);
-        }
-        question.appendChild(questionContent);
-
-        question.addEventListener('click', (event) => {
-            if (event.target.closest('.answer-option') || event.target.closest('.close-expanded') || event.target.closest('.nav-arrow') || event.target.closest('.question-text__close')) {
-                return;
-            }
-
-            if (question.classList.contains('expanded')) {
-                // Закрытие вопроса
-                question.classList.remove('expanded');
-                expanded = null;
-                document.body.style.overflow = '';
-                document.body.classList.remove('question-expanded'); // Убираем класс
-                toggleNav(false);
-                document.removeEventListener('keydown', handleKeyDown);
-                return;
-            }
-
-            // Закрываем предыдущий открытый вопрос
-            if (expanded && expanded !== question) {
-                expanded.classList.remove('expanded');
-            }
-
-               // Открываем новый вопрос
-            question.classList.add('expanded');
-            expanded = question;
-            document.body.style.overflow = 'hidden';
-            document.body.classList.add('question-expanded'); // Добавляем класс
-
-            // show nav and set visibility depending on position
-            const items = Array.from(document.querySelectorAll('.question-item'));
-            const idx = items.indexOf(question);
-            updateNavButtons(idx, items.length);
-            toggleNav(true);
-
-            // Добавляем обработчик клавиатуры
-            document.addEventListener('keydown', handleKeyDown);
-
-            // Прокручиваем к верху (на всякий случай)
-            window.scrollTo(0, 0);
-        });
-    });
-
-    // Закрытие по ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && expanded) {
-            expanded.classList.remove('expanded');
-            expanded = null;
-            document.body.style.overflow = '';
-            // Убираем признак раскрытого вопроса на body
-            document.body.classList.remove('question-expanded');
-            // Also hide navigation/arrows when closing with ESC
-            toggleNav(false);
-            document.removeEventListener('keydown', handleKeyDown);
-        }
-    });
-}
-
-    // Скролл так, чтобы элемент полностью помещался в видимой области
-    function ensureVisible(el) {
-        if (!el) return;
-
-        const topBar = document.querySelector('.top-bar');
-        const primaryBtn = document.querySelector('.primary-btn');
-
-        const topOffset = topBar ? (topBar.getBoundingClientRect().bottom + 8) : 8;
-        const bottomPadding = primaryBtn ? (primaryBtn.offsetHeight + 24) : 100;
-
-        // Найдём ближайший скроллируемый предок (например .questions-container) — если он есть,
-        // будем скроллить его, иначе fallback на window
-        function getScrollParent(node) {
-            while (node && node !== document.body) {
-                const style = window.getComputedStyle(node);
-                const overflowY = style.overflowY;
-                if (overflowY === 'auto' || overflowY === 'scroll') return node;
-                node = node.parentElement;
-            }
-            return window;
-        }
-
-        const scrollParent = getScrollParent(el.parentElement);
-
-        if (scrollParent === window) {
-            const rect = el.getBoundingClientRect();
-            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-
-            if (rect.top < topOffset) {
-                const target = window.pageYOffset + rect.top - topOffset;
-                window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
-                return;
-            }
-
-            if (rect.bottom > (viewportHeight - bottomPadding)) {
-                const delta = rect.bottom - (viewportHeight - bottomPadding);
-                window.scrollBy({ top: delta + 12, behavior: 'smooth' });
-            }
-        } else {
-            // Скроллим внутренний контейнер так, чтобы элемент полностью поместился
-            const parent = scrollParent;
-            const parentRect = parent.getBoundingClientRect();
-            const elRect = el.getBoundingClientRect();
-
-            // top/bottom позиции элемента внутри контейнера
-            const offsetTop = elRect.top - parentRect.top + parent.scrollTop;
-            const offsetBottom = offsetTop + elRect.height;
-
-            const visibleTop = parent.scrollTop;
-            const visibleBottom = parent.scrollTop + parent.clientHeight - (primaryBtn && parent.contains(primaryBtn) ? (primaryBtn.offsetHeight + 16) : 0);
-
-            // Если верх элемента выше видимой области контейнера — прокрутить вверх
-            if (offsetTop < visibleTop + 8) {
-                parent.scrollTo({ top: Math.max(0, offsetTop - 8), behavior: 'smooth' });
-                return;
-            }
-
-            // Если низ элемента ниже видимой области контейнера — прокрутить вниз
-            if (offsetBottom > visibleBottom - 8) {
-                const target = offsetBottom - parent.clientHeight + 8;
-                parent.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
-            }
         }
     }
 
@@ -512,7 +454,7 @@ function setupAccordionBehaviour() {
         const formattedDate = latest.created_at ? formatDateTime(latest.created_at) : '';
         resultEl.innerHTML = `
             <i class="fas fa-chart-bar"></i>
-            Последний <br> результат: ${summaryText}${formattedDate ? `<span class="result-date">${formattedDate}</span>` : ''}
+            Последний результат: <br> ${summaryText}${formattedDate ? `<span class="result-date"> <br> ${formattedDate}</span>` : ''}
         `;
         resultEl.classList.add('show');
         resultEl.classList.remove('hidden');
@@ -533,44 +475,45 @@ function setupAccordionBehaviour() {
         });
     }
 
-    function createHistoryItem(result, index) {
-        const item = document.createElement('div');
-        item.className = 'history-item';
-        if (index === 0) {
-            item.classList.add('history-item--latest');
-        }
-
-        const badge = document.createElement('span');
-        badge.className = 'history-index';
-        badge.textContent = `#${index + 1}`;
-
-        const body = document.createElement('div');
-        body.className = 'history-content';
-
-        const stats = calculateResultStats(result);
-
-        const scoreLine = document.createElement('div');
-        scoreLine.className = 'history-score';
-        const scoreParts = [];
-        if (stats.score !== null) {
-            scoreParts.push(`${stats.score}%`);
-        }
-        if (stats.correct !== null && stats.total !== null) {
-            scoreParts.push(`${stats.correct}/${stats.total} правильных`);
-        }
-        scoreLine.textContent = scoreParts.join(' • ') || '—';
-
-        const timeLine = document.createElement('div');
-        timeLine.className = 'history-time';
-        timeLine.textContent = result.created_at ? formatDateTime(result.created_at) : '';
-
-        body.appendChild(scoreLine);
-        body.appendChild(timeLine);
-
-        item.appendChild(badge);
-        item.appendChild(body);
-        return item;
+   function createHistoryItem(result, index) {
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    if (index === 0) {
+        item.classList.add('history-item--latest');
     }
+
+    // ЖЕЛТЫЙ КРУЖОК С НОМЕРОМ
+    const badge = document.createElement('span');
+    badge.className = 'history-index';
+    badge.textContent = `#${index + 1}`;
+
+    const body = document.createElement('div');
+    body.className = 'history-content';
+
+    const stats = calculateResultStats(result);
+
+    const scoreLine = document.createElement('div');
+    scoreLine.className = 'history-score';
+    const scoreParts = [];
+    if (stats.score !== null) {
+        scoreParts.push(`${stats.score}%`);
+    }
+    if (stats.correct !== null && stats.total !== null) {
+        scoreParts.push(`${stats.correct}/${stats.total} правильных`);
+    }
+    scoreLine.textContent = scoreParts.join(' • ') || '—';
+
+    const timeLine = document.createElement('div');
+    timeLine.className = 'history-time';
+    timeLine.textContent = result.created_at ? formatDateTime(result.created_at) : '';
+
+    body.appendChild(scoreLine);
+    body.appendChild(timeLine);
+
+    item.appendChild(badge);
+    item.appendChild(body);
+    return item;
+}
 
     function calculateResultStats(result) {
         const score = typeof result.score === 'number' ? Math.round(result.score) : null;
@@ -581,20 +524,23 @@ function setupAccordionBehaviour() {
         return { score, total, correct };
     }
 
-    function formatDateTime(value) {
-        const date = value instanceof Date ? value : new Date(value);
-        if (Number.isNaN(date.getTime())) {
-            return '';
-        }
-        return date.toLocaleString('ru-RU', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
+function formatDateTime(value) {
+    let date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return '';
     }
-
+    
+    // Прибавляем 3 часа для московского времени (UTC+3)
+    date = new Date(date.getTime() + (3 * 60 * 60 * 1000));
+    
+    return date.toLocaleString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
     function escapeHtml(str) {
         if (!str) return '';
         return String(str)

@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
-
 .top-bar {
     background: linear-gradient(
         135deg,
@@ -28,7 +27,6 @@
     box-sizing: border-box;
 }
 
-/* Контейнер для бликов в хедере */
 .top-bar::before {
     content: '';
     position: absolute;
@@ -39,7 +37,7 @@
     background: linear-gradient(
         135deg,
         transparent 0%,
-        rgba(255, 255, 255, 0.3) 30%, /* Более яркие белые блики */
+        rgba(255, 255, 255, 0.3) 30%,
         transparent 70%
     );
     border-radius: 50px;
@@ -47,7 +45,6 @@
     pointer-events: none;
 }
 
-/* Эффект градиентной рамки для хедера */
 .top-bar::after {
     content: '';
     position: absolute;
@@ -73,7 +70,6 @@
     opacity: 1;
 }
 
-/* Эффект при наведении на хедер */
 .top-bar:hover {
     background: linear-gradient(
         135deg,
@@ -88,8 +84,6 @@
         inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 }
 
-
-/* Адаптивность для планшетов */
 @media (min-width: 768px) {
     .top-bar {
         width: calc(100%);
@@ -98,7 +92,6 @@
     }
 }
 
-/* Адаптивность для десктопов */
 @media (min-width: 924px) {
     .top-bar {
         width: calc(100%);
@@ -107,14 +100,12 @@
     }
 }
 
-/* Адаптивность для очень маленьких экранов */
 @media (max-width: 480px) {
     .top-bar {
         max-width: min(1000px, 95vw);
         padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
         margin-bottom: 15px;
     }
-
 }
 
 @media (max-width: 360px) {
@@ -132,7 +123,6 @@
 
 .page-conspect-create .container {
     flex-direction: column;
-    min-height: 100vh;
     gap: 16px;
 }
 
@@ -150,13 +140,25 @@
 }
 
 .card-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 @media (min-width: 900px) {
     .card-grid {
-        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: 20px;
+    }
+    
+    .manual-card {
+        grid-row: 1;
+    }
+    
+    .audio-card {
+        grid-row: 2;
     }
 }
 
@@ -220,6 +222,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
+    margin-top: 20px;
 }
 
 .quick-action {

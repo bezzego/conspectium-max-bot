@@ -12,7 +12,6 @@
 .preview {
     background: var(--light-gray);
     border-radius: 20px;
-    height: 700px;
     display: flex;
     flex-direction: column;
     color: #333;
@@ -22,15 +21,15 @@
     overflow: hidden;
 }
 
-@media (max-height: 1158px)  {
+@media (max-height: 1000px)  {
   .preview {
-    max-height: 475px;
+    max-height: 500px;
   }
 }
 
 @media (max-height: 900px)  {
   .preview {
-    max-height: 400px;
+    max-height: 435px;
   }
 }
 

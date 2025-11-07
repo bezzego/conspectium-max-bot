@@ -3,26 +3,43 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Конспектиум</title>
+    <title>Настройки - Конспектиум</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/settings.css">
     <link rel="stylesheet" href="/front/css/liquid_glass.css">
-    <!-- Иконка для вкладки -->
     <link rel="icon" type="image/png" href="/img/short_icon_white.png">
     <link rel="stylesheet" href="/front/css/responsive.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Draggable.min.js"></script>
 </head>
-<body class="page-main">
 
+<style>
+    @media (max-width: 400px) {
+    .top-bar {
+        width: calc(100% - 20px);
+        padding: 8px 12px;
+        margin-bottom: 12px;
+    }
+    
+    .logo {
+        height: 45px;
+        width: 210px;
+    }
+}
+</style>
+    <body class="page-main">
+
+    <!-- Ваш существующий header -->
         <header class="top-bar">
             <button class="back-btn" onclick="goBack()">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <div class="brand">
+                <div class="brand">
                     <a href="/front/html/main.html" class="logo-link">
                         <img class="logo" src="/img/logo_black.png" alt="logo">
                     </a>
-            </div>
+                </div>
             <!-- Пустой элемент для балансировки -->
             <div class="back-btn-placeholder"></div>
         </header>
@@ -31,36 +48,187 @@
         <h1 class="title">Настройки аккаунта</h1>
         <p class="subtitle">Здесь ты можешь изменить настройки <br> своего аккаунта.</p>
 
-        <section class="preview">
-            <div class="conspect-list"></div>
-        </section>
+        <div class="settings-container">
+            <!-- Секция аватара -->
+            <section class="settings-section">
+                <h2 class="settings-title">Аватар профиля</h2>
+                <div class="avatar-settings">
+                    <div class="current-avatar" id="currentAvatar">
+                        <img src="" alt="Текущий аватар" id="currentAvatarImg">
+                    </div>
+                    <button class="change-avatar-btn" id="changeAvatarBtn">
+                        Сменить аватар
+                    </button>
+                </div>
+            </section>
 
-        <!-- Горизонтальный скролл блоков -->
-        <div class="actions-scroll-container">
-            <div class="actions-scroll">
-                <a # class="action-card liquid-glass">
-                    <i><img class="button-icon" src="/img/icon-settings.png" alt="test"></i>
-                    <span>Кнопка</span>
-                    <div class="liquid-reflections"></div>
-                </a>
+            <!-- Секция имени -->
+            <section class="settings-section">
+                <h2 class="settings-title">Имя пользователя</h2>
+                <input type="text" class="name-input-settings" id="userNameInput" 
+                       placeholder="Введите ваше имя" maxlength="20">
+            </section>
+
+            <!-- Секция пола -->
+            <section class="settings-section">
+                <h2 class="settings-title">Пол</h2>
+                <div class="gender-selection-settings">
+                    <div class="gender-option-settings">
+                        <input type="radio" id="genderMaleSettings" name="genderSettings" value="male">
+                        <label for="genderMaleSettings" class="gender-btn-settings">
+                            <i class="fas fa-mars"></i>
+                            <span>Мужской</span>
+                        </label>
+                    </div>
+                    <div class="gender-option-settings">
+                        <input type="radio" id="genderFemaleSettings" name="genderSettings" value="female">
+                        <label for="genderFemaleSettings" class="gender-btn-settings">
+                            <i class="fas fa-venus"></i>
+                            <span>Женский</span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h2 class="settings-title">Настройки приложения</h2>
                 
-                <a # class="action-card liquid-glass">
-                    <i><img class="button-icon" src="/img/icon-settings.png" alt="test"></i>
-                    <span>Кнопка</span>
-                    <div class="liquid-reflections"></div>
-                </a>
-                
-                <a # class="action-card liquid-glass">
-                    <i><img class="button-icon" src="/img/icon-settings.png" alt="test"></i>
-                    <span>Кнопка</span>
-                    <div class="liquid-reflections"></div>
-                </a>
-            </div>
+                <div class="toggle-settings-liquid">
+                    <div class="toggle-item-liquid">
+                        <span class="toggle-label">Звук</span>
+                        <button aria-label="Включить звук" aria-pressed="true" class="liquid-toggle" data-setting="sound">
+                            <div class="knockout">
+                                <div class="indicator indicator--masked">
+                                    <div class="mask"></div>
+                                </div>
+                            </div>
+                            <div class="indicator__liquid">
+                                <div class="shadow"></div>
+                                <div class="wrapper">
+                                    <div class="liquids">
+                                        <div class="liquid__shadow"></div>
+                                        <div class="liquid__track"></div>
+                                    </div>
+                                </div>
+                                <div class="cover"></div>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <div class="toggle-item-liquid">
+                        <span class="toggle-label">Уведомления</span>
+                        <button aria-label="Включить уведомления" aria-pressed="true" class="liquid-toggle" data-setting="notifications">
+                            <div class="knockout">
+                                <div class="indicator indicator--masked">
+                                    <div class="mask"></div>
+                                </div>
+                            </div>
+                            <div class="indicator__liquid">
+                                <div class="shadow"></div>
+                                <div class="wrapper">
+                                    <div class="liquids">
+                                        <div class="liquid__shadow"></div>
+                                        <div class="liquid__track"></div>
+                                    </div>
+                                </div>
+                                <div class="cover"></div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
+    <!-- Модальное окно выбора аватара -->
+    <div class="avatar-carousel-modal" id="avatarModal">
+        <div class="avatar-carousel-container-settings">
+            <div class="welcome-header">
+                <h2>Выберите аватар</h2>
+                <p>Нажмите на аватар чтобы выбрать</p>
+            </div>
+
+            <div class="avatar-section">
+                <!-- Сетка аватарок будет создана через JavaScript -->
+            </div>
+
+            <button class="confirm-btn" id="confirmAvatarBtn">
+                <span>Выбрать аватар</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- SVG Filters for Liquid Effect -->
+    <svg class="sr-only" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="goo">
+          <feGaussianBlur
+            id="SvgjsFeGaussianBlur1000"
+            result="SvgjsFeGaussianBlur1000"
+            in="SourceGraphic"
+            stdDeviation="13"
+          ></feGaussianBlur>
+          <feColorMatrix
+            id="SvgjsFeColorMatrix1001"
+            result="SvgjsFeColorMatrix1001"
+            in="SvgjsFeGaussianBlur1000"
+            values="
+                1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 13 -10
+            "
+            type="matrix"
+          ></feColorMatrix>
+          <feComposite
+            id="SvgjsFeComposite1002"
+            result="SvgjsFeComposite1002"
+            in="SvgjsFeColorMatrix1001"
+            operator="atop"
+          ></feComposite>
+        </filter>
+        <filter id="knockout" colorInterpolationFilters="sRGB">
+          <feColorMatrix
+            result="knocked"
+            type="matrix"
+            values="1 0 0 0 0
+                    0 1 0 0 0
+                    0 0 1 0 0
+                    -1 -1 -1 1 0"
+          />
+          <feComponentTransfer>
+            <feFuncR type="linear" slope="3" intercept="-1" />
+            <feFuncG type="linear" slope="3" intercept="-1" />
+            <feFuncB type="linear" slope="3" intercept="-1" />
+          </feComponentTransfer>
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0 0 0 0 0 1 1 1 1 1" />
+            <feFuncG type="table" tableValues="0 0 0 0 0 1 1 1 1 1" />
+            <feFuncB type="table" tableValues="0 0 0 0 0 1 1 1 1 1" />
+          </feComponentTransfer>
+        </filter>
+        <filter id="remove-black" color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="1 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                      -255 -255 -255 0 1"
+            result="black-pixels"
+          />
+          <feMorphology
+            in="black-pixels"
+            operator="dilate"
+            radius="0.5"
+            result="smoothed"
+          />
+          <feComposite in="SourceGraphic" in2="smoothed" operator="out" />
+        </filter>
+      </defs>
+    </svg>
+
     <script src="/front/js/app.js" defer></script>
-    <script src="/front/js/script.js" defer></script>
+    <script src="/front/js/settings.js" defer></script>
     <script src="/front/js/liquid_glass.js" defer></script>
 
 </body>

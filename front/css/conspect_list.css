@@ -228,7 +228,6 @@ main {
 .preview {
     background: var(--light-gray);
     border-radius: 20px;
-    height: 750px;
     display: flex;
     flex-direction: column;
     color: #333;
