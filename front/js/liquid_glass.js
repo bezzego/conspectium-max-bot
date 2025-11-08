@@ -27,7 +27,6 @@ document.querySelectorAll('.liquid-glass').forEach(card => {
 });
 
 
-// Интерактивные блики, следующие за курсором
 document.querySelectorAll('.liquid-glass').forEach(card => {
     const reflections = card.querySelector('.liquid-reflections');
     
@@ -46,3 +45,25 @@ document.querySelectorAll('.liquid-glass').forEach(card => {
         reflections.style.background = '';
     });
 });
+
+function reloadStylesheets() {
+    const links = document.querySelectorAll('link[rel="stylesheet"]');
+    links.forEach(link => {
+        const href = link.href;
+        link.href = '';
+        link.href = href;
+    });
+}
+
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        setTimeout(() => {
+            document.querySelectorAll('.action-card.liquid-glass').forEach(card => {
+                const parent = card.parentNode;
+                const clone = card.cloneNode(true);
+                parent.replaceChild(clone, card);
+            });
+        }, 50);
+    }
+});е
+new ButtonStateManager();

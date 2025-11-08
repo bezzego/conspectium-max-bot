@@ -565,14 +565,11 @@ const popupStyles = `
 }
 `;
 
-// Добавляем стили в документ
 const styleSheet = document.createElement('style');
 styleSheet.textContent = popupStyles;
 document.head.appendChild(styleSheet);
 
-// Назначаем обработчик на кнопку "Скинули ссылку?"
 document.addEventListener('DOMContentLoaded', function() {
-    // Ищем карточку по тексту ссылки и классу
     const linkCards = document.querySelectorAll('.action-card');
     
     linkCards.forEach(card => {

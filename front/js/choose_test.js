@@ -85,7 +85,6 @@ function showButtons(item) {
         </button>
     `;
 
-    // Добавляем стили прямо в JavaScript
     const styles = `
         .item-buttons {
             display: flex;
@@ -242,7 +241,6 @@ function showButtons(item) {
         }
     `;
 
-    // Добавляем стили только если их еще нет
     if (!document.getElementById('liquid-glass-buttons-styles')) {
         const styleSheet = document.createElement('style');
         styleSheet.id = 'liquid-glass-buttons-styles';
@@ -284,7 +282,6 @@ function showButtons(item) {
             });
         }
 
-        // Анимация появления
         requestAnimationFrame(() => {
             buttons.style.opacity = '1';
         });
@@ -304,25 +301,19 @@ function showButtons(item) {
 async function createQuiz(conspectId) {
     const appInstance = app();
     
-    // Показываем анимацию волшебника
     showWizardAnimation();
     
-    // Засекаем время начала
     const startTime = Date.now();
-    const totalAnimationTime = 6000; // Общее время анимации 5 секунд
+    const totalAnimationTime = 6000; 
     
     try {
-        // Создаем тест
         const quizId = await appInstance.createQuizFromConspect(conspectId);
         
-        // Вычисляем оставшееся время до завершения 5 секунд
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(totalAnimationTime - elapsedTime, 0);
         
-        // Ждем оставшееся время
         await new Promise(resolve => setTimeout(resolve, remainingTime));
-        
-        // Скрываем анимацию после успешного создания
+
         hideWizardAnimation();
         
         appInstance.notify('Тест готов!', 'success');
@@ -330,28 +321,23 @@ async function createQuiz(conspectId) {
         
     } catch (err) {
         console.error(err);
-        
-        // Вычисляем оставшееся время до 5 секунд при ошибке
+
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(totalAnimationTime - elapsedTime, 0);
-        
-        // Ждем оставшееся время
+
         await new Promise(resolve => setTimeout(resolve, remainingTime));
-        
-        // Скрываем анимацию при ошибке
+
         hideWizardAnimation();
         appInstance.notify(err.message || 'Не удалось создать тест', 'error');
     }
 }
 
     function showWizardAnimation() {
-    // Не создаем второй оверлей, если он уже показан
+
     if (window.wizardElements && window.wizardElements.overlay) return;
 
-    // Создаем overlay для загрузки
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'loading-overlay';
-    // Надежные inline-стили чтобы обойти потенциальные конфликтные правила и контексты
     loadingOverlay.style.opacity = '0';
     loadingOverlay.style.transition = 'opacity 0.25s ease';
     loadingOverlay.style.zIndex = '20000';
@@ -394,18 +380,14 @@ async function createQuiz(conspectId) {
         </div>
     `;
     
-    // Добавляем overlay на страницу
     document.body.appendChild(loadingOverlay);
-    
-    // Создаем подпись и добавляем её внутрь оверлея — так её легче гарантировать поверх фона
+
     const signature = document.createElement('div');
     signature.className = 'hackflow-signature';
     signature.textContent = 'by HackFlow';
     signature.style.opacity = '0';
-    // Переопределяем z-index чтобы подпись точно была поверх контента оверлея
     signature.style.zIndex = '20001';
     signature.style.pointerEvents = 'none';
-    // Позиционируем и стилизуем подпись inline, чтобы внешний CSS не мешал отображению
     signature.style.position = 'fixed';
     signature.style.bottom = '20px';
     signature.style.left = '50%';
@@ -417,12 +399,9 @@ async function createQuiz(conspectId) {
     signature.style.width = '100%';
     signature.style.userSelect = 'none';
     signature.style.transition = 'opacity 0.5s ease';
-    // Append inside overlay to ensure stacking context and visibility
     loadingOverlay.appendChild(signature);
-    // Debug log to help quickly verify in DevTools console
     try { console.debug('hackflow signature appended to loadingOverlay'); } catch (e) {}
     
-    // Блокируем скролл страницы на время анимации (сохраняем предыдущее значение)
     try {
         window._prevBodyOverflow = document.body.style.overflow;
     } catch (e) {
@@ -430,27 +409,22 @@ async function createQuiz(conspectId) {
     }
     document.body.style.overflow = 'hidden';
 
-    // Показываем анимацию — даём браузеру применить начальные стили, затем включаем
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             loadingOverlay.style.opacity = '1';
         });
     });
     
-    // Через 1 секунду показываем подпись
     setTimeout(() => {
         signature.style.opacity = '1';
         signature.style.transition = 'opacity 0.5s ease';
     }, 1000);
     
-    // За 1 секунду до окончания хотим скрыть подпись так, чтобы она была видна 5 секунд
-    // (показываем на 1s, скрываем на 6s => 5s видимости)
     setTimeout(() => {
         signature.style.opacity = '0';
         signature.style.transition = 'opacity 0.5s ease';
     }, 6000);
     
-    // Сохраняем ссылки на элементы для последующего удаления
     window.wizardElements = {
         overlay: loadingOverlay,
         signature: signature
@@ -462,7 +436,6 @@ function hideWizardAnimation() {
     
     if (!elements) return;
     
-    // Сразу скрываем подпись (на случай если функция вызвана раньше)
     if (elements.signature) {
         elements.signature.style.opacity = '0';
         elements.signature.style.transition = 'opacity 0.3s ease';
@@ -474,7 +447,6 @@ function hideWizardAnimation() {
         }, 300);
     }
     
-    // Плавное исчезновение анимации
     if (elements.overlay) {
         elements.overlay.style.opacity = '0';
         elements.overlay.style.transition = 'opacity 0.5s ease';
@@ -486,7 +458,6 @@ function hideWizardAnimation() {
         }, 500);
     }
     
-    // Восстанавливаем скролл страницы
     try {
         if (window._prevBodyOverflow !== undefined) {
             document.body.style.overflow = window._prevBodyOverflow || '';
@@ -498,11 +469,9 @@ function hideWizardAnimation() {
         // ignore
     }
 
-    // Очищаем ссылки
     window.wizardElements = null;
     }
 
-    // Добавляем стили для подписи
     const signatureStyles = `
     .hackflow-signature {
         position: fixed;
@@ -535,14 +504,12 @@ function hideWizardAnimation() {
     }
     `;
 
-    // Добавляем стили в документ
     const signatureStyleSheet = document.createElement('style');
     signatureStyleSheet.textContent = signatureStyles;
     document.head.appendChild(signatureStyleSheet);
 })();
 
 function showConspectModalInChoose(conspect) {
-    // Закрываем предыдущее модальное окно если есть
     const existingModal = document.querySelector('.conspect-modal-overlay');
     if (existingModal) {
         existingModal.remove();
@@ -700,7 +667,6 @@ function showConspectModalInChoose(conspect) {
         }
     `;
     
-    // Добавляем стили в head если их еще нет
     if (!document.getElementById('choose-modal-styles')) {
         const styleEl = document.createElement('style');
         styleEl.id = 'choose-modal-styles';
@@ -753,12 +719,10 @@ function showConspectModalInChoose(conspect) {
 
     document.body.appendChild(modalOverlay);
     
-    // Показываем анимацию
     setTimeout(() => {
         modalOverlay.classList.add('visible');
     }, 10);
 
-    // Обработчики событий
     const closeButton = modalOverlay.querySelector('.close-btn');
     const copyButton = modalOverlay.querySelector('.meta-copy-btn');
 
@@ -780,12 +744,10 @@ ${keyPointsText ? 'Ключевые идеи:\n' + keyPointsText : ''}
         `.trim();
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-            // Используем window.ConspectiumApp напрямую вместо app()
             if (window.ConspectiumApp) {
                 window.ConspectiumApp.notify('Конспект скопирован в буфер обмена', 'success');
             }
             
-            // Визуальная обратная связь
             copyButton.innerHTML = '<i class="fas fa-check"></i>';
             copyButton.style.color = '#b9b9b5ff;';
             
@@ -795,7 +757,6 @@ ${keyPointsText ? 'Ключевые идеи:\n' + keyPointsText : ''}
             }, 2000);
         }).catch(err => {
             console.error('Ошибка копирования:', err);
-            // Используем window.ConspectiumApp напрямую вместо app()
             if (window.ConspectiumApp) {
                 window.ConspectiumApp.notify('Не удалось скопировать конспект', 'error');
             }
@@ -811,7 +772,6 @@ ${keyPointsText ? 'Ключевые идеи:\n' + keyPointsText : ''}
         }
     });
 
-    // Закрытие по ESC
     const escHandler = (event) => {
         if (event.key === 'Escape') {
             modalOverlay.classList.remove('visible');
