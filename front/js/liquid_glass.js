@@ -65,5 +65,4 @@ window.addEventListener('pageshow', function(event) {
             });
         }, 50);
     }
-});е
-new ButtonStateManager();
+});

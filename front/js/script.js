@@ -1500,4 +1500,25 @@ function copyConspectToClipboard(conspect, variantKey, markdown) {
     window.closeConspectModal = closeConspectModal;
 })();
 
-// Делаем функцию глобально доступной для choose_test.js
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'app-toast';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Запускаем анимацию появления
+    setTimeout(() => {
+        notification.classList.add('visible');
+    }, 10);
+    
+    // Автоматическое скрытие через 3 секунды
+    setTimeout(() => {
+        notification.classList.remove('visible');
+        notification.classList.add('hiding');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, 2700);
+}

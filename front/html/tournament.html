@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Турниры - Conspectium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/main.css">
+    <link rel="stylesheet" href="/front/css/liquid_glass.css">
+    <link rel="stylesheet" href="/front/css/tournament.css">
+    <link rel="icon" type="image/png" href="/img/short_icon_white.png">
+
+
+</head>
+
+<style>
+    
+</style>
+<body>
+    <div class="container">
+        <header class="top-bar">
+            <button class="back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="brand">
+                    <a href="/front/html/main.html" class="logo-link">
+                        <img class="logo" src="/img/logo_black.png" alt="logo">
+                    </a>
+            </div>
+            <!-- Пустой элемент для балансировки -->
+            <div class="back-btn-placeholder"></div>
+        </header>
+
+    <main>
+        <h1 class="title">Соревнуйся. Создавай турниры</h1>
+        <p class="subtitle">Проходи тесты и получай награды! <br> Соревнуйся с другими участниками.</p>
+
+<div class="tournament-filters">
+    <div class="filters-grid">
+        <!-- Предмет -->
+        <div class="filter-group">
+            <label class="filter-label">Предмет</label>
+            <div class="liquid-select" id="subjectSelect">
+                <select class="hidden-select" id="subjectFilter">
+                    <option value="all">Все предметы</option>
+                    <option value="math">Математика</option>
+                    <option value="history">История</option>
+                    <option value="physics">Физика</option>
+                    <option value="chemistry">Химия</option>
+                    <option value="biology">Биология</option>
+                    <option value="geography">География</option>
+                    <option value="literature">Литература</option>
+                    <option value="programming">Программирование</option>
+                </select>
+                <div class="select-trigger">
+                    <span class="selected-text">Все предметы</span>
+                </div>
+                <div class="select-dropdown">
+                    <div class="select-option" data-value="all">Все предметы</div>
+                    <div class="select-option" data-value="math">Математика</div>
+                    <div class="select-option" data-value="history">История</div>
+                    <div class="select-option" data-value="physics">Физика</div>
+                    <div class="select-option" data-value="chemistry">Химия</div>
+                    <div class="select-option" data-value="biology">Биология</div>
+                    <div class="select-option" data-value="geography">География</div>
+                    <div class="select-option" data-value="literature">Литература</div>
+                    <div class="select-option" data-value="programming">Программирование</div>
+                </div>
+                <div class="select-reflections"></div>
+            </div>
+        </div>
+            <div class="select-overlay" id="selectOverlay"></div>
+
+        <!-- Сложность -->
+        <div class="filter-group">
+            <label class="filter-label">Сложность</label>
+            <div class="liquid-select" id="difficultySelect">
+                <select class="hidden-select" id="difficultyFilter">
+                    <option value="all">Любая сложность</option>
+                    <option value="easy">Легкая</option>
+                    <option value="medium">Средняя</option>
+                    <option value="hard">Сложная</option>
+                </select>
+                <div class="select-trigger">
+                    <span class="selected-text">Любая сложность</span>
+                </div>
+                <div class="select-dropdown">
+                    <div class="select-option" data-value="all">Любая сложность</div>
+                    <div class="select-option" data-value="easy">Легкая</div>
+                    <div class="select-option" data-value="medium">Средняя</div>
+                    <div class="select-option" data-value="hard">Сложная</div>
+                </div>
+                <div class="select-reflections"></div>
+            </div>
+        </div>
+
+        <!-- Время -->
+        <div class="filter-group">
+            <label class="filter-label">Время</label>
+            <div class="liquid-select" id="timeSelect">
+                <select class="hidden-select" id="timeFilter">
+                    <option value="all">Любое время</option>
+                    <option value="short">До 15 мин</option>
+                    <option value="medium">15-30 мин</option>
+                    <option value="long">Более 30 мин</option>
+                </select>
+                <div class="select-trigger">
+                    <span class="selected-text">Любое время</span>
+                </div>
+                <div class="select-dropdown">
+                    <div class="select-option" data-value="all">Любое время</div>
+                    <div class="select-option" data-value="short">До 15 мин</div>
+                    <div class="select-option" data-value="medium">15-30 мин</div>
+                    <div class="select-option" data-value="long">Более 30 мин</div>
+                </div>
+                <div class="select-reflections"></div>
+            </div>
+        </div>
+
+        <!-- Поиск -->
+        <div class="filter-group search-box">
+            <label class="filter-label">Поиск</label>
+            <div class="search-input-container">
+                <input type="text" class="search-input" id="searchFilter" placeholder="Название турнира...">
+                <i class="fas fa-search search-icon"></i>
+                <div class="input-reflections"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Сетка турниров -->
+        <div class="tournaments-grid" id="tournamentsGrid">
+            <!-- Турниры будут добавляться через JavaScript -->
+        </div>
+
+        <!-- Лобби -->
+        <div class="lobby-container" id="lobbyContainer">
+            <div class="lobby-header">
+                <div class="lobby-title" id="lobbyTitle">Лобби: Математика для начинающих</div>
+                <div class="lobby-info">
+                    <div class="lobby-code">
+                        <span id="lobbyCode">TOUR#A1B2C3</span>
+                        <button class="copy-btn" onclick="copyLobbyCode()">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="participants-section">
+                <h3 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Участники (<span id="participantsCount">1</span>/8)
+                </h3>
+                <div class="participants-grid" id="participantsGrid">
+                    <!-- Участники будут добавляться через JavaScript -->
+                    <div class="add-participant" onclick="generateInviteLink()">
+                        <div class="add-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="participant-name">Пригласить</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lobby-settings" id="lobbySettings">
+                <h3 class="section-title">
+                    <i class="fas fa-cog"></i>
+                    Настройки лобби
+                </h3>
+                <div class="settings-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Время на вопрос</label>
+                        <select class="filter-select" id="questionTime">
+                            <option value="30">30 секунд</option>
+                            <option value="45">45 секунд</option>
+                            <option value="60" selected>60 секунд</option>
+                            <option value="90">90 секунд</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Кол-во вопросов</label>
+                        <select class="filter-select" id="questionsCount">
+                            <option value="10">10 вопросов</option>
+                            <option value="15" selected>15 вопросов</option>
+                            <option value="20">20 вопросов</option>
+                            <option value="25">25 вопросов</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lobby-controls">
+                <button class="ready-btn" id="readyBtn" onclick="toggleReady()">Готов</button>
+                <button class="start-btn" id="startBtn" onclick="startTournament()" disabled>Начать турнир</button>
+                <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">
+                    <i class="fas fa-cog"></i> Настройки
+                </button>
+            </div>
+        </div>
+
+        <!-- Результаты -->
+        <div class="results-container" id="resultsContainer">
+            <div class="results-header">
+                <div class="results-title" id="resultsTitle">Результаты турнира</div>
+                <div class="results-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalParticipants">0</div>
+                        <div class="stat-label">Участников</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="averageScore">0%</div>
+                        <div class="stat-label">Средний результат</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="bestTime">0:00</div>
+                        <div class="stat-label">Лучшее время</div>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Участник</th>
+                        <th>Результат</th>
+                        <th>Время</th>
+                        <th>Точность</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTable">
+                    <!-- Результаты будут добавляться через JavaScript -->
+                </tbody>
+            </table>
+            
+            <div class="share-results">
+                <div class="action-buttons">
+                    <button class="ready-btn" onclick="shareResults()">
+                        <i class="fas fa-share-alt"></i> Поделиться
+                    </button>
+                    <button class="start-btn" onclick="createNewTournament()">
+                        <i class="fas fa-plus"></i> Новый турнир
+                    </button>
+                    <button class="settings-btn" onclick="showTournamentStats()">
+                        <i class="fas fa-chart-bar"></i> Статистика
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </main>
+
+
+
+    <script src="/front/js/liquid_glass.js" defer></script>
+    <script src="/front/js/tournament.js" defer></script>
+</body>
+</html>
