@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -51,3 +54,34 @@ async def upload_audio(
     db.commit()
     db.refresh(audio_source)
     return AudioSourceRead.model_validate(audio_source)
+
+
+@router.get(
+    "/{audio_id}/download",
+    response_class=FileResponse,
+    summary="Скачать исходный аудиофайл",
+)
+def download_audio(
+    audio_id: int,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> FileResponse:
+    audio_source = (
+        db.query(AudioSource)
+        .filter(AudioSource.id == audio_id, AudioSource.user_id == user.id)
+        .one_or_none()
+    )
+    if audio_source is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Файл не найден")
+    if not audio_source.file_path:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Файл не сохранён")
+
+    file_path = Path(audio_storage.base_dir) / audio_source.file_path
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Файл недоступен")
+
+    return FileResponse(
+        path=file_path,
+        media_type=audio_source.mime_type or "application/octet-stream",
+        filename=audio_source.original_filename or file_path.name,
+    )

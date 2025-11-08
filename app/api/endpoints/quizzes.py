@@ -160,6 +160,24 @@ def update_quiz(
     return summary
 
 
+@router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_quiz(
+    quiz_id: int,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> None:
+    quiz = (
+        db.query(Quiz)
+        .filter(Quiz.id == quiz_id, Quiz.user_id == user.id)
+        .one_or_none()
+    )
+    if quiz is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тест не найден")
+
+    db.delete(quiz)
+    db.commit()
+
+
 @router.post("/{quiz_id}/results", response_model=QuizResultRead, status_code=status.HTTP_201_CREATED)
 def submit_quiz_result(
     quiz_id: int,

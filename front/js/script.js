@@ -10,10 +10,14 @@ window.goBack = goBack;
 
 (function () {
     const body = document.body;
+    let variantChoiceStylesInjected = false;
+    let uploadHandlersAttached = false;
     const VARIANT_LABELS = {
+        full: 'Фактический конспект',
+        brief: 'Краткий конспект',
         compressed: 'Сжатый конспект',
-        full: 'Полный конспект',
     };
+    const VARIANT_ORDER = ['full', 'brief', 'compressed'];
 
     function escapeHtml(text) {
         if (!text) return '';
@@ -102,12 +106,23 @@ window.goBack = goBack;
         return htmlParts.join('\n');
     }
 
+    function getPreferredMarkdown(conspect) {
+        return (
+            conspect.brief_markdown ||
+            conspect.compressed_markdown ||
+            conspect.full_markdown ||
+            ''
+        );
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         const app = window.ConspectiumApp;
         if (!app) {
             console.error('ConspectiumApp not found');
             return;
         }
+
+        setupUploadHandlers(app);
 
         try {
             await app.ready();
@@ -124,7 +139,6 @@ window.goBack = goBack;
         });
 
         initHorizontalScroll();
-        setupUploadHandlers(app);
 
         if (body.classList.contains('page-main')) {
             initMainPage(app);
@@ -155,38 +169,292 @@ window.goBack = goBack;
         });
     }
 
-    function setupUploadHandlers(app) {
-        const button = document.getElementById('uploadAudioButton');
-        const input = document.getElementById('audioUploadInput');
-        if (!button || !input) {
+    function ensureVariantChoiceStyles() {
+        if (variantChoiceStylesInjected) {
             return;
         }
+        const style = document.createElement('style');
+        style.id = 'variant-choice-styles';
+        style.textContent = `
+.variant-choice-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 12000;
+    padding: 20px;
+}
+.variant-choice-modal {
+    width: 100%;
+    max-width: 420px;
+    background: #1f2027;
+    border-radius: 20px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+.variant-choice-modal h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+.variant-choice-subtitle {
+    margin: 0 0 16px 0;
+    color: rgba(255,255,255,0.65);
+    font-size: 14px;
+}
+.variant-choice-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.variant-choice-option {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+.variant-choice-option input {
+    margin-top: 5px;
+}
+.variant-choice-option.active {
+    border-color: rgba(245,216,110,0.7);
+    background: rgba(245,216,110,0.08);
+}
+.variant-choice-option label {
+    cursor: pointer;
+    flex: 1;
+}
+.variant-choice-option-title {
+    font-weight: 600;
+    font-size: 15px;
+}
+.variant-choice-option-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+}
+.variant-choice-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+}
+.variant-choice-btn {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.variant-choice-btn.cancel {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
+.variant-choice-btn.primary {
+    background: linear-gradient(135deg, #ffd76f, #f0b349);
+    color: #1f1f1f;
+}
+.variant-choice-btn.primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+        `;
+        document.head.appendChild(style);
+        variantChoiceStylesInjected = true;
+    }
 
-        button.addEventListener('click', (event) => {
-            event.preventDefault();
-            input.click();
+    function showVariantChoiceModal({ title } = {}) {
+        ensureVariantChoiceStyles();
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'variant-choice-overlay';
+            const optionsMarkup = VARIANT_ORDER.map((key) => {
+                const descriptions = {
+                    full: 'Максимально подробный конспект со всеми деталями.',
+                    brief: 'Сбалансированный обзор основных идей.',
+                    compressed: 'Самая сжатая выжимка фактов.',
+                };
+                return `
+                    <label class="variant-choice-option" data-variant="${key}">
+                        <input type="radio" name="variantChoice" value="${key}">
+                        <div>
+                            <div class="variant-choice-option-title">${VARIANT_LABELS[key]}</div>
+                            <div class="variant-choice-option-desc">${descriptions[key]}</div>
+                        </div>
+                    </label>
+                `;
+            }).join('');
+
+            overlay.innerHTML = `
+                <div class="variant-choice-modal">
+                    <h3>Выбери формат конспекта</h3>
+                    ${title ? `<p class="variant-choice-subtitle">${escapeHtml(title)}</p>` : ''}
+                    <div class="variant-choice-options">
+                        ${optionsMarkup}
+                    </div>
+                    <div class="variant-choice-actions">
+                        <button type="button" class="variant-choice-btn cancel">Отмена</button>
+                        <button type="button" class="variant-choice-btn primary" disabled>Продолжить</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            const optionNodes = Array.from(overlay.querySelectorAll('.variant-choice-option'));
+            const radios = overlay.querySelectorAll('input[name="variantChoice"]');
+            const cancelBtn = overlay.querySelector('.variant-choice-btn.cancel');
+            const confirmBtn = overlay.querySelector('.variant-choice-btn.primary');
+            let selectedValue = null;
+
+            const cleanup = () => {
+                overlay.remove();
+            };
+
+            const selectOption = (value, element) => {
+                selectedValue = value;
+                confirmBtn.disabled = !selectedValue;
+                optionNodes.forEach((node) => node.classList.toggle('active', node === element));
+                const radio = element.querySelector('input');
+                if (radio) {
+                    radio.checked = true;
+                }
+            };
+
+            const defaultOption =
+                optionNodes.find((node) => node.dataset.variant === 'brief') || optionNodes[0];
+            if (defaultOption) {
+                selectOption(defaultOption.dataset.variant, defaultOption);
+            }
+
+            optionNodes.forEach((option) => {
+                option.addEventListener('click', () => {
+                    selectOption(option.dataset.variant, option);
+                });
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                cleanup();
+                resolve(null);
+            });
+
+            confirmBtn.addEventListener('click', () => {
+                if (!selectedValue) {
+                    return;
+                }
+                cleanup();
+                resolve(selectedValue);
+            });
+
+            overlay.addEventListener('click', (event) => {
+                if (event.target === overlay) {
+                    cleanup();
+                    resolve(null);
+                }
+            });
         });
+    }
 
-        input.addEventListener('change', async () => {
-            if (!input.files || !input.files.length) {
+    function setupUploadHandlers(app) {
+        if (uploadHandlersAttached) {
+            return;
+        }
+        const inputs = Array.from(document.querySelectorAll('#audioUploadInput'));
+        const triggers = Array.from(document.querySelectorAll('#uploadAudioButton'));
+        if (!inputs.length) {
+            return;
+        }
+        uploadHandlersAttached = true;
+
+        const targetInput = inputs[0];
+        const state = {
+            pendingVariant: null,
+            skipNextClick: false,
+        };
+
+        const requestVariant = async (title) => {
+            const variant = await showVariantChoiceModal({ title });
+            state.pendingVariant = variant || null;
+            return variant;
+        };
+
+        const openFilePicker = () => {
+            state.skipNextClick = true;
+            targetInput.click();
+        };
+
+        const handleTriggerClick = async (event) => {
+            event.preventDefault();
+            const title =
+                event.currentTarget?.dataset?.variantPrompt || 'Выбери полноту конспекта';
+            const variant = await requestVariant(title);
+            if (!variant) {
                 return;
             }
-            const file = input.files[0];
+            openFilePicker();
+        };
+
+        triggers.forEach((trigger) => {
+            trigger.addEventListener('click', handleTriggerClick);
+        });
+
+        targetInput.addEventListener(
+            'click',
+            async (event) => {
+                if (state.skipNextClick) {
+                    state.skipNextClick = false;
+                    return;
+                }
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                const variant = await requestVariant('Выбери полноту конспекта');
+                if (!variant) {
+                    return;
+                }
+                openFilePicker();
+            },
+            true,
+        );
+
+        targetInput.addEventListener('change', async () => {
+            if (!targetInput.files || !targetInput.files.length) {
+                return;
+            }
+            const file = targetInput.files[0];
             try {
+                let variant = state.pendingVariant;
+                if (!variant) {
+                    variant = await requestVariant(file.name);
+                }
+                if (!variant) {
+                    targetInput.value = '';
+                    return;
+                }
+                state.pendingVariant = null;
                 app.showLoading('Загружаем аудио...');
                 const audio = await app.uploadAudio(file);
                 app.showLoading('Создаём конспект... Это может занять несколько минут для длинных аудио.');
-                const conspect = await app.createConspectFromAudio(audio.id, file.name);
+                const conspect = await app.createConspectFromAudio(audio.id, file.name, {
+                    variants: [variant],
+                });
                 app.hideLoading();
                 app.notify('Конспект готов!', 'success');
                 refreshConspectData(app, conspect.id);
-                showConspectModal(conspect, { initialVariant: 'compressed' });
+                showConspectModal(conspect, { initialVariant: variant });
             } catch (err) {
                 console.error(err);
                 app.hideLoading();
                 app.notify(err.message || 'Не удалось обработать аудио', 'error');
             } finally {
-                input.value = '';
+                targetInput.value = '';
+                state.pendingVariant = null;
             }
         });
     }
@@ -354,12 +622,22 @@ window.goBack = goBack;
                     return;
                 }
                 try {
+                    const variant = await showVariantChoiceModal({
+                        title: titleInput?.value.trim() || 'Новый конспект',
+                    });
+                    if (!variant) {
+                        return;
+                    }
                     app.showLoading('Создаём конспект... Это может занять пару минут.');
-                    const conspect = await app.createConspectFromText(textInput.value.trim(), titleInput.value.trim());
+                    const conspect = await app.createConspectFromText(
+                        textInput.value.trim(),
+                        titleInput.value.trim(),
+                        { variants: [variant] },
+                    );
                     app.hideLoading();
                     app.notify('Конспект готов!', 'success');
                     await loadConspectDetails(app, conspect.id);
-                    showConspectModal(conspect, { initialVariant: 'compressed' });
+                    showConspectModal(conspect, { initialVariant: variant });
                     textInput.value = '';
                     titleInput.value = '';
                 } catch (err) {
@@ -411,7 +689,7 @@ window.goBack = goBack;
             container.querySelector('.conspect-title').textContent = conspect.title || 'Без названия';
             const summaryNode = container.querySelector('.conspect-summary');
             if (summaryNode) {
-                const preferredMarkdown = conspect.compressed_markdown || conspect.full_markdown;
+                const preferredMarkdown = getPreferredMarkdown(conspect);
                 summaryNode.innerHTML = renderMarkdown(preferredMarkdown || conspect.summary || '');
             }
 
@@ -626,6 +904,12 @@ function showConspectModal(conspect, options = {}) {
     gap: 10px;
     margin-bottom: 8px;
     flex-wrap: wrap;
+}
+
+.modal-meta-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .modal-meta {
@@ -846,6 +1130,21 @@ function showConspectModal(conspect, options = {}) {
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
+.variant-btn.variant-btn--add {
+    border-style: dashed;
+    opacity: 0.8;
+}
+
+.variant-btn.variant-btn--add:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    opacity: 1;
+}
+
+.meta-copy-btn + .meta-copy-btn {
+    margin-left: 8px;
+}
+
 .markdown-viewer {
     color: #fff;
     font-size: 15px;
@@ -969,42 +1268,28 @@ function showConspectModal(conspect, options = {}) {
     const createdAtSource = conspect.generated_at || conspect.updated_at || conspect.created_at;
     const createdAt = createdAtSource ? new Date(createdAtSource).toLocaleString('ru-RU') : '';
 
-    const variantData = {};
-    if (conspect.compressed_markdown) {
-        variantData.compressed = {
-            markdown: conspect.compressed_markdown,
-            label: VARIANT_LABELS.compressed,
-        };
-    }
-    if (conspect.full_markdown) {
-        variantData.full = {
-            markdown: conspect.full_markdown,
-            label: VARIANT_LABELS.full,
-        };
-    }
-    const variantKeys = Object.keys(variantData);
-    let defaultVariant = options.initialVariant && variantData[options.initialVariant]
-        ? options.initialVariant
-        : null;
-    if (!defaultVariant && variantData.compressed) {
-        defaultVariant = 'compressed';
-    }
-    if (!defaultVariant && variantData.full) {
-        defaultVariant = 'full';
-    }
-    if (!defaultVariant) {
-        defaultVariant = 'summary';
-    }
+    let activeConspect = conspect;
+    const variantState = {
+        full: conspect.full_markdown,
+        brief: conspect.brief_markdown,
+        compressed: conspect.compressed_markdown,
+    };
+
+    const determineDefaultVariant = (initialKey) => {
+        if (initialKey && (variantState[initialKey] || initialKey === 'summary')) {
+            return initialKey;
+        }
+        if (variantState.brief) return 'brief';
+        if (variantState.compressed) return 'compressed';
+        if (variantState.full) return 'full';
+        return 'summary';
+    };
 
     const keyPoints = (conspect.keywords || []).map((point) => `<li>${escapeHtml(point)}</li>`).join('');
     const isOffline = conspect.model_used === 'offline-fallback';
 
     conspectModalOverlay = document.createElement('div');
     conspectModalOverlay.className = 'conspect-modal-overlay';
-
-    const variantButtonsMarkup = variantKeys
-        .map((key) => `<button class="variant-btn" data-variant="${key}">${escapeHtml(variantData[key].label)}</button>`)
-        .join('');
 
     conspectModalOverlay.innerHTML = `
         <div class="conspect-modal">
@@ -1013,9 +1298,16 @@ function showConspectModal(conspect, options = {}) {
                     <h2>${escapeHtml(conspect.title || 'Без названия')}</h2>
                     <div class="modal-meta-row">
                         ${createdAt ? `<p class="modal-meta">Создан: ${escapeHtml(createdAt)}</p>` : ''}
-                        <button class="meta-copy-btn" title="Копировать конспект">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                        <div class="modal-meta-buttons">
+                            <button class="meta-copy-btn copy-btn" title="Копировать конспект">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            ${
+                                conspect.audio_source_id
+                                    ? `<button class="meta-copy-btn download-btn" data-audio-id="${conspect.audio_source_id}" title="Скачать аудио"><i class="fas fa-download"></i></button>`
+                                    : ''
+                            }
+                        </div>
                     </div>
                     ${isOffline ? '<div class="conspect-badge">Офлайн черновик</div>' : ''}
                 </div>
@@ -1026,11 +1318,7 @@ function showConspectModal(conspect, options = {}) {
                 </div>
             </div>
             <div class="modal-body">
-                ${variantKeys.length ? `
-                    <div class="modal-variant-toggle">
-                        ${variantButtonsMarkup}
-                    </div>
-                ` : ''}
+                <div class="modal-variant-toggle"></div>
                 <div class="modal-summary markdown-viewer"></div>
                 ${keyPoints ? `
                     <h3>Ключевые идеи</h3>
@@ -1046,53 +1334,109 @@ function showConspectModal(conspect, options = {}) {
     });
 
     const summaryContainer = conspectModalOverlay.querySelector('.modal-summary');
-    const variantButtons = Array.from(conspectModalOverlay.querySelectorAll('.variant-btn'));
-    const copyButton = conspectModalOverlay.querySelector('.meta-copy-btn');
+    const variantToggle = conspectModalOverlay.querySelector('.modal-variant-toggle');
+    const copyButton = conspectModalOverlay.querySelector('.meta-copy-btn.copy-btn');
+    const downloadButton = conspectModalOverlay.querySelector('.meta-copy-btn.download-btn');
     const originalCopyHtml = copyButton ? copyButton.innerHTML : '';
-    let currentVariantKey = defaultVariant;
+    let currentVariantKey = determineDefaultVariant(options.initialVariant);
     let currentVariantMarkdown =
-        variantData[currentVariantKey]?.markdown || (currentVariantKey === 'summary' ? conspect.summary : '');
+        variantState[currentVariantKey] || (currentVariantKey === 'summary' ? activeConspect.summary : '');
+    let variantButtons = [];
+
+    const updateVariantButtonsState = () => {
+        variantButtons.forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.variant === currentVariantKey);
+        });
+    };
 
     const updateVariant = (key) => {
         currentVariantKey = key;
-        currentVariantMarkdown = variantData[key]?.markdown || (key === 'summary' ? conspect.summary : '');
-        variantButtons.forEach((btn) => {
-            btn.classList.toggle('active', btn.dataset.variant === key);
-        });
-        if (!summaryContainer) {
-            return;
+        if (key === 'summary') {
+            currentVariantMarkdown = activeConspect.summary || '';
+            if (summaryContainer) {
+                summaryContainer.innerHTML = renderMarkdown(currentVariantMarkdown);
+            }
+        } else if (variantState[key]) {
+            currentVariantMarkdown = variantState[key];
+            if (summaryContainer) {
+                summaryContainer.innerHTML = renderMarkdown(variantState[key]);
+            }
+        } else if (summaryContainer) {
+            currentVariantMarkdown = '';
+            summaryContainer.innerHTML = '<p>Этот вариант пока не создан.</p>';
         }
-        if (variantData[key] && variantData[key].markdown) {
-            summaryContainer.innerHTML = renderMarkdown(variantData[key].markdown);
-        } else if (key === 'summary') {
-            summaryContainer.innerHTML = renderMarkdown(conspect.summary || '');
-        } else {
-            summaryContainer.innerHTML = '<p>Конспект пока отсутствует.</p>';
+        updateVariantButtonsState();
+    };
+
+    const appInstance = window.ConspectiumApp;
+
+    const requestVariantGeneration = async (variantKey) => {
+        if (!appInstance) return;
+        try {
+            appInstance.showLoading('Готовим новый вариант...');
+            const updated = await appInstance.generateConspectVariant(activeConspect.id, variantKey);
+            appInstance.hideLoading();
+            activeConspect = updated;
+            variantState.full = updated.full_markdown;
+            variantState.brief = updated.brief_markdown;
+            variantState.compressed = updated.compressed_markdown;
+            renderVariantButtons();
+            updateVariant(variantKey);
+        } catch (error) {
+            console.error(error);
+            appInstance.hideLoading();
+            appInstance.notify(error.message || 'Не удалось создать вариант', 'error');
         }
     };
 
-    if (variantButtons.length) {
-        variantButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                updateVariant(button.dataset.variant);
-            });
+    const renderVariantButtons = () => {
+        if (!variantToggle) return;
+        variantToggle.innerHTML = '';
+        VARIANT_ORDER.forEach((key) => {
+            const button = document.createElement('button');
+            button.className = 'variant-btn';
+            button.dataset.variant = key;
+            if (variantState[key]) {
+                button.textContent = VARIANT_LABELS[key];
+                button.addEventListener('click', () => updateVariant(key));
+            } else {
+                button.textContent = `${VARIANT_LABELS[key]} +`;
+                button.classList.add('variant-btn--add');
+                button.addEventListener('click', () => requestVariantGeneration(key));
+            }
+            variantToggle.appendChild(button);
         });
-    }
+        variantButtons = Array.from(variantToggle.querySelectorAll('.variant-btn:not(.variant-btn--add)'));
+        updateVariantButtonsState();
+    };
 
-    updateVariant(defaultVariant);
+    renderVariantButtons();
+    updateVariant(currentVariantKey);
 
     const closeButton = conspectModalOverlay.querySelector('.close-btn');
     if (closeButton) {
         closeButton.addEventListener('click', closeConspectModal);
     }
 
+    if (downloadButton && appInstance) {
+        downloadButton.addEventListener('click', async () => {
+            try {
+                appInstance.showLoading('Готовим аудио...');
+                await appInstance.downloadAudioSource(Number(downloadButton.dataset.audioId));
+                appInstance.hideLoading();
+            } catch (error) {
+                console.error(error);
+                appInstance.hideLoading();
+                appInstance.notify(error.message || 'Не удалось скачать аудио', 'error');
+            }
+        });
+    }
+
     if (copyButton) {
         copyButton.addEventListener('click', () => {
-            copyConspectToClipboard(conspect, currentVariantKey, currentVariantMarkdown)
+            copyConspectToClipboard(activeConspect, currentVariantKey, currentVariantMarkdown)
                 .then(() => {
-                    if (window.ConspectiumApp) {
-                        window.ConspectiumApp.notify('Конспект скопирован в буфер обмена', 'success');
-                    }
+                    appInstance?.notify('Конспект скопирован в буфер обмена', 'success');
                     copyButton.innerHTML = '<i class="fas fa-check"></i>';
                     copyButton.classList.add('copied');
                     setTimeout(() => {
@@ -1102,9 +1446,7 @@ function showConspectModal(conspect, options = {}) {
                 })
                 .catch((err) => {
                     console.error('Ошибка копирования: ', err);
-                    if (window.ConspectiumApp) {
-                        window.ConspectiumApp.notify('Не удалось скопировать конспект', 'error');
-                    }
+                    appInstance?.notify('Не удалось скопировать конспект', 'error');
                 });
         });
     }

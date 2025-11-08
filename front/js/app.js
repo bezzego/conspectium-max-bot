@@ -8,11 +8,19 @@
         user: null,
     };
 
+    function setUser(user) {
+        state.user = user;
+        if (user) {
+            localStorage.setItem(USER_KEY, JSON.stringify(user));
+        } else {
+            localStorage.removeItem(USER_KEY);
+        }
+    }
+
     function clearAuthState() {
         state.token = null;
-        state.user = null;
+        setUser(null);
         localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
     }
 
     if (localStorage.getItem(USER_KEY)) {
@@ -41,14 +49,13 @@
         state.token = data.token.access_token;
         state.user = data.user;
         localStorage.setItem(TOKEN_KEY, state.token);
-        localStorage.setItem(USER_KEY, JSON.stringify(state.user));
+        setUser(state.user);
     }
 
     async function fetchCurrentUser() {
         const response = await authFetch('/auth/me', { _internalCall: true });
         if (response) {
-            state.user = response;
-            localStorage.setItem(USER_KEY, JSON.stringify(response));
+            setUser(response);
         }
     }
 
@@ -205,11 +212,14 @@
         return attempt();
     }
 
-    async function createConspectFromAudio(audioSourceId, title) {
+    async function createConspectFromAudio(audioSourceId, title, options = {}) {
         const payload = {
             audio_source_id: audioSourceId,
             title: title || null,
         };
+        if (Array.isArray(options.variants) && options.variants.length) {
+            payload.variants = options.variants;
+        }
         const job = await authFetch('/conspects', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -222,11 +232,14 @@
         return authFetch(`/conspects/${finishedJob.conspect_id}`);
     }
 
-    async function createConspectFromText(text, title) {
+    async function createConspectFromText(text, title, options = {}) {
         const payload = {
             initial_summary: text,
             title: title || null,
         };
+        if (Array.isArray(options.variants) && options.variants.length) {
+            payload.variants = options.variants;
+        }
         const job = await authFetch('/conspects', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -258,6 +271,81 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
+    }
+
+    async function deleteQuiz(quizId) {
+        if (!quizId) {
+            throw new Error('Не указан идентификатор теста');
+        }
+        await authFetch(`/quizzes/${quizId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async function updateProfile(payload) {
+        const sanitized = {};
+        ['display_name', 'gender', 'avatar_id', 'avatar_url'].forEach((key) => {
+            if (payload[key] !== undefined) {
+                sanitized[key] = payload[key];
+            }
+        });
+        const user = await authFetch('/auth/me', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sanitized),
+        });
+        setUser(user);
+        return user;
+    }
+
+    async function generateConspectVariant(conspectId, variant) {
+        if (!variant) {
+            throw new Error('Не выбран тип варианта');
+        }
+        const job = await authFetch(`/conspects/${conspectId}/variants`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ variant }),
+        });
+        await pollJob(job.id, { intervalMs: 3000, timeoutMs: 15 * 60 * 1000 });
+        return authFetch(`/conspects/${conspectId}`);
+    }
+
+    function parseFilename(disposition) {
+        if (!disposition) return null;
+        const match = /filename\*?=(?:UTF-8'')?\"?([^\";]+)/i.exec(disposition);
+        if (match && match[1]) {
+            try {
+                return decodeURIComponent(match[1]);
+            } catch {
+                return match[1];
+            }
+        }
+        return null;
+    }
+
+    async function downloadAudioSource(audioId) {
+        await ensureAuth();
+        const response = await fetch(`${API_BASE}/audio/${audioId}/download`, {
+            headers: {
+                Authorization: `Bearer ${state.token}`,
+            },
+        });
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || 'Не удалось скачать файл');
+        }
+        const blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const filename = parseFilename(disposition) || `audio-${audioId}.m4a`;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
     }
 
     function notify(message, type = 'info') {
@@ -299,6 +387,10 @@
         createConspectFromText,
         createQuizFromConspect,
         createManualQuiz,
+        updateProfile,
+        deleteQuiz,
+        generateConspectVariant,
+        downloadAudioSource,
         notify,
         state,
     };

@@ -316,6 +316,17 @@
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
 }
 
+.test-actions .action-btn.delete {
+    background: rgba(255, 100, 118, 0.1);
+    color: #ff6376;
+    border: 1px solid rgba(255, 99, 118, 0.4);
+}
+
+.test-actions .action-btn.delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(255, 99, 118, 0.35);
+}
+
 .rename-form {
     display: none;
     flex-direction: column;

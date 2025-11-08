@@ -22,8 +22,9 @@ class ConspectStatus(str, Enum):
 
 
 class ConspectVariantType(str, Enum):
-    COMPRESSED = "compressed"
     FULL = "full"
+    BRIEF = "brief"
+    COMPRESSED = "compressed"
 
 
 class QuizStatus(str, Enum):

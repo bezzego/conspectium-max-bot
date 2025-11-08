@@ -471,11 +471,11 @@ function openExpandedQuestion(question) {
 
         container.innerHTML = '';
         results.forEach((result, index) => {
-            container.appendChild(createHistoryItem(result, index));
+            container.appendChild(createHistoryItem(result, index, results.length));
         });
     }
 
-   function createHistoryItem(result, index) {
+   function createHistoryItem(result, index, total) {
     const item = document.createElement('div');
     item.className = 'history-item';
     if (index === 0) {
@@ -485,7 +485,8 @@ function openExpandedQuestion(question) {
     // ЖЕЛТЫЙ КРУЖОК С НОМЕРОМ
     const badge = document.createElement('span');
     badge.className = 'history-index';
-    badge.textContent = `#${index + 1}`;
+    const attemptNumber = total - index;
+    badge.textContent = `#${attemptNumber}`;
 
     const body = document.createElement('div');
     body.className = 'history-content';

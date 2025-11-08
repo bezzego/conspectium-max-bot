@@ -11,22 +11,63 @@ const ALL_AVATARS = [
     { id: 'f4', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Zoe&radius=50&backgroundColor=ffd5dc' }
 ];
 
+const APP_USER_STORAGE_KEY = 'conspectium_user';
+
 class SettingsManager {
     constructor() {
         this.currentAvatar = 'robot';
         this.userName = '';
         this.userGender = null;
-        
+        this.customAvatarUrl = null;
+        this.app = window.ConspectiumApp || null;
+        this.saveTimer = null;
+        this.saveButton = null;
+
         this.init();
     }
 
-    init() {
-        this.loadUserData();
+    async init() {
+        if (!this.app) {
+            console.warn('ConspectiumApp недоступно');
+            return;
+        }
+        try {
+            await this.app.ready();
+        } catch (error) {
+            console.error('Ошибка авторизации', error);
+        }
+        await this.loadUserData();
         this.setupEventListeners();
         this.renderCurrentAvatar();
     }
 
-    loadUserData() {
+    async loadUserData() {
+        try {
+            let user = this.app?.state.user;
+            if (!user) {
+                user = await this.app.authFetch('/auth/me');
+            }
+            if (user) {
+                this.applyUser(user);
+                this.persistToLocalStorage();
+                this.updateUI();
+                return;
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+        }
+        this.loadFromStorageFallback();
+        this.updateUI();
+    }
+
+    applyUser(user) {
+        this.userName = user.display_name || user.first_name || '';
+        this.userGender = user.gender || null;
+        this.currentAvatar = user.avatar_id || 'robot';
+        this.customAvatarUrl = user.avatar_url || null;
+    }
+
+    loadFromStorageFallback() {
         try {
             const userData = localStorage.getItem('userData');
             if (userData) {
@@ -34,71 +75,114 @@ class SettingsManager {
                 this.currentAvatar = data.avatar?.id || 'robot';
                 this.userName = data.name || '';
                 this.userGender = data.gender || null;
+                this.customAvatarUrl = data.avatar?.url || null;
             }
-            this.updateUI();
         } catch (error) {
             console.error('Ошибка загрузки данных:', error);
         }
     }
 
+    resolveAvatar() {
+        const fromList = ALL_AVATARS.find((avatar) => avatar.id === this.currentAvatar);
+        if (fromList) {
+            return fromList;
+        }
+        if (this.currentAvatar && this.customAvatarUrl) {
+            return { id: this.currentAvatar, type: 'custom', url: this.customAvatarUrl };
+        }
+        return ALL_AVATARS.find((avatar) => avatar.id === 'robot') || ALL_AVATARS[0];
+    }
+
+    persistToLocalStorage() {
+        try {
+            const avatar = this.resolveAvatar();
+            const payload = {
+                name: this.userName,
+                gender: this.userGender,
+                avatar,
+                timestamp: new Date().toISOString(),
+            };
+            localStorage.setItem('userData', JSON.stringify(payload));
+        } catch (error) {
+            console.error('Ошибка сохранения данных:', error);
+        }
+    }
+
     updateUI() {
-        // Обновляем аватар
         this.renderCurrentAvatar();
-        
-        // Обновляем имя
-        document.getElementById('userNameInput').value = this.userName;
-        
-        // Обновляем пол
+
+        const nameInput = document.getElementById('userNameInput');
+        if (nameInput) {
+            nameInput.value = this.userName;
+        }
+
+        document.querySelectorAll('.gender-btn-settings').forEach((btn) => btn.classList.remove('selected'));
         if (this.userGender) {
             const radioId = `gender${this.userGender.charAt(0).toUpperCase() + this.userGender.slice(1)}Settings`;
-            document.getElementById(radioId).checked = true;
-            document.querySelector(`label[for="${radioId}"]`).classList.add('selected');
+            const radio = document.getElementById(radioId);
+            if (radio) {
+                radio.checked = true;
+                const label = document.querySelector(`label[for="${radioId}"]`);
+                label?.classList.add('selected');
+            }
         }
     }
 
     renderCurrentAvatar() {
-        const currentAvatar = ALL_AVATARS.find(avatar => avatar.id === this.currentAvatar) || ALL_AVATARS[3];
-        document.getElementById('currentAvatarImg').src = currentAvatar.url;
+        const currentAvatar = this.resolveAvatar();
+        const img = document.getElementById('currentAvatarImg');
+        if (img && currentAvatar) {
+            img.src = currentAvatar.url;
+        }
     }
 
     setupEventListeners() {
-        // Кнопка смены аватара
-        document.getElementById('changeAvatarBtn').addEventListener('click', () => {
-            this.showAvatarModal();
-        });
+        const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+        changeAvatarBtn?.addEventListener('click', () => this.showAvatarModal());
 
-        // Ввод имени
-        document.getElementById('userNameInput').addEventListener('input', (e) => {
-            this.userName = e.target.value.trim();
-            this.saveUserData();
-        });
+        this.saveButton = document.getElementById('saveProfileBtn');
+        if (this.saveButton) {
+            this.saveButton.addEventListener('click', async () => {
+                this.saveButton.disabled = true;
+                try {
+                    await this.saveUserData({ notify: true, showLoading: true });
+                } finally {
+                    this.saveButton.disabled = false;
+                }
+            });
+        }
 
-        // Выбор пола
-        document.querySelectorAll('input[name="genderSettings"]').forEach(radio => {
+        const nameInput = document.getElementById('userNameInput');
+        if (nameInput) {
+            nameInput.addEventListener('input', (e) => {
+                this.userName = e.target.value;
+                this.scheduleSave();
+            });
+        }
+
+        document.querySelectorAll('input[name="genderSettings"]').forEach((radio) => {
             radio.addEventListener('change', (e) => {
                 this.userGender = e.target.value;
-                document.querySelectorAll('.gender-btn-settings').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                e.target.nextElementSibling.classList.add('selected');
-                this.saveUserData();
+                document.querySelectorAll('.gender-btn-settings').forEach((btn) => btn.classList.remove('selected'));
+                e.target.nextElementSibling?.classList.add('selected');
+                this.scheduleSave(true);
             });
         });
 
-        // Текущий аватар (клик для открытия модалки)
-        document.getElementById('currentAvatar').addEventListener('click', () => {
-            this.showAvatarModal();
-        });
+        const avatarBlock = document.getElementById('currentAvatar');
+        avatarBlock?.addEventListener('click', () => this.showAvatarModal());
     }
 
     showAvatarModal() {
         const modal = document.getElementById('avatarModal');
+        if (!modal) return;
         modal.classList.add('visible');
-        this.initAvatarCarousel();
+        this.setupAvatarCarousel();
     }
 
     hideAvatarModal() {
         const modal = document.getElementById('avatarModal');
+        if (!modal) return;
         modal.classList.remove('visible');
     }
 
@@ -109,69 +193,119 @@ class SettingsManager {
     setupAvatarCarousel() {
         const avatarSection = document.querySelector('.avatar-section');
         const confirmBtn = document.getElementById('confirmAvatarBtn');
-        
+        if (!avatarSection || !confirmBtn) return;
+
         let selectedAvatarId = this.currentAvatar;
 
-        // Создаем сетку аватарок
         const createAvatarGrid = () => {
             avatarSection.innerHTML = `
                 <div class="avatar-grid" id="avatarGridSettings"></div>
             `;
-            
+
             const avatarGrid = document.getElementById('avatarGridSettings');
-            
+
             ALL_AVATARS.forEach((avatar, index) => {
                 const avatarItem = document.createElement('div');
                 avatarItem.className = `avatar-grid-item ${avatar.id === selectedAvatarId ? 'selected' : ''}`;
                 avatarItem.innerHTML = `
                     <img src="${avatar.url}" alt="Аватар ${index + 1}" loading="lazy">
                 `;
-                
+
                 avatarItem.addEventListener('click', () => {
-                    // Убираем выделение у всех аватарок
-                    document.querySelectorAll('.avatar-grid-item').forEach(item => {
-                        item.classList.remove('selected');
-                    });
-                    
-                    // Добавляем выделение выбранной аватарке
+                    document.querySelectorAll('.avatar-grid-item').forEach((item) => item.classList.remove('selected'));
                     avatarItem.classList.add('selected');
                     selectedAvatarId = avatar.id;
                 });
-                
+
                 avatarGrid.appendChild(avatarItem);
             });
         };
 
-        // Кнопка подтверждения
-        confirmBtn.addEventListener('click', () => {
+        const onConfirm = () => {
             this.currentAvatar = selectedAvatarId;
+            const avatarData = ALL_AVATARS.find((item) => item.id === selectedAvatarId);
+            this.customAvatarUrl = avatarData?.url || this.customAvatarUrl;
             this.renderCurrentAvatar();
-            this.saveUserData();
+            this.saveUserData({ notify: true });
             this.hideAvatarModal();
-        });
+        };
 
-        // Закрытие модалки по клику на фон
-        document.getElementById('avatarModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('avatarModal')) {
-                this.hideAvatarModal();
-            }
-        });
+        confirmBtn.onclick = onConfirm;
+
+        const modal = document.getElementById('avatarModal');
+        if (modal) {
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    this.hideAvatarModal();
+                }
+            };
+        }
 
         createAvatarGrid();
     }
 
-    saveUserData() {
-        const userData = {
-            name: this.userName,
-            gender: this.userGender,
-            avatar: ALL_AVATARS.find(avatar => avatar.id === this.currentAvatar),
-            timestamp: new Date().toISOString()
-        };
-        
+    async persistProfile(payload) {
+        if (!this.app) return null;
+        if (typeof this.app.updateProfile === 'function') {
+            return this.app.updateProfile(payload);
+        }
+        const user = await this.app.authFetch('/auth/me', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (this.app.state) {
+            this.app.state.user = user;
+        }
         try {
-            localStorage.setItem('userData', JSON.stringify(userData));
+            localStorage.setItem(APP_USER_STORAGE_KEY, JSON.stringify(user));
+        } catch (error) {
+            console.warn('Не удалось обновить кэш профиля', error);
+        }
+        return user;
+    }
+
+    scheduleSave(immediate = false) {
+        if (!this.app) return;
+        if (immediate) {
+            clearTimeout(this.saveTimer);
+            this.saveUserData().catch((error) => console.error(error));
+            return;
+        }
+        clearTimeout(this.saveTimer);
+        this.saveTimer = setTimeout(() => {
+            this.saveUserData().catch((error) => console.error(error));
+        }, 600);
+    }
+
+    async saveUserData(options = {}) {
+        if (!this.app) return;
+        const { notify = false, showLoading = false } = options;
+        const avatar = this.resolveAvatar();
+        const payload = {
+            display_name: this.userName.trim() || null,
+            gender: this.userGender,
+            avatar_id: avatar?.id || null,
+            avatar_url: avatar?.url || null,
+        };
+
+        try {
+            if (showLoading) {
+                this.app.showLoading('Сохраняем профиль...');
+            }
+            await this.persistProfile(payload);
+            this.customAvatarUrl = payload.avatar_url;
+            this.persistToLocalStorage();
+            if (notify) {
+                this.app.notify('Профиль сохранён', 'success');
+            }
         } catch (error) {
             console.error('Ошибка сохранения данных:', error);
+            this.app.notify(error.message || 'Не удалось сохранить данные', 'error');
+        } finally {
+            if (showLoading) {
+                this.app.hideLoading();
+            }
         }
     }
 }

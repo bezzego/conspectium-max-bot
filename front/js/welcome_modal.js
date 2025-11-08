@@ -30,6 +30,27 @@ let lastX = 0;
 let lastTime = 0;
 const ITEM_SPACING = 145;
 
+async function persistProfile(app, payload) {
+    if (!app) return;
+    if (typeof app.updateProfile === 'function') {
+        return app.updateProfile(payload);
+    }
+    const user = await app.authFetch('/auth/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    if (app.state) {
+        app.state.user = user;
+    }
+    try {
+        localStorage.setItem('conspectium_user', JSON.stringify(user));
+    } catch (error) {
+        console.warn('Не удалось обновить кэш профиля', error);
+    }
+    return user;
+}
+
 // Рендер аватарок
 function renderAvatars() {
     avatarTrack.innerHTML = '';
@@ -253,16 +274,35 @@ function setupEventListeners() {
     });
     
     // Кнопка подтверждения
-    confirmBtn.addEventListener('click', () => {
+    confirmBtn.addEventListener('click', async () => {
         if (!validateForm()) return;
-        
+
         const userData = {
             name: nameInput.value.trim(),
             gender: selectedGender,
             avatar: avatars[currentIndex],
             timestamp: new Date().toISOString()
         };
-        
+
+        const app = window.ConspectiumApp;
+        if (app) {
+            try {
+                app.showLoading('Сохраняем профиль...');
+                await persistProfile(app, {
+                    display_name: userData.name,
+                    gender: userData.gender,
+                    avatar_id: userData.avatar?.id,
+                    avatar_url: userData.avatar?.url,
+                });
+                app.hideLoading();
+            } catch (error) {
+                console.error(error);
+                app.hideLoading();
+                app.notify(error.message || 'Не удалось сохранить профиль', 'error');
+                return;
+            }
+        }
+
         try {
             localStorage.setItem('userData', JSON.stringify(userData));
         } catch (error) {

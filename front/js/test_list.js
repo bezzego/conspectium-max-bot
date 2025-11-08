@@ -177,8 +177,15 @@
         renameBtn.textContent = 'Переименовать';
         renameBtn.addEventListener('click', () => toggleRenameForm(quiz.id));
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'action-btn delete';
+        deleteBtn.type = 'button';
+        deleteBtn.textContent = 'Удалить';
+        deleteBtn.addEventListener('click', () => confirmDelete(quiz.id, quiz.title));
+
         actions.appendChild(launchBtn);
         actions.appendChild(renameBtn);
+        actions.appendChild(deleteBtn);
         return actions;
     }
 
@@ -238,6 +245,32 @@
                 input.focus();
                 input.select();
             }
+        }
+    }
+
+    function confirmDelete(quizId, title) {
+        const app = window.ConspectiumApp;
+        if (!app) return;
+        const name = title ? ` «${title}»` : '';
+        const confirmed = window.confirm(`Удалить тест${name}? Это действие нельзя отменить.`);
+        if (!confirmed) {
+            return;
+        }
+        deleteQuiz(quizId, app);
+    }
+
+    async function deleteQuiz(quizId, app) {
+        app.showLoading('Удаляем тест...');
+        try {
+            await app.deleteQuiz(quizId);
+            state.tests = state.tests.filter((quiz) => quiz.id !== quizId);
+            renderTests();
+            app.notify('Тест удалён', 'success');
+        } catch (err) {
+            console.error(err);
+            app.notify(err.message || 'Не удалось удалить тест', 'error');
+        } finally {
+            app.hideLoading();
         }
     }
 

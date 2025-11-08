@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import re
 from datetime import datetime
@@ -51,6 +52,8 @@ class GenerationService:
         if not payload.audio_source_id and not (payload.initial_summary and payload.initial_summary.strip()):
             raise ValueError('Укажи аудио-файл или текст для создания конспекта')
 
+        variants = self._normalize_variants(payload.variants)
+
         conspect = Conspect(
             user_id=user.id,
             audio_source_id=payload.audio_source_id,
@@ -67,6 +70,44 @@ class GenerationService:
             status=GenerationJobStatus.PENDING,
             conspect_id=conspect.id,
             audio_source_id=payload.audio_source_id,
+            prompt=json.dumps(
+                {
+                    "variants": [variant.value for variant in variants],
+                    "mode": "create",
+                }
+            ),
+        )
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        return job
+
+    def create_conspect_variant_job(
+        self,
+        db: Session,
+        *,
+        user: User,
+        conspect_id: int,
+        variant: ConspectVariantType,
+    ) -> GenerationJob:
+        conspect = db.get(Conspect, conspect_id)
+        if not conspect or conspect.user_id != user.id:
+            raise ValueError("Конспект не найден")
+        if self._variant_exists(conspect, variant):
+            raise ValueError("Этот вариант уже создан")
+
+        job = GenerationJob(
+            user_id=user.id,
+            job_type=GenerationJobType.CONSPECT,
+            status=GenerationJobStatus.PENDING,
+            conspect_id=conspect.id,
+            audio_source_id=conspect.audio_source_id,
+            prompt=json.dumps(
+                {
+                    "variants": [variant.value],
+                    "mode": "append",
+                }
+            ),
         )
         db.add(job)
         db.commit()
@@ -90,59 +131,49 @@ class GenerationService:
 
             transcript_text = self._obtain_transcript(session, job)
             audio_source = session.get(AudioSource, job.audio_source_id) if job.audio_source_id else None
+            variants, job_mode = self._job_execution_options(job)
             try:
                 ai_client = self.ai_client if job.audio_source_id else self.text_ai_client
                 variant_payloads: dict[str, dict] = {}
-                for variant in (ConspectVariantType.COMPRESSED, ConspectVariantType.FULL):
+                for variant in variants:
                     variant_payloads[variant.value] = ai_client.generate_conspect_variant(transcript_text, variant)
-                response = {"variants": variant_payloads}
+                response = {"variants": variant_payloads, "mode": "online"}
             except Exception as exc:  # noqa: BLE001
                 logging.exception("Conspect generation via AI failed: %s", exc)
                 if settings.environment != "production":
-                    response = self._build_local_conspect(conspect, transcript_text, exc, audio_source)
+                    response = self._build_local_conspect(conspect, transcript_text, exc, audio_source, variants)
                     variant_payloads = response.get("variants", {})
                 else:
                     raise
 
-            compressed_variant = variant_payloads.get(ConspectVariantType.COMPRESSED.value, {})
-            full_variant = variant_payloads.get(ConspectVariantType.FULL.value, {})
-
-            if "mode" not in response:
-                response["mode"] = "online"
-
-            conspect.title = (
-                compressed_variant.get("title")
-                or full_variant.get("title")
-                or conspect.title
-                or "Конспект"
+            self._apply_variants_to_conspect(
+                conspect,
+                variant_payloads,
+                allow_title_update=job_mode == "create",
             )
-            conspect.compressed_markdown = compressed_variant.get("markdown")
-            conspect.full_markdown = full_variant.get("markdown")
-            conspect.summary = self._markdown_to_plain(conspect.compressed_markdown or "")
-            if not conspect.summary and full_variant.get("markdown"):
-                conspect.summary = self._markdown_to_plain(full_variant.get("markdown"))
-            if not conspect.summary and transcript_text:
-                conspect.summary = transcript_text[:200].strip()
-            conspect.keywords = (
-                compressed_variant.get("key_points")
-                or full_variant.get("key_points")
-                or conspect.keywords
-            )
-            if conspect.keywords:
-                conspect.keywords = [str(point) for point in conspect.keywords if str(point).strip()]
+            self._refresh_conspect_summary(conspect, transcript_text)
 
             generation_mode = response.get("mode", "online")
             conspect.model_used = (
-                ai_client.model_name if generation_mode != "offline" else "offline-fallback"
+                (self.ai_client.model_name if job.audio_source_id else self.text_ai_client.model_name)
+                if generation_mode != "offline"
+                else "offline-fallback"
             )
-            conspect.raw_response = response
-            conspect.status = ConspectStatus.READY
-            conspect.generated_at = datetime.utcnow()
+            response_variants = variant_payloads
+            existing_response = conspect.raw_response or {}
+            combined_variants = dict(existing_response.get("variants") or {})
+            combined_variants.update(response_variants)
+            updated_response = {**existing_response, **response}
+            updated_response["variants"] = combined_variants
+            conspect.raw_response = updated_response
+            if job_mode == "create":
+                conspect.status = ConspectStatus.READY
+                conspect.generated_at = datetime.utcnow()
             conspect.updated_at = datetime.utcnow()
 
             job.status = GenerationJobStatus.COMPLETED
             job.finished_at = datetime.utcnow()
-            job.response_payload = response
+            job.response_payload = updated_response
 
             session.commit()
         except Exception as exc:  # noqa: BLE001
@@ -328,22 +359,115 @@ class GenerationService:
                 session.add(answer)
 
     # Utility -----------------------------------------------------------
+    def _normalize_variants(
+        self,
+        variants: Sequence[ConspectVariantType] | None,
+    ) -> list[ConspectVariantType]:
+        if not variants:
+            return [ConspectVariantType.BRIEF]
+        normalized: list[ConspectVariantType] = []
+        seen: set[ConspectVariantType] = set()
+        for variant in variants:
+            if not isinstance(variant, ConspectVariantType):
+                continue
+            if variant in seen:
+                continue
+            seen.add(variant)
+            normalized.append(variant)
+        return normalized or [ConspectVariantType.BRIEF]
+
+    def _variant_exists(self, conspect: Conspect, variant: ConspectVariantType) -> bool:
+        if variant == ConspectVariantType.FULL:
+            return bool(conspect.full_markdown)
+        if variant == ConspectVariantType.BRIEF:
+            return bool(conspect.brief_markdown)
+        return bool(conspect.compressed_markdown)
+
+    def _job_execution_options(self, job: GenerationJob) -> tuple[list[ConspectVariantType], str]:
+        options: dict[str, object] = {}
+        if job.prompt:
+            try:
+                payload = json.loads(job.prompt)
+                if isinstance(payload, dict):
+                    options = payload
+            except json.JSONDecodeError:
+                options = {}
+
+        variant_values = options.get("variants")
+        variants: list[ConspectVariantType] = []
+        if isinstance(variant_values, list):
+            for value in variant_values:
+                try:
+                    variants.append(ConspectVariantType(value))
+                except ValueError:
+                    continue
+
+        if not variants:
+            variants = [ConspectVariantType.FULL, ConspectVariantType.COMPRESSED]
+
+        raw_mode = options.get("mode")
+        mode = raw_mode if isinstance(raw_mode, str) else "create"
+        return variants, mode
+
+    def _apply_variants_to_conspect(
+        self,
+        conspect: Conspect,
+        variant_payloads: dict[str, dict],
+        *,
+        allow_title_update: bool,
+    ) -> None:
+        for variant_key, payload in variant_payloads.items():
+            try:
+                variant = ConspectVariantType(variant_key)
+            except ValueError:
+                continue
+
+            markdown = (payload.get("markdown") or "").strip()
+            if variant == ConspectVariantType.FULL:
+                conspect.full_markdown = markdown or conspect.full_markdown
+            elif variant == ConspectVariantType.BRIEF:
+                conspect.brief_markdown = markdown or conspect.brief_markdown
+            else:
+                conspect.compressed_markdown = markdown or conspect.compressed_markdown
+
+            title = (payload.get("title") or "").strip()
+            if allow_title_update and title:
+                conspect.title = title
+
+            key_points = payload.get("key_points")
+            if key_points:
+                conspect.keywords = [
+                    str(point) for point in key_points if str(point).strip()
+                ] or conspect.keywords
+
+    def _refresh_conspect_summary(self, conspect: Conspect, transcript_text: str | None) -> None:
+        preferred_markdown = (
+            conspect.brief_markdown
+            or conspect.compressed_markdown
+            or conspect.full_markdown
+        )
+        if preferred_markdown:
+            conspect.summary = self._markdown_to_plain(preferred_markdown)
+        elif transcript_text:
+            conspect.summary = transcript_text[:200].strip()
+
     def _mark_job_failed(self, session: Session, job_id: int, error: str) -> None:
         job = session.get(GenerationJob, job_id)
         if not job:
             return
+        _, job_mode = self._job_execution_options(job)
         job.status = GenerationJobStatus.FAILED
         job.error = error
         job.finished_at = datetime.utcnow()
         if job.conspect_id:
             conspect = session.get(Conspect, job.conspect_id)
-            if conspect:
+            if conspect and job_mode == "create":
                 conspect.status = ConspectStatus.FAILED
         if job.quiz_id:
             quiz = session.get(Quiz, job.quiz_id)
             if quiz:
                 quiz.status = QuizStatus.FAILED
-        if job.audio_source_id:
+        if job.audio_source_id and job_mode == "create":
             audio_source = session.get(AudioSource, job.audio_source_id)
             if audio_source:
                 audio_source.status = AudioProcessingStatus.FAILED
@@ -373,6 +497,7 @@ class GenerationService:
         transcript: str,
         error: Exception,
         audio_source: AudioSource | None,
+        variants: Sequence[ConspectVariantType],
     ) -> dict:
         sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", transcript) if s.strip()]
         title = conspect.title or (audio_source.original_filename if audio_source else "Черновик конспекта")
@@ -414,19 +539,41 @@ class GenerationService:
             full_md_parts.extend(["", "## Ключевые идеи"])
             full_md_parts.extend(f"- {point}" for point in key_points)
 
-        return {
-            "variants": {
-                ConspectVariantType.COMPRESSED.value: {
-                    "title": conspect_title,
-                    "markdown": "\n".join(compressed_md_parts),
-                    "key_points": key_points,
-                },
-                ConspectVariantType.FULL.value: {
+        variant_map: dict[str, dict] = {}
+        effective_variants = list(variants) or [ConspectVariantType.BRIEF]
+        for variant in effective_variants:
+            if variant == ConspectVariantType.FULL:
+                variant_map[variant.value] = {
                     "title": conspect_title,
                     "markdown": "\n".join(full_md_parts),
                     "key_points": key_points,
-                },
-            },
+                }
+            elif variant == ConspectVariantType.BRIEF:
+                lines = [f"# {conspect_title}", ""]
+                if key_points:
+                    lines.extend(["## Главное", summary, "", "## Ключевые тезисы"])
+                    lines.extend(f"- {point}" for point in key_points[:5])
+                else:
+                    lines.extend(["## Главное", summary])
+                variant_map[variant.value] = {
+                    "title": conspect_title,
+                    "markdown": "\n".join(lines),
+                    "key_points": key_points,
+                }
+            else:
+                lines = [f"# {conspect_title}", "", "## Выжимка"]
+                if key_points:
+                    lines.extend(f"- {point}" for point in key_points[:5])
+                else:
+                    lines.append(summary)
+                variant_map[variant.value] = {
+                    "title": conspect_title,
+                    "markdown": "\n".join(lines),
+                    "key_points": key_points,
+                }
+
+        return {
+            "variants": variant_map,
             "mode": "offline",
             "error": str(error),
         }

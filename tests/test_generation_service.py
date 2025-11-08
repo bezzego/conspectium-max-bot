@@ -25,23 +25,30 @@ def test_markdown_to_plain_strips_markdown_formatting() -> None:
     assert "#" not in plain
 
 
-def test_local_conspect_builder_returns_both_variants() -> None:
+def test_local_conspect_builder_returns_requested_variants() -> None:
     service = _make_service()
     conspect = types.SimpleNamespace(title="Черновик")
     transcript = "Первое предложение. Второе предложение. Третье предложение."
 
-    response = service._build_local_conspect(conspect, transcript, RuntimeError("stub"), audio_source=None)
+    response = service._build_local_conspect(
+        conspect,
+        transcript,
+        RuntimeError("stub"),
+        audio_source=None,
+        variants=[ConspectVariantType.FULL, ConspectVariantType.BRIEF],
+    )
 
     assert response["mode"] == "offline"
     variants = response["variants"]
-    assert ConspectVariantType.COMPRESSED.value in variants
+    assert ConspectVariantType.BRIEF.value in variants
     assert ConspectVariantType.FULL.value in variants
+    assert ConspectVariantType.COMPRESSED.value not in variants
 
-    compressed = variants[ConspectVariantType.COMPRESSED.value]
+    brief = variants[ConspectVariantType.BRIEF.value]
     full = variants[ConspectVariantType.FULL.value]
 
-    assert compressed["markdown"]
+    assert brief["markdown"]
     assert full["markdown"]
-    assert compressed["title"] == conspect.title
+    assert brief["title"] == conspect.title
     assert full["title"] == conspect.title
-    assert isinstance(compressed.get("key_points", []), list)
+    assert isinstance(brief.get("key_points", []), list)

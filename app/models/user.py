@@ -14,6 +14,11 @@ class User(Base):
     language_code = Column(String(16), nullable=True)
     photo_url = Column(String(1024), nullable=True)
 
+    display_name = Column(String(255), nullable=True)
+    gender = Column(String(32), nullable=True)
+    avatar_id = Column(String(64), nullable=True)
+    avatar_url = Column(String(1024), nullable=True)
+
     last_login_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(

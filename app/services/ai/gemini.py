@@ -68,13 +68,22 @@ class GeminiClient:
         )
         if variant == ConspectVariantType.FULL:
             variant_prompt = (
-                "Produce a detailed version that keeps full context, expands key ideas, and highlights supporting "
-                "details. Use multiple paragraphs and subsections where suitable."
+                "Variant type: ФАКТИЧЕСКИЙ (full).\n"
+                "Сохрани максимум деталей и всю фактическую канву выступления. Передавай аргументы, цифры, имена, "
+                "хронологию и причинно-следственные связи. Каждый раздел должен включать вводный абзац и короткое "
+                "подытоживание того, почему блок важен."
+            )
+        elif variant == ConspectVariantType.BRIEF:
+            variant_prompt = (
+                "Variant type: КРАТКИЙ (brief).\n"
+                "Нужен баланс между деталями и ёмкостью. Собери основные тезисы и опиши ключевые выводы, разделяя текст "
+                "на короткие абзацы и маркированные списки. Убирай второстепенные примеры, но оставляй связи между идеями."
             )
         else:
             variant_prompt = (
-                "Produce a concise version that focuses on the essential ideas only. Limit the length to the core "
-                "theses, avoid repetition, and keep the result easy to skim."
+                "Variant type: СЖАТЫЙ (compressed).\n"
+                "Сделай ультракороткую выжимку: 5–7 пунктов, каждый — одно предложение о факте/выводе. "
+                "Не используй воду, не повторяйся, избегай длинных абзацев. Это шпаргалка для быстрого повтора."
             )
         format_prompt = (
             "Return a JSON object with the following structure:\n"

@@ -12,6 +12,10 @@ class UserBase(BaseModel):
     last_name: Optional[str] = None
     language_code: Optional[str] = None
     photo_url: Optional[str] = None
+    display_name: Optional[str] = None
+    gender: Optional[str] = None
+    avatar_id: Optional[str] = None
+    avatar_url: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -40,3 +44,10 @@ class AuthToken(BaseModel):
 class AuthResponse(BaseModel):
     token: AuthToken
     user: UserRead
+
+
+class UserUpdateRequest(BaseModel):
+    display_name: Optional[str] = None
+    gender: Optional[str] = None
+    avatar_id: Optional[str] = None
+    avatar_url: Optional[str] = None

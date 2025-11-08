@@ -3,7 +3,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.enums import ConspectStatus
+from app.models.enums import ConspectStatus, ConspectVariantType
+from app.schemas.audio import AudioSourceRead
 
 
 class ConspectBase(BaseModel):
@@ -12,6 +13,7 @@ class ConspectBase(BaseModel):
     title: Optional[str] = None
     summary: Optional[str] = None
     compressed_markdown: Optional[str] = None
+    brief_markdown: Optional[str] = None
     full_markdown: Optional[str] = None
     keywords: Optional[List[str]] = None
     status: ConspectStatus
@@ -25,13 +27,25 @@ class ConspectBase(BaseModel):
 
 class ConspectRead(ConspectBase):
     audio_source_id: Optional[int] = None
+    audio_source: Optional[AudioSourceRead] = None
+    available_variants: List[ConspectVariantType] = Field(default_factory=list)
 
 
 class ConspectCreateRequest(BaseModel):
     audio_source_id: Optional[int] = Field(default=None, description="ID загруженного аудио")
     title: Optional[str] = Field(default=None, description="Название для будущего конспекта")
     initial_summary: Optional[str] = Field(default=None, description="Текст вместо аудиофайла")
+    variants: Optional[List[ConspectVariantType]] = Field(
+        default=None,
+        description="Перечень вариантов конспекта, которые нужно сгенерировать",
+        min_length=1,
+        max_length=3,
+    )
 
 
 class ConspectListResponse(BaseModel):
     items: List[ConspectRead]
+
+
+class ConspectVariantCreateRequest(BaseModel):
+    variant: ConspectVariantType
