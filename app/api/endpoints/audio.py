@@ -76,7 +76,10 @@ def download_audio(
     if not audio_source.file_path:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Файл не сохранён")
 
-    file_path = Path(audio_storage.base_dir) / audio_source.file_path
+    try:
+        file_path = audio_storage.resolve_path(audio_source.file_path)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Файл недоступен") from exc
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Файл недоступен")
 

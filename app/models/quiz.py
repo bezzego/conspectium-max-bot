@@ -38,7 +38,11 @@ class Quiz(Base):
     user = relationship("User", backref="quizzes")
     conspect = relationship("Conspect", back_populates="quizzes")
     questions = relationship("QuizQuestion", back_populates="quiz", cascade="all, delete-orphan")
-    results = relationship("QuizResult", back_populates="quiz")
+    results = relationship(
+        "QuizResult",
+        back_populates="quiz",
+        cascade="all, delete-orphan",
+    )
 
 
 class QuizQuestion(Base):
@@ -75,5 +79,8 @@ class QuizResult(Base):
     answers_payload = Column(JSONB, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 
-    quiz = relationship("Quiz", back_populates="results")
+    quiz = relationship(
+        "Quiz",
+        back_populates="results",
+    )
     user = relationship("User")

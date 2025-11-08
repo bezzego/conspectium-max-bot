@@ -4,7 +4,6 @@ import json
 import logging
 import re
 from datetime import datetime
-from pathlib import Path
 from typing import Iterable, Sequence
 
 from sqlalchemy.orm import Session, sessionmaker
@@ -28,6 +27,11 @@ from app.schemas.conspect import ConspectCreateRequest
 from app.schemas.quiz import QuizCreateFromConspectRequest
 from app.services.ai.gemini import GeminiClient, gemini_client, gemini_text_client
 from app.services.storage import audio_storage
+
+try:  # pragma: no cover - optional dependency guard for better resilience
+    from google.api_core import exceptions as google_exceptions
+except Exception:  # pragma: no cover
+    google_exceptions = None
 
 
 class GenerationService:
@@ -53,10 +57,14 @@ class GenerationService:
             raise ValueError('Укажи аудио-файл или текст для создания конспекта')
 
         variants = self._normalize_variants(payload.variants)
+        audio_source_id: int | None = None
+        if payload.audio_source_id is not None:
+            audio_source = self._get_user_audio_source(db, user.id, payload.audio_source_id)
+            audio_source_id = audio_source.id
 
         conspect = Conspect(
             user_id=user.id,
-            audio_source_id=payload.audio_source_id,
+            audio_source_id=audio_source_id,
             title=payload.title,
             status=ConspectStatus.PROCESSING,
             input_prompt=payload.initial_summary,
@@ -69,7 +77,7 @@ class GenerationService:
             job_type=GenerationJobType.CONSPECT,
             status=GenerationJobStatus.PENDING,
             conspect_id=conspect.id,
-            audio_source_id=payload.audio_source_id,
+            audio_source_id=audio_source_id,
             prompt=json.dumps(
                 {
                     "variants": [variant.value for variant in variants],
@@ -203,9 +211,10 @@ class GenerationService:
         audio_source.status = AudioProcessingStatus.PROCESSING
         session.commit()
 
-        file_path = Path(audio_source.file_path)
-        if not file_path.is_absolute():
-            file_path = audio_storage.base_dir / file_path
+        try:
+            file_path = audio_storage.resolve_path(audio_source.file_path)
+        except ValueError as exc:
+            raise RuntimeError("Audio source path is invalid") from exc
 
         try:
             transcription_payload = self.ai_client.transcribe_audio(
@@ -226,6 +235,20 @@ class GenerationService:
                 }
                 session.commit()
                 return fallback_transcript
+            if self._is_transient_ai_failure(exc):
+                audio_source.status = AudioProcessingStatus.PENDING
+                metadata = audio_source.extra_metadata or {}
+                metadata.update(
+                    {
+                        "transient_error": str(exc),
+                        "transient_at": datetime.utcnow().isoformat(),
+                    }
+                )
+                audio_source.extra_metadata = metadata
+                session.commit()
+                raise RuntimeError(
+                    "Сервис распознавания перегружен. Повтори попытку через пару минут."
+                ) from exc
             audio_source.status = AudioProcessingStatus.FAILED
             session.commit()
             raise RuntimeError(f"Ошибка распознавания аудио: {exc}") from exc
@@ -251,6 +274,8 @@ class GenerationService:
         conspect = db.get(Conspect, payload.conspect_id)
         if not conspect or conspect.user_id != user.id:
             raise ValueError("Конспект не найден")
+        if conspect.status != ConspectStatus.READY:
+            raise ValueError("Дождись завершения генерации конспекта")
 
         quiz = Quiz(
             user_id=user.id,
@@ -297,6 +322,10 @@ class GenerationService:
                 logging.exception("Quiz generation via AI failed: %s", exc)
                 if settings.environment != "production":
                     ai_response = self._build_local_quiz(conspect, exc)
+                elif self._is_transient_ai_failure(exc):
+                    raise RuntimeError(
+                        "Сервис генерации тестов перегружен. Попробуй снова через минуту."
+                    ) from exc
                 else:
                     raise
             fallback_title = "Новый тест"
@@ -376,12 +405,38 @@ class GenerationService:
             normalized.append(variant)
         return normalized or [ConspectVariantType.BRIEF]
 
+    def _get_user_audio_source(self, db: Session, user_id: int, audio_source_id: int) -> AudioSource:
+        audio_source = db.get(AudioSource, audio_source_id)
+        if not audio_source or audio_source.user_id != user_id:
+            raise ValueError("Аудиофайл не найден")
+        if audio_source.status == AudioProcessingStatus.FAILED:
+            raise ValueError("Не удалось обработать аудио. Попробуй загрузить файл заново.")
+        if not (audio_source.transcription or audio_source.file_path):
+            raise ValueError("Аудиофайл ещё не готов к обработке")
+        return audio_source
+
     def _variant_exists(self, conspect: Conspect, variant: ConspectVariantType) -> bool:
         if variant == ConspectVariantType.FULL:
             return bool(conspect.full_markdown)
         if variant == ConspectVariantType.BRIEF:
             return bool(conspect.brief_markdown)
         return bool(conspect.compressed_markdown)
+
+    def _is_transient_ai_failure(self, exc: Exception) -> bool:
+        if google_exceptions is None:
+            return False
+        transient_types: tuple[type[Exception], ...] = (
+            google_exceptions.RetryError,
+            google_exceptions.ServiceUnavailable,
+            google_exceptions.DeadlineExceeded,
+            google_exceptions.ResourceExhausted,
+        )
+        if isinstance(exc, transient_types):
+            return True
+        cause = exc.__cause__
+        if cause and isinstance(cause, transient_types):
+            return True
+        return False
 
     def _job_execution_options(self, job: GenerationJob) -> tuple[list[ConspectVariantType], str]:
         options: dict[str, object] = {}
@@ -469,7 +524,7 @@ class GenerationService:
                 quiz.status = QuizStatus.FAILED
         if job.audio_source_id and job_mode == "create":
             audio_source = session.get(AudioSource, job.audio_source_id)
-            if audio_source:
+            if audio_source and audio_source.status != AudioProcessingStatus.PENDING:
                 audio_source.status = AudioProcessingStatus.FAILED
         session.commit()
 

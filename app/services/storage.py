@@ -1,6 +1,8 @@
 import os
+import re
 from pathlib import Path
 from typing import BinaryIO
+from uuid import uuid4
 
 from fastapi import UploadFile
 
@@ -19,7 +21,7 @@ class AudioStorageService:
 
     def save_upload(self, user_id: int, upload: UploadFile) -> tuple[Path, int]:
         user_dir = self._user_dir(user_id)
-        path = user_dir / upload.filename
+        path = user_dir / self._safe_filename(upload.filename or "audio")
         total_size = 0
 
         with path.open("wb") as out_file:
@@ -33,12 +35,32 @@ class AudioStorageService:
 
     def save_bytes(self, user_id: int, filename: str, data: bytes) -> Path:
         user_dir = self._user_dir(user_id)
-        path = user_dir / filename
+        path = user_dir / self._safe_filename(filename or "audio")
         path.write_bytes(data)
         return path
 
+    def resolve_path(self, file_path: str | os.PathLike[str]) -> Path:
+        candidate = Path(file_path)
+        if not candidate.is_absolute():
+            candidate = self.base_dir / candidate
+        candidate = candidate.resolve()
+        base = self.base_dir.resolve()
+        if not str(candidate).startswith(str(base)):
+            raise ValueError("Invalid audio storage path")
+        return candidate
+
     def open(self, file_path: str) -> BinaryIO:
-        return open(os.path.join(self.base_dir, file_path), "rb")
+        return self.resolve_path(file_path).open("rb")
+
+    def _safe_filename(self, original: str) -> str:
+        filename = Path(original).name
+        stem, ext = os.path.splitext(filename)
+        safe_stem = re.sub(r"[^A-Za-z0-9._-]", "_", stem or "audio")
+        safe_ext = re.sub(r"[^A-Za-z0-9.]", "", ext) or ".bin"
+        unique_suffix = uuid4().hex
+        truncated_stem = safe_stem[:40]
+        truncated_ext = safe_ext[:10]
+        return f"{truncated_stem}_{unique_suffix}{truncated_ext}"
 
 
 audio_storage = AudioStorageService(settings.audio_storage_dir)
