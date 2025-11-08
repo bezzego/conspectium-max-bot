@@ -90,11 +90,6 @@
 }
 
 
-.top-bar:hover::after {
-    opacity: 1;
-}
-
-
 /* Стили для логотипа */
 .brand {
     display: flex;

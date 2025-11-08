@@ -736,7 +736,7 @@ window.goBack = goBack;
         const shareBtn = document.getElementById('shareQuizBtn');
         if (shareBtn) {
             shareBtn.addEventListener('click', () => {
-                window.ConspectiumApp.notify('Скоро добавим возможность делиться тестами!', 'info');
+                window.ConspectiumApp.notify('Уже скоро добавим!', 'info');
             });
         }
     }
@@ -1500,25 +1500,32 @@ function copyConspectToClipboard(conspect, variantKey, markdown) {
     window.closeConspectModal = closeConspectModal;
 })();
 
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.className = 'app-toast';
-    notification.textContent = message;
-    document.body.appendChild(notification);
+function showNotification(message, type = 'info') {
+    const containerClass = 'app-toast-container';
+    let container = document.querySelector(`.${containerClass}`);
+    if (!container) {
+        container = document.createElement('div');
+        container.className = containerClass;
+        document.body.appendChild(container);
+    }
     
-    // Запускаем анимацию появления
+    const toast = document.createElement('div');
+    toast.className = `app-toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    
     setTimeout(() => {
-        notification.classList.add('visible');
+        toast.classList.add('visible');
     }, 10);
     
-    // Автоматическое скрытие через 3 секунды
     setTimeout(() => {
-        notification.classList.remove('visible');
-        notification.classList.add('hiding');
+        toast.classList.remove('visible');
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
+            toast.remove();
+            if (!container.children.length) {
+                container.remove();
             }
         }, 300);
-    }, 2700);
+    }, 4000);
 }
+
