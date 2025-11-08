@@ -132,7 +132,7 @@
 
 }
 
-@media (max-width: 360px) {
+@media (max-width: 410px) {
     .top-bar {
         width: calc(100% - 20px);
         padding: 8px 12px;
@@ -146,6 +146,57 @@
 }
 
 /* MAIN.HTML */
+
+/* Контейнер для горизонтального скролла */
+.actions-scroll-container {
+    margin-bottom: 80px; /* Отступ для кнопки загрузки аудио */
+    position: relative;
+}
+
+/* Горизонтальный скролл */
+.actions-scroll {
+    display: flex;
+    gap: 10px; /* Отступ между кнопками 10px */
+    overflow-x: auto;
+    scrollbar-width: none; /* Скрываем скроллбар для Firefox */
+    -ms-overflow-style: none; /* Скрываем скроллбар для IE */
+}
+
+/* Скрываем скроллбар для Webkit браузеров */
+.actions-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* Убедитесь что кнопка загрузки аудио фиксирована внизу */
+.upload-btn.liquid-glass {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    /* остальные стили остаются без изменений */
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .actions-scroll-container {
+        margin-bottom: 70px; /* Меньший отступ на мобильных */
+    }
+    
+    .actions-scroll {
+        gap: 8px; /* Меньший отступ на мобильных */
+    }
+}
+
+@media (max-width: 480px) {
+    .actions-scroll-container {
+        margin-bottom: 65px;
+    }
+    
+    .actions-scroll {
+        gap: 6px;
+    }
+}
 
 .action-card.liquid-glass {
     position: relative;
