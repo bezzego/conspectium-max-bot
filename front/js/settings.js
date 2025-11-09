@@ -2,11 +2,11 @@
 const ALL_AVATARS = [
     { id: 'm1', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Mason&radius=50&backgroundColor=d1d4f9' },
     { id: 'm2', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Kingston&radius=50&backgroundColor=b6e3f4' },
-    { id: 'm3', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Avery&radius=50&backgroundColor=b6e3f4' },
+    { id: 'm3', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Avery&radius=50&backgroundColor=b6e3f4' },
     { id: 'robot', type: 'robot', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Oliver&radius=50&backgroundColor=b6e3f4' },
     { id: 'f1', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Vivian&radius=50&backgroundColor=ffdfbf' },
-    { id: 'f2', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jocelyn&radius=50&backgroundColor=ffd5dc,c0aede' },
-    { id: 'f3', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Vivian&radius=50&backgroundColor=ffdfbf' },
+    { id: 'f2', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jocelyn&radius=50&backgroundColor=ffd5dc,c0aede' },
+    { id: 'f3', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Valentina&skinColor=ecad80&backgroundColor=ffdfbf' },
     { id: 'm4', type: 'male', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Charlie&radius=50&backgroundColor=d1d4f9' },
     { id: 'f4', type: 'female', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Zoe&radius=50&backgroundColor=ffd5dc' }
 ];

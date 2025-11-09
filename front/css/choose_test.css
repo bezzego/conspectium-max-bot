@@ -62,7 +62,7 @@
     background: linear-gradient(
         135deg,
         transparent 0%,
-        rgba(255, 255, 255, 0.3) 30%, /* Более яркие белые блики */
+        rgba(255, 255, 255, 0.3) 30%, 
         transparent 70%
     );
     border-radius: 50px;
@@ -237,7 +237,7 @@ main {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: min(333px, 90vw); /* Максимум 333px, но не более 90% ширины экрана */
+    width: min(333px, 90vw);
     height: 1px;
     background: #7e7d7d;
 }
@@ -248,7 +248,7 @@ main {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(280px, 80vw, 600px); /* Минимум 280px, адаптивно до 800px */
+    width: clamp(280px, 80vw, 600px);
     height: 1px;
     background: #7e7d7d;
 }
@@ -269,7 +269,6 @@ main {
     padding: 0 20px;
 }
 
-/* Затемнение фона при активном состоянии */
 .conspect-item.active {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 12px;
@@ -277,12 +276,10 @@ main {
     padding: 10px 10px 11px 10px;
 }
 
-/* Затемнение текста конспекта */
 .conspect-item.active .item-content {
     opacity: 0.3;
 }
 
-/* Позиционирование кнопок по краям */
 .item-buttons {
     position: absolute;
     top: 50%;
@@ -305,7 +302,6 @@ main {
     pointer-events: auto;
 }
 
-/* Стили для кнопок конспекта */
 .action-btn {
     width: 141px;
     height: 34px;
@@ -342,7 +338,6 @@ main {
     background: #444;
 }
 
-/* Стили для скроллбара */
 .conspect-list::-webkit-scrollbar {
     width: 6px;
 }

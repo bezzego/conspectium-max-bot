@@ -16,8 +16,6 @@
 
 body {
     background: var(--background);
-    /* NOTE: don't force overflow:hidden globally — this file is included on multiple pages.
-       Page scroll blocking is handled dynamically when the loading overlay is shown. */
 }
 
 .loading-overlay {
@@ -45,22 +43,22 @@ body {
     display: flex;
     position: relative;
     margin-bottom: 30px;
-    transform: scale(0.8); /* Уменьшаем весь блок */
+    transform: scale(0.8);
 }
 
 /** Wizard CSS & Animations */
 .wizard {
     position: relative;
-    width: 152px; /* Уменьшено с 190px */
-    height: 192px; /* Уменьшено с 240px */
+    width: 152px; 
+    height: 192px;
 }
 
 .body {
     position: absolute;
     bottom: 0;
-    left: 54px; /* Уменьшено с 68px */
-    height: 80px; /* Уменьшено с 100px */
-    width: 48px; /* Уменьшено с 60px */
+    left: 54px; 
+    height: 80px; 
+    width: 48px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
@@ -69,9 +67,9 @@ body {
     content: "";
     position: absolute;
     bottom: 0;
-    left: 16px; /* Уменьшено с 20px */
-    height: 80px; /* Уменьшено с 100px */
-    width: 48px; /* Уменьшено с 60px */
+    left: 16px; 
+    height: 80px; 
+    width: 48px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
     transform: skewX(14deg);
@@ -79,24 +77,24 @@ body {
 
 .right-arm {
     position: absolute;
-    bottom: 59px; /* Уменьшено с 74px */
-    left: 88px; /* Уменьшено с 110px */
-    height: 35px; /* Уменьшено с 44px */
-    width: 72px; /* Уменьшено с 90px */
+    bottom: 59px; 
+    left: 88px; 
+    height: 35px;
+    width: 72px;
     background: var(--primary);
     border: 2px solid var(--secondary);
-    border-radius: 18px; /* Уменьшено с 22px */
-    transform-origin: 13px 18px; /* Уменьшено с 16px 22px */
+    border-radius: 18px;
+    transform-origin: 13px 18px;
     transform: rotate(70deg);
     animation: right_arm 10s ease-in-out infinite;
 }
 
 .right-hand {
     position: absolute;
-    right: 6px; /* Уменьшено с 8px */
-    bottom: 6px; /* Уменьшено с 8px */
-    width: 24px; /* Уменьшено с 30px */
-    height: 24px; /* Уменьшено с 30px */
+    right: 6px;
+    bottom: 6px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: var(--primary);
     border: 2px solid var(--secondary);
@@ -109,38 +107,38 @@ body {
     content: "";
     position: absolute;
     right: 0px;
-    top: -6px; /* Уменьшено с -8px */
-    width: 12px; /* Уменьшено с 15px */
-    height: 24px; /* Уменьшено с 30px */
-    border-radius: 8px; /* Уменьшено с 10px */
+    top: -6px; 
+    width: 12px; 
+    height: 24px; 
+    border-radius: 8px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
-    transform: translateY(13px); /* Уменьшено с 16px */
+    transform: translateY(13px); 
     animation: right_finger 10s ease-in-out infinite;
 }
 
 .left-arm {
     position: absolute;
-    bottom: 59px; /* Уменьшено с 74px */
-    left: 21px; /* Уменьшено с 26px */
-    height: 35px; /* Уменьшено с 44px */
-    width: 56px; /* Уменьшено с 70px */
+    bottom: 59px; 
+    left: 21px; 
+    height: 35px;
+    width: 56px;
     background: var(--primary);
     border: 2px solid var(--secondary);
-    border-bottom-left-radius: 6px; /* Уменьшено с 8px */
-    transform-origin: 48px 21px; /* Уменьшено с 60px 26px */
+    border-bottom-left-radius: 6px;
+    transform-origin: 48px 21px;
     transform: rotate(-70deg);
     animation: left_arm 10s ease-in-out infinite;
 }
 
 .left-hand {
     position: absolute;
-    left: -14px; /* Уменьшено с -18px */
+    left: -14px;
     top: 0;
-    width: 14px; /* Уменьшено с 18px */
-    height: 24px; /* Уменьшено с 30px */
-    border-top-left-radius: 28px; /* Уменьшено с 35px */
-    border-bottom-left-radius: 28px; /* Уменьшено с 35px */
+    width: 14px; 
+    height: 24px; 
+    border-top-left-radius: 28px; 
+    border-bottom-left-radius: 28px;
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
@@ -150,9 +148,9 @@ body {
     position: absolute;
     right: 0;
     top: 0;
-    width: 24px; /* Уменьшено с 30px */
-    height: 12px; /* Уменьшено с 15px */
-    border-radius: 16px; /* Уменьшено с 20px */
+    width: 24px; 
+    height: 12px; 
+    border-radius: 16px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
     transform-origin: right bottom;
@@ -163,9 +161,9 @@ body {
 .head {
     position: absolute;
     top: 0;
-    left: 11px; /* Уменьшено с 14px */
-    width: 128px; /* Уменьшено с 160px */
-    height: 168px; /* Уменьшено с 210px */
+    left: 11px; 
+    width: 128px; 
+    height: 168px; 
     transform-origin: center center;
     transform: rotate(-3deg);
     animation: head 10s ease-in-out infinite;
@@ -174,9 +172,9 @@ body {
 .beard {
     position: absolute;
     bottom: 0;
-    left: 30px; /* Уменьшено с 38px */
-    height: 85px; /* Уменьшено с 106px */
-    width: 64px; /* Уменьшено с 80px */
+    left: 30px; 
+    height: 85px; 
+    width: 64px; 
     border-bottom-right-radius: 55%;
     background: var(--primary);
     border: 2px solid var(--secondary);
@@ -185,21 +183,21 @@ body {
 .beard::after {
     content: "";
     position: absolute;
-    top: 13px; /* Уменьшено с 16px */
-    left: -8px; /* Уменьшено с -10px */
-    width: 32px; /* Уменьшено с 40px */
-    height: 16px; /* Уменьшено с 20px */
-    border-radius: 16px; /* Уменьшено с 20px */
+    top: 13px;
+    left: -8px; 
+    width: 32px;
+    height: 16px; 
+    border-radius: 16px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
 
 .face {
     position: absolute;
-    bottom: 61px; /* Уменьшено с 76px */
-    left: 30px; /* Уменьшено с 38px */
-    height: 24px; /* Уменьшено с 30px */
-    width: 48px; /* Уменьшено с 60px */
+    bottom: 61px; 
+    left: 30px; 
+    height: 24px;
+    width: 48px;
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
@@ -208,11 +206,11 @@ body {
     content: "";
     position: absolute;
     top: 0px;
-    left: 32px; /* Уменьшено с 40px */
-    width: 16px; /* Уменьшено с 20px */
-    height: 32px; /* Уменьшено с 40px */
-    border-bottom-right-radius: 16px; /* Уменьшено с 20px */
-    border-bottom-left-radius: 16px; /* Уменьшено с 20px */
+    left: 32px; 
+    width: 16px; 
+    height: 32px; 
+    border-bottom-right-radius: 16px; 
+    border-bottom-left-radius: 16px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
@@ -220,11 +218,11 @@ body {
 .face::after {
     content: "";
     position: absolute;
-    top: 13px; /* Уменьшено с 16px */
-    left: -8px; /* Уменьшено с -10px */
-    width: 40px; /* Уменьшено с 50px */
-    height: 16px; /* Уменьшено с 20px */
-    border-radius: 16px; /* Уменьшено с 20px */
+    top: 13px; 
+    left: -8px; 
+    width: 40px; 
+    height: 16px; 
+    border-radius: 16px; 
     border-bottom-right-radius: 0px;
     background: var(--primary);
     border: 2px solid var(--secondary);
@@ -233,10 +231,10 @@ body {
 .adds {
     position: absolute;
     top: 0px;
-    left: -8px; /* Уменьшено с -10px */
-    width: 32px; /* Уменьшено с 40px */
-    height: 16px; /* Уменьшено с 20px */
-    border-radius: 16px; /* Уменьшено с 20px */
+    left: -8px;
+    width: 32px;
+    height: 16px;
+    border-radius: 16px;
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
@@ -244,23 +242,23 @@ body {
 .adds::after {
     content: "";
     position: absolute;
-    top: 4px; /* Уменьшено с 5px */
-    left: 64px; /* Уменьшено с 80px */
-    width: 12px; /* Уменьшено с 15px */
-    height: 16px; /* Уменьшено с 20px */
-    border-bottom-right-radius: 16px; /* Уменьшено с 20px */
-    border-top-right-radius: 16px; /* Уменьшено с 20px */
+    top: 4px; 
+    left: 64px; 
+    width: 12px; 
+    height: 16px; 
+    border-bottom-right-radius: 16px; 
+    border-top-right-radius: 16px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
 
 .hat {
     position: absolute;
-    bottom: 85px; /* Уменьшено с 106px */
+    bottom: 85px;
     left: 0;
-    width: 128px; /* Уменьшено с 160px */
-    height: 16px; /* Уменьшено с 20px */
-    border-radius: 16px; /* Уменьшено с 20px */
+    width: 128px;
+    height: 16px;
+    border-radius: 16px;
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
@@ -268,13 +266,13 @@ body {
 .hat::before {
     content: "";
     position: absolute;
-    top: -56px; /* Уменьшено с -70px */
+    top: -56px;
     left: 50%;
     transform: translatex(-50%);
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 27px 56px 40px; /* Уменьшено с 34px 70px 50px */
+    border-width: 0 27px 56px 40px;
     border-color: transparent transparent var(--primary) transparent;
 }
 
@@ -283,32 +281,32 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 128px; /* Уменьшено с 160px */
-    height: 16px; /* Уменьшено с 20px */
+    width: 128px;
+    height: 16px;
     background: var(--primary);
     border: 2px solid var(--secondary);
-    border-radius: 16px; /* Уменьшено с 20px */
+    border-radius: 16px;
 }
 
 .hat-of-the-hat {
     position: absolute;
-    bottom: 62px; /* Уменьшено с 78px */
-    left: 63px; /* Уменьшено с 79px */
+    bottom: 62px; 
+    left: 63px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 20px 20px 15px; /* Уменьшено с 25px 25px 19px */
+    border-width: 0 20px 20px 15px;
     border-color: transparent transparent var(--primary) transparent;
 }
 
 .hat-of-the-hat::after {
     content: "";
     position: absolute;
-    top: 5px; /* Уменьшено с 6px */
-    left: -3px; /* Уменьшено с -4px */
-    width: 28px; /* Уменьшено с 35px */
-    height: 8px; /* Уменьшено с 10px */
-    border-radius: 8px; /* Уменьшено с 10px */
+    top: 5px;
+    left: -3px;
+    width: 28px;
+    height: 8px;
+    border-radius: 8px;
     border-bottom-left-radius: 0px;
     background: var(--primary);
     border: 2px solid var(--secondary);
@@ -317,8 +315,8 @@ body {
 
 .four-point-star {
     position: absolute;
-    width: 10px; /* Уменьшено с 12px */
-    height: 10px; /* Уменьшено с 12px */
+    width: 10px;
+    height: 10px;
 }
 
 .four-point-star::after,
@@ -341,33 +339,33 @@ body {
 }
 
 .--first {
-    bottom: 22px; /* Уменьшено с 28px */
-    left: 37px; /* Уменьшено с 46px */
+    bottom: 22px;
+    left: 37px; 
 }
 
 .--second {
-    bottom: 32px; /* Уменьшено с 40px */
-    left: 64px; /* Уменьшено с 80px */
+    bottom: 32px;
+    left: 64px;
 }
 
 .--third {
-    bottom: 12px; /* Уменьшено с 15px */
-    left: 86px; /* Уменьшено с 108px */
+    bottom: 12px;
+    left: 86px; 
 }
 
 /** Objects CSS & Animations */
 .objects {
     position: relative;
-    width: 160px; /* Уменьшено с 200px */
-    height: 192px; /* Уменьшено с 240px */
+    width: 160px;
+    height: 192px;
 }
 
 .square {
     position: absolute;
-    bottom: -48px; /* Уменьшено с -60px */
-    left: -4px; /* Уменьшено с -5px */
-    width: 96px; /* Уменьшено с 120px */
-    height: 96px; /* Уменьшено с 120px */
+    bottom: -48px;
+    left: -4px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     border: 2px solid var(--secondary);
     transform: rotate(-360deg);
@@ -377,20 +375,20 @@ body {
 .square::after {
     content: "";
     position: absolute;
-    top: 8px; /* Уменьшено с 10px */
+    top: 8px; 
     left: 0;
-    width: 40px; /* Уменьшено с 50px */
-    height: 40px; /* Уменьшено с 50px */
+    width: 40px; 
+    height: 40px; 
     background: var(--primary);
     border: 2px solid var(--secondary);
 }
 
 .circle {
     position: absolute;
-    bottom: 8px; /* Уменьшено с 10px */
+    bottom: 8px; 
     left: 0;
-    width: 80px; /* Уменьшено с 100px */
-    height: 80px; /* Уменьшено с 100px */
+    width: 80px; 
+    height: 80px;
     border-radius: 50%;
     border: 2px solid var(--secondary);
     transform: rotate(-360deg);
@@ -400,10 +398,10 @@ body {
 .circle::after {
     content: "";
     position: absolute;
-    bottom: -8px; /* Уменьшено с -10px */
-    left: 20px; /* Уменьшено с 25px */
-    width: 40px; /* Уменьшено с 50px */
-    height: 40px; /* Уменьшено с 50px */
+    bottom: -8px;
+    left: 20px;
+    width: 40px;
+    height: 40px; 
     border-radius: 50%;
     background: var(--primary);
     border: 2px solid var(--secondary);
@@ -411,10 +409,10 @@ body {
 
 .triangle {
     position: absolute;
-    bottom: -50px; /* Уменьшено с -62px */
-    left: -8px; /* Уменьшено с -10px */
-    width: 88px; /* Уменьшено с 110px */
-    height: 88px; /* Уменьшено с 110px */
+    bottom: -50px;
+    left: -8px;
+    width: 88px; 
+    height: 88px; 
     border-radius: 50%;
     border: 2px solid var(--secondary);
     transform: rotate(-360deg);
@@ -425,11 +423,11 @@ body {
     content: "";
     position: absolute;
     top: 0;
-    right: -8px; /* Уменьшено с -10px */
+    right: -8px; 
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 22px 38px 22px; /* Уменьшено с 28px 48px 28px */
+    border-width: 0 22px 38px 22px; 
     border-color: transparent transparent var(--primary) transparent;
 }
 
