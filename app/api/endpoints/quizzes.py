@@ -268,6 +268,7 @@ def create_quiz_manual(
         )
         question = QuizQuestion(
             quiz_id=quiz.id,
+            user_id=user.id,
             title=question_title,
             explanation=explanation,
             position=position,
@@ -284,6 +285,7 @@ def create_quiz_manual(
                 )
             answer = QuizAnswer(
                 question_id=question.id,
+                user_id=user.id,
                 text=answer_text,
                 is_correct=answer_payload.is_correct,
                 position=answer_position,

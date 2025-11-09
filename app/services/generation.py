@@ -370,6 +370,7 @@ class GenerationService:
         for idx, item in enumerate(questions_payload):
             question = QuizQuestion(
                 quiz_id=quiz.id,
+                user_id=quiz.user_id,
                 title=item.get("question", f"Вопрос {idx + 1}"),
                 explanation=item.get("explanation"),
                 position=idx,
@@ -381,6 +382,7 @@ class GenerationService:
             for answer_idx, answer_payload in enumerate(answers):
                 answer = QuizAnswer(
                     question_id=question.id,
+                    user_id=quiz.user_id,
                     text=answer_payload.get("text", ""),
                     is_correct=bool(answer_payload.get("is_correct")),
                     position=answer_idx,

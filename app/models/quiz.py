@@ -48,6 +48,7 @@ class Quiz(Base):
 class QuizQuestion(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     quiz_id = Column(Integer, ForeignKey("quiz.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(Text, nullable=False)
     explanation = Column(Text, nullable=True)
     position = Column(Integer, nullable=False, default=0)
@@ -56,6 +57,7 @@ class QuizQuestion(Base):
     answers = relationship(
         "QuizAnswer", back_populates="question", cascade="all, delete-orphan", order_by="QuizAnswer.position"
     )
+    user = relationship("User")
 
 
 class QuizAnswer(Base):
@@ -63,11 +65,13 @@ class QuizAnswer(Base):
     question_id = Column(
         Integer, ForeignKey("quizquestion.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
     text = Column(Text, nullable=False)
     is_correct = Column(Boolean, nullable=False, default=False)
     position = Column(Integer, nullable=False, default=0)
 
     question = relationship("QuizQuestion", back_populates="answers")
+    user = relationship("User")
 
 
 class QuizResult(Base):
