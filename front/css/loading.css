@@ -1,31 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
- 
- 
-:root {
-    --primary: #ffffff;
-    --secondary: #333333;
-    --background: #333333;
-    --accent: #444444;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background: var(--background);
-}
-
 .loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: #333333;
+    background: rgba(51, 51, 51, 0.8);
+    backdrop-filter: blur(20px);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 9999;
@@ -37,510 +19,114 @@ body {
     align-items: center;
     justify-content: center;
     position: relative;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.15) 100%);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 25px;
+    padding: 50px 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.2),
+                inset 0 -1px 0 rgba(0,0,0,0.1);
+    width: 320px;
+    height: 320px;
+    margin-bottom: 60px; /* Добавляем отступ снизу для подписи */
 }
 
-.scene {
-    display: flex;
-    position: relative;
-    margin-bottom: 30px;
-    transform: scale(0.8);
-}
-
-/** Wizard CSS & Animations */
-.wizard {
-    position: relative;
-    width: 152px; 
-    height: 192px;
-}
-
-.body {
-    position: absolute;
-    bottom: 0;
-    left: 54px; 
-    height: 80px; 
-    width: 48px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.body::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 16px; 
-    height: 80px; 
-    width: 48px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    transform: skewX(14deg);
-}
-
-.right-arm {
-    position: absolute;
-    bottom: 59px; 
-    left: 88px; 
-    height: 35px;
-    width: 72px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    border-radius: 18px;
-    transform-origin: 13px 18px;
-    transform: rotate(70deg);
-    animation: right_arm 10s ease-in-out infinite;
-}
-
-.right-hand {
-    position: absolute;
-    right: 6px;
-    bottom: 6px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    transform-origin: center center;
-    transform: rotate(-40deg);
-    animation: right_hand 10s ease-in-out infinite;
-}
-
-.right-hand::after {
-    content: "";
-    position: absolute;
-    right: 0px;
-    top: -6px; 
-    width: 12px; 
-    height: 24px; 
-    border-radius: 8px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    transform: translateY(13px); 
-    animation: right_finger 10s ease-in-out infinite;
-}
-
-.left-arm {
-    position: absolute;
-    bottom: 59px; 
-    left: 21px; 
-    height: 35px;
-    width: 56px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    border-bottom-left-radius: 6px;
-    transform-origin: 48px 21px;
-    transform: rotate(-70deg);
-    animation: left_arm 10s ease-in-out infinite;
-}
-
-.left-hand {
-    position: absolute;
-    left: -14px;
-    top: 0;
-    width: 14px; 
-    height: 24px; 
-    border-top-left-radius: 28px; 
-    border-bottom-left-radius: 28px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.left-hand::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 24px; 
-    height: 12px; 
-    border-radius: 16px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    transform-origin: right bottom;
-    transform: scaleX(0);
-    animation: left_finger 10s ease-in-out infinite;
-}
-
-.head {
-    position: absolute;
-    top: 0;
-    left: 11px; 
-    width: 128px; 
-    height: 168px; 
-    transform-origin: center center;
-    transform: rotate(-3deg);
-    animation: head 10s ease-in-out infinite;
-}
-
-.beard {
-    position: absolute;
-    bottom: 0;
-    left: 30px; 
-    height: 85px; 
-    width: 64px; 
-    border-bottom-right-radius: 55%;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.beard::after {
-    content: "";
-    position: absolute;
-    top: 13px;
-    left: -8px; 
-    width: 32px;
-    height: 16px; 
-    border-radius: 16px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.face {
-    position: absolute;
-    bottom: 61px; 
-    left: 30px; 
-    height: 24px;
-    width: 48px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.face::before {
-    content: "";
-    position: absolute;
-    top: 0px;
-    left: 32px; 
-    width: 16px; 
-    height: 32px; 
-    border-bottom-right-radius: 16px; 
-    border-bottom-left-radius: 16px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.face::after {
-    content: "";
-    position: absolute;
-    top: 13px; 
-    left: -8px; 
-    width: 40px; 
-    height: 16px; 
-    border-radius: 16px; 
-    border-bottom-right-radius: 0px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.adds {
-    position: absolute;
-    top: 0px;
-    left: -8px;
-    width: 32px;
-    height: 16px;
-    border-radius: 16px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.adds::after {
-    content: "";
-    position: absolute;
-    top: 4px; 
-    left: 64px; 
-    width: 12px; 
-    height: 16px; 
-    border-bottom-right-radius: 16px; 
-    border-top-right-radius: 16px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.hat {
-    position: absolute;
-    bottom: 85px;
-    left: 0;
-    width: 128px;
-    height: 16px;
-    border-radius: 16px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.hat::before {
-    content: "";
-    position: absolute;
-    top: -56px;
-    left: 50%;
-    transform: translatex(-50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 27px 56px 40px;
-    border-color: transparent transparent var(--primary) transparent;
-}
-
-.hat::after {
-    content: "";
+.loading-content::before {
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 128px;
-    height: 16px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    border-radius: 16px;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+    opacity: 0.6;
+    pointer-events: none;
+    border-radius: 25px;
 }
 
-.hat-of-the-hat {
-    position: absolute;
-    bottom: 62px; 
-    left: 63px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 20px 20px 15px;
-    border-color: transparent transparent var(--primary) transparent;
+.loader {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 10px; /* Опускаем анимацию чуть ниже */
 }
 
-.hat-of-the-hat::after {
-    content: "";
-    position: absolute;
-    top: 5px;
-    left: -3px;
-    width: 28px;
-    height: 8px;
-    border-radius: 8px;
-    border-bottom-left-radius: 0px;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-    transform: rotate(40deg);
+.loader::before {
+  content: "";
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  position: absolute;
+  width: 140px;
+  height: 55px;
+  z-index: 20;
+  border-radius: 0 0 10px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.274);
+  border-top: none;
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.082);
+  animation: anim2 2s infinite;
 }
 
-.four-point-star {
-    position: absolute;
-    width: 10px;
-    height: 10px;
+.loader div {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  z-index: -1;
+  animation: anim 2s infinite linear;
+  animation-delay: calc(-0.3s * var(--i));
+  transform: translateY(5px);
+  margin: 0.2em;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
-
-.four-point-star::after,
-.four-point-star::before {
-    content: "";
-    position: absolute;
-    background: var(--primary);
-    border: 1px solid var(--secondary);
-    display: block;
-    left: 0;
-    width: 141.4213%;
-    top: 0;
-    bottom: 0;
-    border-radius: 10%;
-    transform: rotate(66.66deg) skewX(45deg);
-}
-
-.four-point-star::after {
-    transform: rotate(156.66deg) skew(45deg);
-}
-
-.--first {
-    bottom: 22px;
-    left: 37px; 
-}
-
-.--second {
-    bottom: 32px;
-    left: 64px;
-}
-
-.--third {
-    bottom: 12px;
-    left: 86px; 
-}
-
-/** Objects CSS & Animations */
-.objects {
-    position: relative;
-    width: 160px;
-    height: 192px;
-}
-
-.square {
-    position: absolute;
-    bottom: -48px;
-    left: -4px;
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    border: 2px solid var(--secondary);
-    transform: rotate(-360deg);
-    animation: path_square 10s ease-in-out infinite;
-}
-
-.square::after {
-    content: "";
-    position: absolute;
-    top: 8px; 
-    left: 0;
-    width: 40px; 
-    height: 40px; 
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.circle {
-    position: absolute;
-    bottom: 8px; 
-    left: 0;
-    width: 80px; 
-    height: 80px;
-    border-radius: 50%;
-    border: 2px solid var(--secondary);
-    transform: rotate(-360deg);
-    animation: path_circle 10s ease-in-out infinite;
-}
-
-.circle::after {
-    content: "";
-    position: absolute;
-    bottom: -8px;
-    left: 20px;
-    width: 40px;
-    height: 40px; 
-    border-radius: 50%;
-    background: var(--primary);
-    border: 2px solid var(--secondary);
-}
-
-.triangle {
-    position: absolute;
-    bottom: -50px;
-    left: -8px;
-    width: 88px; 
-    height: 88px; 
-    border-radius: 50%;
-    border: 2px solid var(--secondary);
-    transform: rotate(-360deg);
-    animation: path_triangle 10s ease-in-out infinite;
-}
-
-.triangle::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -8px; 
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 22px 38px 22px; 
-    border-color: transparent transparent var(--primary) transparent;
-}
-
-/** Анимации остаются без изменений */
-@keyframes right_arm {
-    0% { transform: rotate(70deg); }
-    10% { transform: rotate(8deg); }
-    15% { transform: rotate(20deg); }
-    20% { transform: rotate(10deg); }
-    25% { transform: rotate(26deg); }
-    30% { transform: rotate(10deg); }
-    35% { transform: rotate(28deg); }
-    40% { transform: rotate(9deg); }
-    45% { transform: rotate(28deg); }
-    50% { transform: rotate(8deg); }
-    58% { transform: rotate(74deg); }
-    62% { transform: rotate(70deg); }
-}
-
-@keyframes left_arm {
-    0% { transform: rotate(-70deg); }
-    10% { transform: rotate(6deg); }
-    15% { transform: rotate(-18deg); }
-    20% { transform: rotate(5deg); }
-    25% { transform: rotate(-18deg); }
-    30% { transform: rotate(5deg); }
-    35% { transform: rotate(-17deg); }
-    40% { transform: rotate(5deg); }
-    45% { transform: rotate(-18deg); }
-    50% { transform: rotate(6deg); }
-    58% { transform: rotate(-74deg); }
-    62% { transform: rotate(-70deg); }
-}
-
-@keyframes right_hand {
-    0% { transform: rotate(-40deg); }
-    10% { transform: rotate(-20deg); }
-    15% { transform: rotate(-5deg); }
-    20% { transform: rotate(-60deg); }
-    25% { transform: rotate(-0deg); }
-    30% { transform: rotate(-60deg); }
-    35% { transform: rotate(-0deg); }
-    40% { transform: rotate(-40deg); }
-    45% { transform: rotate(-60deg); }
-    50% { transform: rotate(10deg); }
-    60% { transform: rotate(-40deg); }
-}
-
-@keyframes right_finger {
-    0% { transform: translateY(13px); }
-    10% { transform: none; }
-    50% { transform: none; }
-    60% { transform: translateY(13px); }
-}
-
-@keyframes left_finger {
-    0% { transform: scaleX(0); }
-    10% { transform: scaleX(1) rotate(6deg); }
-    15% { transform: scaleX(1) rotate(0deg); }
-    20% { transform: scaleX(1) rotate(8deg); }
-    25% { transform: scaleX(1) rotate(0deg); }
-    30% { transform: scaleX(1) rotate(7deg); }
-    35% { transform: scaleX(1) rotate(0deg); }
-    40% { transform: scaleX(1) rotate(5deg); }
-    45% { transform: scaleX(1) rotate(0deg); }
-    50% { transform: scaleX(1) rotate(6deg); }
-    58% { transform: scaleX(0); }
-}
-
-@keyframes head {
-    0% { transform: rotate(-3deg); }
-    10% { transform: translatex(8px) rotate(7deg); }
-    50% { transform: translatex(0px) rotate(0deg); }
-    56% { transform: rotate(-3deg); }
-}
-
-@keyframes path_circle {
-    0% { transform: translateY(0); }
-    10% { transform: translateY(-80px) rotate(-5deg); }
-    55% { transform: translateY(-80px) rotate(-360deg); }
-    58% { transform: translateY(-80px) rotate(-360deg); }
-    63% { transform: rotate(-360deg); }
-}
-
-@keyframes path_square {
-    0% { transform: translateY(0); }
-    10% { transform: translateY(-124px) translatex(-12px) rotate(10deg); }
-    55% { transform: translateY(-124px) translatex(-12px) rotate(-350deg); }
-    57% { transform: translateY(-124px) translatex(-12px) rotate(-350deg); }
-    63% { transform: rotate(-360deg); }
-}
-
-@keyframes path_triangle {
-    0% { transform: translateY(0); }
-    10% { transform: translateY(-138px) translatex(8px) rotate(-10deg); }
-    55% { transform: translateY(-138px) translatex(8px) rotate(-365deg); }
-    58% { transform: translateY(-138px) translatex(8px) rotate(-365deg); }
-    63% { transform: rotate(-360deg); }
-}
-
 
 .loading-text {
-    margin-top: 15px;
+    margin-top: 15px; /* Увеличиваем отступ сверху для текста */
     color: white;
     font-size: 16px;
     font-family: 'Manrope', sans-serif;
     text-align: center;
-    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-weight: 600;
+    position: relative;
+    z-index: 2;
 }
 
-@keyframes progress {
-    from { width: 0; }
-    to { width: 100%; }
+.hackflow-signature {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'Manrope', Arial, sans-serif;
+    font-size: 14px;
+    text-align: center;
+    user-select: none;
+    z-index: 10001;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+@keyframes anim {
+  0%,
+  100% {
+    transform: translateY(5px);
+  }
+  50% {
+    transform: translateY(-65px);
+  }
+}
+
+@keyframes anim2 {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
 }
 
 .noise {
@@ -549,6 +135,94 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url(data:image/png;base64,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);
-    opacity: 0.1;
+    background-image: url(data:image/png;base64,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);
+    opacity: 0.05;
+    pointer-events: none;
+    border-radius: 25px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .loading-content {
+        width: 280px;
+        height: 280px;
+        padding: 30px 25px;
+        margin-bottom: 50px;
+    }
+    
+    .loader {
+        margin-top: 8px;
+    }
+    
+    .loader::before {
+        width: 120px;
+        height: 45px;
+    }
+    
+    .loader div {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .loading-text {
+        font-size: 15px;
+        margin-top: 12px;
+    }
+    
+    .hackflow-signature {
+        font-size: 13px;
+    }
+    
+    @keyframes anim {
+        0%,
+        100% {
+            transform: translateY(5px);
+        }
+        50% {
+            transform: translateY(-55px);
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .loading-content {
+        width: 250px;
+        height: 250px;
+        padding: 45px 20px;
+        margin-bottom: 45px;
+    }
+    
+    .loader {
+        margin-top: 5px;
+    }
+    
+    .loader::before {
+        width: 100px;
+        height: 40px;
+    }
+    
+    .loader div {
+        width: 18px;
+        height: 18px;
+        margin: 0.15em;
+    }
+    
+    .loading-text {
+        font-size: 14px;
+        margin-top: 10px;
+    }
+    
+    .hackflow-signature {
+        font-size: 12px;
+    }
+    
+    @keyframes anim {
+        0%,
+        100% {
+            transform: translateY(5px);
+        }
+        50% {
+            transform: translateY(-45px);
+        }
+    }
 }

@@ -18,6 +18,15 @@ body {
     padding: 10px;
 }
 
+.logo {
+    margin-top: 5px;
+    height: 50px;
+    width: 250px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    transition: all 0.4s ease;
+}
+
 
 .top-bar {
     background: linear-gradient(
@@ -157,13 +166,6 @@ body {
 .creation-btn i {
     font-size: 32px;
     color: #333;
-}
-
-.logo {
-    margin-top: 2px;
-    height: 50px;
-    width: 250px;
-    object-fit: contain; /* Сохраняет пропорции логотипа */
 }
 
 .title {

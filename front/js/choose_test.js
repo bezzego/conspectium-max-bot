@@ -332,8 +332,7 @@ async function createQuiz(conspectId) {
     }
 }
 
-    function showWizardAnimation() {
-
+function showWizardAnimation() {
     if (window.wizardElements && window.wizardElements.overlay) return;
 
     const loadingOverlay = document.createElement('div');
@@ -345,63 +344,22 @@ async function createQuiz(conspectId) {
     
     loadingOverlay.innerHTML = `
         <div class="loading-content">
-            <div class="scene">
-                <div class="objects">
-                    <div class="square"></div>
-                    <div class="circle"></div>
-                    <div class="triangle"></div>
-                </div>
-                <div class="wizard">
-                    <div class="body"></div>
-                    <div class="right-arm">
-                        <div class="right-hand"></div>
-                    </div>
-                    <div class="left-arm">
-                        <div class="left-hand"></div>
-                    </div>
-                    <div class="head">
-                        <div class="beard"></div>
-                        <div class="face">
-                            <div class="adds"></div>
-                        </div>
-                        <div class="hat">
-                            <div class="hat-of-the-hat"></div>
-                            <div class="four-point-star --first"></div>
-                            <div class="four-point-star --second"></div>
-                            <div class="four-point-star --third"></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="loader">
+                <div style="--i: 1"></div>
+                <div style="--i: 2"></div>
+                <div style="--i: 3"></div>
+                <div style="--i: 4"></div>
             </div>
             
             <div class="loading-text">Нейросеть создает тест..</div>
             
             <div class="noise"></div>
         </div>
+        <div class="hackflow-signature" style="opacity: 0;">by HackFlow</div>
     `;
     
     document.body.appendChild(loadingOverlay);
 
-    const signature = document.createElement('div');
-    signature.className = 'hackflow-signature';
-    signature.textContent = 'by HackFlow';
-    signature.style.opacity = '0';
-    signature.style.zIndex = '20001';
-    signature.style.pointerEvents = 'none';
-    signature.style.position = 'fixed';
-    signature.style.bottom = '20px';
-    signature.style.left = '50%';
-    signature.style.transform = 'translateX(-50%)';
-    signature.style.fontFamily = "Manrope, Arial, sans-serif";
-    signature.style.fontSize = '14px';
-    signature.style.color = '#cccccc';
-    signature.style.textAlign = 'center';
-    signature.style.width = '100%';
-    signature.style.userSelect = 'none';
-    signature.style.transition = 'opacity 0.5s ease';
-    loadingOverlay.appendChild(signature);
-    try { console.debug('hackflow signature appended to loadingOverlay'); } catch (e) {}
-    
     try {
         window._prevBodyOverflow = document.body.style.overflow;
     } catch (e) {
@@ -414,20 +372,27 @@ async function createQuiz(conspectId) {
             loadingOverlay.style.opacity = '1';
         });
     });
-    
+
+    // Появление подписи через 0.5 секунды
     setTimeout(() => {
-        signature.style.opacity = '1';
-        signature.style.transition = 'opacity 0.5s ease';
-    }, 1000);
-    
+        const signature = loadingOverlay.querySelector('.hackflow-signature');
+        if (signature) {
+            signature.style.opacity = '1';
+            signature.style.transition = 'opacity 0.5s ease';
+        }
+    }, 500);
+
+    // Исчезновение подписи за 1 секунду до конца (через 5 секунд от начала)
     setTimeout(() => {
-        signature.style.opacity = '0';
-        signature.style.transition = 'opacity 0.5s ease';
-    }, 6000);
+        const signature = loadingOverlay.querySelector('.hackflow-signature');
+        if (signature) {
+            signature.style.opacity = '0';
+            signature.style.transition = 'opacity 0.5s ease';
+        }
+    }, 5000);
     
     window.wizardElements = {
-        overlay: loadingOverlay,
-        signature: signature
+        overlay: loadingOverlay
     };
 }
 

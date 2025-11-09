@@ -224,7 +224,7 @@ function createNavigationElements() {
         document.addEventListener('keydown', handleKeyDown);
     }
 
-function openExpandedQuestion(question) {
+   function openExpandedQuestion(question) {
     // Закрываем предыдущий открытый вопрос
     if (expanded && expanded !== question) {
         closeExpandedQuestion();
@@ -234,19 +234,10 @@ function openExpandedQuestion(question) {
     question.classList.add('expanded');
     expanded = question;
     document.body.classList.add('question-expanded');
+    document.body.classList.add('history-hidden'); // Добавляем класс для скрытия истории
 
     // Добавляем крестик
-    const questionText = question.querySelector('.question-text');
-    if (questionText && !questionText.querySelector('.question-text__close')) {
-        const closeBtn = document.createElement('div');
-        closeBtn.className = 'question-text__close';
-        closeBtn.innerHTML = '✕';
-        closeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeExpandedQuestion();
-        });
-        questionText.appendChild(closeBtn);
-    }
+    addCloseButtonToQuestion(question);
 
     // Показываем навигацию
     showNavigation();
@@ -255,20 +246,59 @@ function openExpandedQuestion(question) {
     window.scrollTo(0, 0);
 }
 
-    function closeExpandedQuestion() {
-        if (expanded) {
-            // Удаляем крестик
-            const closeBtn = expanded.querySelector('.question-text__close');
-            if (closeBtn) {
-                closeBtn.remove();
-            }
-            
-            expanded.classList.remove('expanded');
-            expanded = null;
-            document.body.classList.remove('question-expanded');
-            hideNavigation();
+function closeExpandedQuestion() {
+    if (expanded) {
+        // Удаляем крестик
+        const closeBtn = expanded.querySelector('.question-text__close');
+        if (closeBtn) {
+            closeBtn.remove();
         }
+        
+        expanded.classList.remove('expanded');
+        expanded = null;
+        document.body.classList.remove('question-expanded');
+        document.body.classList.remove('history-hidden'); // Убираем класс для показа истории
+        
+        hideNavigation();
     }
+}
+
+function hideHistory() {
+    const historyContainer = document.getElementById('quizHistory');
+    const historySection = document.querySelector('.history-section'); // или другой селектор контейнера истории
+    
+    if (historyContainer) {
+        historyContainer.style.display = 'none';
+    }
+    if (historySection) {
+        historySection.style.display = 'none';
+    }
+    
+    // Также скрываем панель с последним результатом если она есть
+    const latestResult = document.getElementById('quizResult');
+    if (latestResult) {
+        latestResult.style.display = 'none';
+    }
+}
+
+function showHistory() {
+    const historyContainer = document.getElementById('quizHistory');
+    const historySection = document.querySelector('.history-section'); // или другой селектор контейнера истории
+    
+    if (historyContainer) {
+        historyContainer.style.display = 'block';
+    }
+    if (historySection) {
+        historySection.style.display = 'block';
+    }
+    
+    // Показываем панель с последним результатом если она есть
+    const latestResult = document.getElementById('quizResult');
+    if (latestResult) {
+        latestResult.style.display = 'block';
+    }
+}
+
 
 
     function navigateQuestions(delta) {
@@ -281,15 +311,36 @@ function openExpandedQuestion(question) {
         const targetIndex = currentIndex + delta;
         if (targetIndex < 0 || targetIndex >= items.length) return;
 
-        // Переключаем вопрос
+        // Закрываем текущий вопрос
         expanded.classList.remove('expanded');
+        
+        // Открываем новый вопрос
         const targetQuestion = items[targetIndex];
         targetQuestion.classList.add('expanded');
         expanded = targetQuestion;
 
+        // Добавляем крестик к новому вопросу
+        addCloseButtonToQuestion(targetQuestion);
+
+        // История остается скрытой (уже скрыта при первом открытии)
+        
         // Обновляем навигацию
         showNavigation();
     }
+
+    function addCloseButtonToQuestion(question) {
+    const questionText = question.querySelector('.question-text');
+    if (questionText && !questionText.querySelector('.question-text__close')) {
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'question-text__close';
+        closeBtn.innerHTML = '✕';
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeExpandedQuestion();
+        });
+        questionText.appendChild(closeBtn);
+    }
+}
 
   function showNavigation() {
     if (!expanded) return;

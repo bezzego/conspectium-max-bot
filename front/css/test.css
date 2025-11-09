@@ -124,15 +124,6 @@
     filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
-/* Адаптивность для планшетов */
-@media (min-width: 768px) {
-    .top-bar {
-        width: calc(100%);
-        max-width: min(1000px, 85vw);
-        padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 28px);
-    }
-}
-
 /* Адаптивность для десктопов */
 @media (min-width: 924px) {
     .top-bar {
@@ -499,7 +490,7 @@
 
 /* КОНТЕНТ В ПОЛНОЭКРАННОМ РЕЖИМЕ - ДОБАВЛЯЕМ СКРОЛЛ */
 .question-item.expanded .question-content {
-    padding: 80px 20px 140px 20px;
+    padding: 60px 20px 140px 20px;
     max-width: 800px;
     margin: 0 auto;
     min-height: auto;
@@ -1060,7 +1051,6 @@
         width: 24px;
         height: 24px;
         right: 10px;
-        font-size: 12px;
     }
     
     .question-item.expanded .answer-option {
@@ -1101,8 +1091,57 @@
     }
 }
 
+/* Скрываем все что связано с историей при открытом вопросе */
+.history-hidden #quizHistory,
+.history-hidden .quiz-history,
+.history-hidden .history-section,
+.history-hidden .history-container,
+.history-hidden [class*="history"],
+.history-hidden .results-history,
+.history-hidden .attempts-history,
+.history-hidden #quizResult {
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Дополнительно скрываем по текстовому содержанию */
+.history-hidden *:contains("История"),
+.history-hidden *:contains("история"),
+.history-hidden *:contains("прохождени"),
+.history-hidden *:contains("результат") {
+    display: none !important;
+}
+
+.history-section,
+#quizHistory,
+#quizResult {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.question-expanded .history-section,
+.question-expanded #quizHistory,
+.question-expanded #quizResult {
+    display: none !important;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
 .hidden {
     display: none !important;
+}
+
+@media (max-width: 410px) {
+    .top-bar {
+        padding: 8px 12px;
+        margin-bottom: 12px;
+    }
+    
+    .logo {
+        height: 50px;
+        width: 220px;
+    }
 }
 
 /* ГАРАНТИРУЕМ, ЧТО ВСЕ ЭЛЕМЕНТЫ ВИДИМЫ В ПОЛНОЭКРАННОМ РЕЖИМЕ */

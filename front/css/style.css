@@ -147,15 +147,6 @@ body {
     height: 75px;
 }
 
-/* Адаптивность для планшетов */
-@media (min-width: 768px) {
-    .top-bar {
-        width: calc(100%);
-        max-width: min(1000px, 85vw);
-        padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 28px);
-    }
-}
-
 /* Адаптивность для десктопов */
 @media (min-width: 924px) {
     .top-bar {
@@ -185,21 +176,7 @@ body {
     transition: none !important;
 }
 
-/* Убираем все :active, :hover, :focus состояния принудительно */
-button:active, 
-button:focus, 
-button:hover,
-.back-btn:active,
-.back-btn:focus, 
-.back-btn:hover,
-.accent-btn:active,
-.accent-btn:focus,
-.accent-btn:hover {
-    transform: scale(1) !important;
-    background: initial !important;
-    border-color: initial !important;
-    box-shadow: none !important;
-}
+
 
 /* Отключаем все переходы временно */
 .no-transitions * {

@@ -806,71 +806,174 @@ async function loadMainConspects(app) {
         }));
     }
 
-    // Conspect create ---------------------------------------------------
-    function initConspectCreatePage(app) {
-        const textButton = document.getElementById('createFromTextBtn');
-        const textInput = document.getElementById('conspectTextInput');
-        const titleInput = document.getElementById('conspectTitleInput');
-        const createQuizBtn = document.getElementById('createQuizFromLatest');
-        const shareBtn = document.getElementById('shareConspectBtn');
+   // Conspect create ---------------------------------------------------
+function initConspectCreatePage(app) {
+    const textButton = document.getElementById('createFromTextBtn');
+    const textInput = document.getElementById('conspectTextInput');
+    const titleInput = document.getElementById('conspectTitleInput');
+    const createQuizBtn = document.getElementById('createQuizFromLatest');
+    const shareBtn = document.getElementById('shareConspectBtn');
 
-        if (textButton && textInput) {
-            textButton.addEventListener('click', async () => {
-                if (!textInput.value.trim()) {
-                    app.notify('Введи текст для конспекта', 'error');
-                    return;
-                }
-                try {
-                    const variant = await showVariantChoiceModal({
-                        title: titleInput?.value.trim() || 'Новый конспект',
-                    });
-                    if (!variant) {
-                        return;
-                    }
-                    app.showLoading('Создаём конспект... Это может занять пару минут.');
-                    const conspect = await app.createConspectFromText(
-                        textInput.value.trim(),
-                        titleInput.value.trim(),
-                        { variants: [variant] },
-                    );
-                    app.hideLoading();
-                    app.notify('Конспект готов!', 'success');
-                    await loadConspectDetails(app, conspect.id);
-                    showConspectModal(conspect, { initialVariant: variant });
-                    textInput.value = '';
-                    titleInput.value = '';
-                } catch (err) {
-                    console.error(err);
-                    app.hideLoading();
-                    app.notify(err.message || 'Не удалось создать конспект', 'error');
-                }
-            });
-        }
-
-        if (createQuizBtn) {
-            createQuizBtn.addEventListener('click', () => {
-                const latestId = createQuizBtn.dataset.latestConspectId;
-                if (!latestId) {
-                    app.notify('Сначала создай конспект', 'info');
-                    return;
-                }
-                window.location.href = `choose_test.html?conspectId=${latestId}`;
-            });
-        }
-
-        if (shareBtn) {
-            shareBtn.addEventListener('click', () => {
-                const latestId = shareBtn.dataset.latestConspectId;
-                if (!latestId) {
-                    app.notify('Нет конспекта для отправки ссылки', 'info');
-                    return;
-                }
-                const shareUrl = `${window.location.origin}/front/html/conspect_list.html#conspect-${latestId}`;
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    app.notify('Ссылка скопирована в буфер обмена', 'success');
+    if (textButton && textInput) {
+        textButton.addEventListener('click', async () => {
+            if (!textInput.value.trim()) {
+                app.notify('Введи текст для конспекта', 'error');
+                return;
+            }
+            try {
+                const variant = await showVariantChoiceModal({
+                    title: titleInput?.value.trim() || 'Новый конспект',
                 });
+                if (!variant) {
+                    return;
+                }
+                
+                // Показываем новую анимацию вместо стандартного loading
+                showConspectCreateAnimation();
+                
+                const conspect = await app.createConspectFromText(
+                    textInput.value.trim(),
+                    titleInput.value.trim(),
+                    { variants: [variant] },
+                );
+                
+                // Скрываем анимацию
+                hideConspectCreateAnimation();
+                
+                app.notify('Конспект готов!', 'success');
+                await loadConspectDetails(app, conspect.id);
+                showConspectModal(conspect, { initialVariant: variant });
+                textInput.value = '';
+                titleInput.value = '';
+            } catch (err) {
+                console.error(err);
+                // Скрываем анимацию в случае ошибки
+                hideConspectCreateAnimation();
+                app.notify(err.message || 'Не удалось создать конспект', 'error');
+            }
+        });
+    }
+
+    if (createQuizBtn) {
+        createQuizBtn.addEventListener('click', () => {
+            const latestId = createQuizBtn.dataset.latestConspectId;
+            if (!latestId) {
+                app.notify('Сначала создай конспект', 'info');
+                return;
+            }
+            window.location.href = `choose_test.html?conspectId=${latestId}`;
+        });
+    }
+
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            const latestId = shareBtn.dataset.latestConspectId;
+            if (!latestId) {
+                app.notify('Нет конспекта для отправки ссылки', 'info');
+                return;
+            }
+            const shareUrl = `${window.location.origin}/front/html/conspect_list.html#conspect-${latestId}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                app.notify('Ссылка скопирована в буфер обмена', 'success');
             });
+        });
+    }
+}
+
+    // Функция для показа анимации создания конспекта
+    function showConspectCreateAnimation() {
+        if (window.conspectCreateAnimation) return;
+
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.style.opacity = '0';
+        loadingOverlay.style.transition = 'opacity 0.25s ease';
+        loadingOverlay.style.zIndex = '20000';
+        loadingOverlay.style.pointerEvents = 'auto';
+        
+        loadingOverlay.innerHTML = `
+            <div class="loading-content">
+                <div class="loader">
+                    <div style="--i: 1"></div>
+                    <div style="--i: 2"></div>
+                    <div style="--i: 3"></div>
+                    <div style="--i: 4"></div>
+                </div>
+                
+                <div class="loading-text">Нейросеть создает конспект..</div>
+                
+                <div class="noise"></div>
+            </div>
+            <div class="hackflow-signature" style="opacity: 0;">by HackFlow</div>
+        `;
+        
+        document.body.appendChild(loadingOverlay);
+
+        try {
+            window._prevBodyOverflow = document.body.style.overflow;
+        } catch (e) {
+            window._prevBodyOverflow = '';
         }
+        document.body.style.overflow = 'hidden';
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                loadingOverlay.style.opacity = '1';
+            });
+        });
+
+        // Появление подписи через 0.5 секунды
+        setTimeout(() => {
+            const signature = loadingOverlay.querySelector('.hackflow-signature');
+            if (signature) {
+                signature.style.opacity = '1';
+                signature.style.transition = 'opacity 0.5s ease';
+            }
+        }, 500);
+
+        // Исчезновение подписи за 1 секунду до конца (через 5 секунд от начала)
+        setTimeout(() => {
+            const signature = loadingOverlay.querySelector('.hackflow-signature');
+            if (signature) {
+                signature.style.opacity = '0';
+                signature.style.transition = 'opacity 0.5s ease';
+            }
+        }, 5000);
+        
+        window.conspectCreateAnimation = {
+            overlay: loadingOverlay
+        };
+    }
+
+    // Функция для скрытия анимации создания конспекта
+    function hideConspectCreateAnimation() {
+        const elements = window.conspectCreateAnimation;
+        
+        if (!elements) return;
+        
+        if (elements.overlay) {
+            elements.overlay.style.opacity = '0';
+            elements.overlay.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                if (elements.overlay.parentNode) {
+                    elements.overlay.parentNode.removeChild(elements.overlay);
+                }
+            }, 500);
+        }
+        
+        try {
+            if (window._prevBodyOverflow !== undefined) {
+                document.body.style.overflow = window._prevBodyOverflow || '';
+                window._prevBodyOverflow = undefined;
+            } else {
+                document.body.style.overflow = '';
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        window.conspectCreateAnimation = null;
     }
 
     async function loadConspectDetails(app, conspectId) {
