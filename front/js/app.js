@@ -2,6 +2,8 @@
     const API_BASE = '/api';
     const TOKEN_KEY = 'conspectium_token';
     const USER_KEY = 'conspectium_user';
+    const DEV_PROFILE_KEY = 'conspectium_dev_profile';
+    const DEV_PROFILE_IDS_KEY = 'conspectium_dev_ids';
 
     const state = {
         token: localStorage.getItem(TOKEN_KEY) || null,
@@ -32,13 +34,79 @@
         }
     }
 
+    function allocateDevTelegramId() {
+        let usedIds = [];
+        const raw = localStorage.getItem(DEV_PROFILE_IDS_KEY);
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    usedIds = parsed.filter((value) => Number.isInteger(value));
+                }
+            } catch (err) {
+                console.warn('Failed to parse dev id pool', err);
+            }
+        }
+        const usedSet = new Set(usedIds);
+
+        let candidate = null;
+        for (let attempt = 0; attempt < 50; attempt += 1) {
+            const randomId = Math.floor(1000000 + Math.random() * 9000000);
+            if (!usedSet.has(randomId)) {
+                candidate = randomId;
+                break;
+            }
+        }
+
+        if (candidate === null) {
+            candidate = Math.floor(1000000 + Math.random() * 9000000);
+            usedIds = [];
+        }
+
+        usedIds.push(candidate);
+        try {
+            localStorage.setItem(DEV_PROFILE_IDS_KEY, JSON.stringify(usedIds));
+        } catch (err) {
+            console.warn('Failed to persist dev id pool', err);
+        }
+
+        return candidate;
+    }
+
+    function getDevProfile() {
+        const cached = localStorage.getItem(DEV_PROFILE_KEY);
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (parsed?.username && parsed?.telegram_id) {
+                    return parsed;
+                }
+            } catch (err) {
+                console.warn('Failed to parse dev profile', err);
+                localStorage.removeItem(DEV_PROFILE_KEY);
+            }
+        }
+
+        const randomSuffix = (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2))
+            .replace(/[^a-zA-Z0-9]/g, '')
+            .slice(-6)
+            .toUpperCase();
+        const profile = {
+            username: `Demo User ${randomSuffix}`,
+            telegram_id: allocateDevTelegramId(),
+        };
+        localStorage.setItem(DEV_PROFILE_KEY, JSON.stringify(profile));
+        return profile;
+    }
+
     async function devLogin() {
+        const profile = getDevProfile();
         const response = await fetch(`${API_BASE}/auth/dev-login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username: 'Demo User' }),
+            body: JSON.stringify(profile),
         });
 
         if (!response.ok) {
