@@ -1,29 +1,31 @@
-        /* Основные стили liquid glass */
-    :root {
-        --primary-gold: rgba(243, 194, 17, 0.377);
-        --primary-gold-hover: rgba(245, 213, 99, 0.35);
-        --success-color: rgba(56, 142, 60, 0.3);
-        --danger-color: rgba(255, 100, 118, 0.3);
-        --info-color: rgba(33, 150, 243, 0.3);
-    }
-
-    body {
-        font-family: 'Manrope', sans-serif;
-        background: #333;;
-        min-height: 100vh;
-        margin: 0;
-        color: #fff;
-        position: relative;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding-bottom: 80px;
-        position: relative;
-        z-index: 1; /* Нормальный z-index для контейнера */
-    }
-
+/* Основные стили liquid glass */
+:root {
+    --primary-gold: rgba(243, 194, 17, 0.377);
+    --primary-gold-hover: rgba(245, 213, 99, 0.35);
+    --success-color: rgba(56, 142, 60, 0.3);
+    --danger-color: rgba(255, 100, 118, 0.3);
+    --info-color: rgba(33, 150, 243, 0.3);
+}
+body {
+    font-family: 'Manrope', sans-serif;
+    background: #333;
+    min-height: 100vh;
+    margin: 0;
+    color: #fff;
+    position: relative;
+    width: 100%;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding: 0 20px;
+}
+/* Стили для заголовков */
+.title, .subtitle {
+    text-align: center;
+}
 /* Стили для выпадающих фильтров */
 .tournament-filters {
     background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.15) 100%);
@@ -35,9 +37,8 @@
     margin-bottom: 25px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     position: relative;
-    z-index: 100; /* ДОБАВЛЯЕМ z-index для контейнера фильтров */
+    z-index: 100;
 }
-
 .tournament-filters::before {
     content: '';
     position: absolute;
@@ -49,13 +50,17 @@
     opacity: 0.6;
     pointer-events: none;
 }
-
+/* Сетка фильтров */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
 /* СОВРЕМЕННЫЙ ВЫПАДАЮЩИЙ СПИСОК В СТИЛЕ LIQUID GLASS */
 .filter-group {
     position: relative;
     margin-bottom: 20px;
 }
-
 .filter-label {
     display: block;
     margin-bottom: 10px;
@@ -64,13 +69,11 @@
     color: rgba(255,255,255,0.9);
     text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-
 /* Основной контейнер select */
 .liquid-select {
     position: relative;
     width: 100%;
 }
-
 /* Триггер (видимая часть) */
 .select-trigger {
     display: flex;
@@ -89,12 +92,11 @@
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    box-shadow: 
+    box-shadow:
         0 4px 20px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
-
 /* Стрелка */
 .select-trigger::after {
     content: "";
@@ -107,12 +109,10 @@
     transition: transform 0.3s ease-out;
     flex-shrink: 0;
 }
-
 /* Анимация стрелки при открытии */
 .liquid-select.open .select-trigger::after {
     transform: rotate(180deg);
 }
-
 .select-dropdown {
     position: absolute;
     top: 100%;
@@ -124,7 +124,7 @@
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 15px;
     margin-top: 8px;
-    box-shadow: 
+    box-shadow:
         0 20px 50px rgba(0,0,0,0.4),
         inset 0 1px 0 rgba(255,255,255,0.1);
     z-index: 10000; /* УВЕЛИЧИВАЕМ z-index */
@@ -135,7 +135,6 @@
     max-height: 300px;
     overflow-y: auto;
 }
-
 /* ТОЛЬКО ДЛЯ МОБИЛЬНЫХ, КОГДА МЕСТА НЕ ХВАТАЕТ */
 @media (max-width: 768px) {
     .select-dropdown.fixed-position {
@@ -150,11 +149,11 @@
         margin: 0;
         z-index: 1000001;
     }
-    
+   
     .liquid-select.open .select-dropdown.fixed-position {
         transform: translateY(0);
     }
-    
+   
     /* Затемнение фона при открытом списке */
     .select-overlay {
         position: fixed;
@@ -168,20 +167,18 @@
         visibility: hidden;
         transition: all 0.3s ease;
     }
-    
+   
     .liquid-select.open ~ .select-overlay {
         opacity: 1;
         visibility: visible;
     }
 }
-
 /* Анимация открытия */
 .liquid-select.open .select-dropdown {
     opacity: 1;
     visibility: visible;
     transform: translateY(0) scale(1);
 }
-
 /* Опции */
 .select-option {
     padding: 14px 20px;
@@ -192,24 +189,20 @@
     position: relative;
     font-size: 14px;
 }
-
 .select-option:last-child {
     border-bottom: none;
 }
-
 /* Ховер эффект для опций */
 .select-option:hover {
     background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 100%);
     color: #fff;
     transform: translateX(5px);
 }
-
 /* Выбранная опция */
 .select-option.selected {
     background: linear-gradient(135deg, rgba(243,194,17,0.25) 0%, rgba(240,193,25,0.15) 100%);
     color: #fff;
 }
-
 .select-option.selected::after {
     content: '✓';
     position: absolute;
@@ -218,28 +211,24 @@
     font-weight: bold;
     font-size: 16px;
 }
-
 /* Эффекты при взаимодействии */
 .select-trigger:hover {
     background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.15) 100%);
     border: 1px solid rgba(255,255,255,0.25);
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
         0 8px 30px rgba(0, 0, 0, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.25),
         inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 }
-
 .liquid-select.open .select-trigger {
     border: 1px solid rgba(243, 194, 17, 0.4);
     background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.18) 100%);
-    box-shadow: 
+    box-shadow:
         0 0 0 3px rgba(243, 194, 17, 0.15),
         0 8px 30px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
-
-
 /* Скрытый нативный select для доступности */
 .hidden-select {
     position: absolute;
@@ -248,66 +237,53 @@
     width: 1px;
     height: 1px;
 }
-
 /* Стили для скроллбара в выпадающем списке */
 .select-dropdown::-webkit-scrollbar {
     width: 4px;
 }
-
 .select-dropdown::-webkit-scrollbar-track {
     background: rgba(255,255,255,0.05);
     border-radius: 3px;
     margin: 5px;
 }
-
 .select-dropdown::-webkit-scrollbar-thumb {
     background: rgba(255,255,255,0.2);
     border-radius: 3px;
 }
-
 .select-dropdown::-webkit-scrollbar-thumb:hover {
     background: rgba(255,255,255,0.3);
 }
-
 /* АДАПТИВНОСТЬ */
 @media (max-width: 768px) {
     .select-trigger {
         padding: 16px 18px;
         font-size: 16px;
     }
-    
+   
     .select-option {
         padding: 16px 18px;
         font-size: 15px;
     }
-    
+   
     .select-trigger::after {
         width: 18px;
         height: 18px;
     }
 }
-
 @media (max-width: 480px) {
     .select-trigger {
         padding: 14px 16px;
     }
-    
+   
     .select-option {
         padding: 14px 16px;
     }
 }
-
-
-
-
-
-
 /* Кастомный контейнер для select */
 .select-container {
     position: relative;
     width: 100%;
 }
-
 .filter-select {
     width: 100%;
     padding: 14px 16px;
@@ -326,13 +302,12 @@
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    box-shadow: 
+    box-shadow:
         0 4px 20px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         inset 0 -1px 0 rgba(0, 0, 0, 0.05);
     margin-bottom: 0;
 }
-
 @keyframes centerFadeIn {
     from {
         opacity: 0;
@@ -343,7 +318,6 @@
         transform: translateX(-50%) scale(1);
     }
 }
-
 @keyframes centerFadeOut {
     from {
         opacity: 1;
@@ -354,20 +328,17 @@
         transform: translateX(-50%) scale(0.9);
     }
 }
-
 .filter-select:hover {
     background-color: rgba(255,255,255,0.15);
     border-color: rgba(255,255,255,0.3);
     transform: translateY(-1px);
 }
-
 .filter-select:focus {
     outline: none;
     border-color: var(--primary-gold);
     box-shadow: 0 0 0 2px rgba(243, 194, 17, 0.2);
     background-color: rgba(255,255,255,0.12);
 }
-
 /* Стили для опций в выпадающем списке */
 .filter-select option {
     background: rgba(40, 40, 60, 0.95);
@@ -375,12 +346,10 @@
     border: none;
     padding: 10px;
 }
-
        /* ПОЛЕ ПОИСКА */
 .search-box {
     position: relative;
 }
-
 .search-input {
     width: 100%;
     padding: 12px 16px 12px 45px;
@@ -393,18 +362,15 @@
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
 }
-
 .search-input::placeholder {
     color: rgba(255,255,255,0.6);
 }
-
 .search-input:focus {
     outline: none;
     border-color: var(--primary-gold);
     box-shadow: 0 0 0 2px rgba(243, 194, 17, 0.2);
     background-color: rgba(255,255,255,0.12);
 }
-
 .search-icon {
     position: absolute;
     left: 16px;
@@ -413,16 +379,13 @@
     color: rgba(255,255,255,0.6);
     z-index: 2;
 }
-
-
-      /* Сетка турниров */
 .tournaments-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 20px;
     margin-bottom: 30px;
+    justify-content: center;
 }
-
 .tournament-card {
     background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.15) 100%);
     backdrop-filter: blur(15px);
@@ -433,9 +396,9 @@
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     overflow: hidden;
-    z-index: 1; /* НИЗКИЙ z-index для карточек */
+    z-index: 1;
+    max-width: 100%;
 }
-
 .tournament-card::before {
     content: '';
     position: absolute;
@@ -447,16 +410,13 @@
     opacity: 0;
     transition: opacity 0.4s ease;
 }
-
 .tournament-card:hover::before {
     opacity: 1;
 }
-
 .tournament-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
-
 .tournament-badge {
     display: inline-flex;
     align-items: center;
@@ -469,7 +429,6 @@
     margin-bottom: 15px;
     backdrop-filter: blur(10px);
 }
-
 .tournament-title {
     font-size: 18px;
     font-weight: 700;
@@ -477,21 +436,18 @@
     line-height: 1.3;
     text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-
 .tournament-description {
     font-size: 14px;
     color: rgba(255,255,255,0.8);
     margin-bottom: 15px;
     line-height: 1.4;
 }
-
 .tournament-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
 }
-
 .tournament-difficulty {
     padding: 4px 8px;
     border-radius: 8px;
@@ -500,34 +456,29 @@
     text-transform: uppercase;
     backdrop-filter: blur(5px);
 }
-
-.difficulty-easy { 
-    background: rgba(76, 175, 80, 0.3); 
+.difficulty-easy {
+    background: rgba(76, 175, 80, 0.3);
     border: 1px solid rgba(76, 175, 80, 0.5);
 }
-.difficulty-medium { 
-    background: rgba(255, 152, 0, 0.3); 
+.difficulty-medium {
+    background: rgba(255, 152, 0, 0.3);
     border: 1px solid rgba(255, 152, 0, 0.5);
 }
-.difficulty-hard { 
-    background: rgba(244, 67, 54, 0.3); 
+.difficulty-hard {
+    background: rgba(244, 67, 54, 0.3);
     border: 1px solid rgba(244, 67, 54, 0.5);
 }
-
 .tournament-stats {
     display: flex;
     gap: 15px;
     font-size: 13px;
 }
-
 .stat {
     display: flex;
     align-items: center;
     gap: 5px;
     color: rgba(255,255,255,0.8);
 }
-
-       /* Лобби */
 .lobby-container {
     display: none;
     background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.15) 100%);
@@ -536,10 +487,7 @@
     border: 1px solid rgba(255,255,255,0.25);
     padding: 30px;
     margin-bottom: 20px;
-    box-shadow: 0 12px 50px rgba(0,0,0,0.15);
-    position: relative;
 }
-
 .lobby-container::before {
     content: '';
     position: absolute;
@@ -552,7 +500,6 @@
     pointer-events: none;
     border-radius: 25px;
 }
-
 .lobby-header {
     display: flex;
     justify-content: space-between;
@@ -563,19 +510,16 @@
     position: relative;
     z-index: 2;
 }
-
 .lobby-title {
     font-size: 24px;
     font-weight: 700;
     text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-
 .lobby-info {
     display: flex;
     gap: 15px;
     align-items: center;
 }
-
 .lobby-code {
     background: rgba(255,255,255,0.1);
     padding: 8px 16px;
@@ -587,7 +531,6 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.2);
 }
-
 .copy-btn {
     background: none;
     border: none;
@@ -597,17 +540,14 @@
     border-radius: 4px;
     transition: background 0.3s ease;
 }
-
 .copy-btn:hover {
     background: rgba(255,255,255,0.1);
 }
-
 .participants-section {
     margin-bottom: 30px;
     position: relative;
     z-index: 2;
 }
-
 .section-title {
     font-size: 18px;
     font-weight: 600;
@@ -617,18 +557,15 @@
     gap: 8px;
     text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-
 .participants-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 20px;
 }
-
 .participant {
     text-align: center;
     position: relative;
 }
-
 .participant-avatar {
     width: 55px;
     height: 55px;
@@ -644,12 +581,10 @@
     transition: all 0.3s ease;
     backdrop-filter: blur(5px);
 }
-
 .participant-avatar.ready {
     border-color: #4CAF50;
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
 }
-
 .participant-avatar.host::before {
     content: '👑';
     position: absolute;
@@ -666,22 +601,18 @@
     z-index: 2;
     backdrop-filter: blur(5px);
 }
-
 .participant-name {
     font-size: 12px;
     font-weight: 500;
     margin-bottom: 2px;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
-
 .participant-status {
     font-size: 10px;
     color: rgba(255,255,255,0.6);
 }
-
 .status-ready { color: #4CAF50; }
 .status-not-ready { color: #ff9800; }
-
 .participant-tooltip {
     position: absolute;
     bottom: 100%;
@@ -698,11 +629,9 @@
     z-index: 10;
     backdrop-filter: blur(10px);
 }
-
 .participant:hover .participant-tooltip {
     opacity: 1;
 }
-
 .add-participant {
     display: flex;
     flex-direction: column;
@@ -710,7 +639,6 @@
     justify-content: center;
     cursor: pointer;
 }
-
 .add-icon {
     width: 55px;
     height: 55px;
@@ -725,12 +653,10 @@
     backdrop-filter: blur(5px);
     margin-bottom: 20px;
 }
-
 .add-icon:hover {
     background: rgba(255,255,255,0.15);
     transform: scale(1.05);
 }
-
 .lobby-controls {
     display: flex;
     gap: 15px;
@@ -739,7 +665,6 @@
     position: relative;
     z-index: 2;
 }
-
 .ready-btn, .start-btn, .settings-btn {
     padding: 12px 30px;
     border: none;
@@ -752,40 +677,33 @@
     overflow: hidden;
     backdrop-filter: blur(10px);
 }
-
 .ready-btn {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.3);
     color: #fff;
 }
-
 .ready-btn.ready {
     background: var(--success-color);
     border-color: rgba(76,175,80,0.5);
 }
-
 .start-btn {
     background: var(--primary-gold);
     border: 1px solid rgba(255,255,255,0.4);
     color: #fff;
 }
-
 .start-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
-
 .start-btn:not(:disabled):hover {
     background: var(--primary-gold-hover);
     transform: translateY(-2px);
 }
-
 .settings-btn {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.2);
     color: #fff;
 }
-
         /* Настройки лобби */
         .lobby-settings {
             background: rgba(255,255,255,0.1);
@@ -794,14 +712,13 @@
             margin-top: 20px;
             display: none;
         }
-
         .settings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-
         /* Таблица результатов */
+/* Результаты - БАЗОВЫЕ СТИЛИ */
 .results-container {
     display: none;
     background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.15) 100%);
@@ -810,10 +727,7 @@
     border: 1px solid rgba(255,255,255,0.25);
     padding: 25px;
     margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
 }
-
 .results-container::before {
     content: '';
     position: absolute;
@@ -826,7 +740,6 @@
     pointer-events: none;
     border-radius: 25px;
 }
-
 .results-header {
     display: flex;
     justify-content: space-between;
@@ -837,35 +750,29 @@
     position: relative;
     z-index: 2;
 }
-
 .results-title {
     font-size: 24px;
     font-weight: 700;
     text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-
 .results-stats {
     display: flex;
     gap: 20px;
     font-size: 14px;
 }
-
 .stat-item {
     text-align: center;
 }
-
 .stat-value {
     font-size: 18px;
     font-weight: 700;
     color: var(--primary-gold);
     text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-
 .stat-label {
     font-size: 12px;
     color: rgba(255,255,255,0.7);
 }
-
       /* АДАПТИВНАЯ ТАБЛИЦА ДЛЯ МОБИЛЬНЫХ */
 .results-table-container {
     position: relative;
@@ -876,13 +783,11 @@
     background: rgba(255,255,255,0.05);
     backdrop-filter: blur(10px);
 }
-
 .results-table {
     width: 100%;
     border-collapse: collapse;
     min-width: 600px; /* Минимальная ширина для скролла на мобильных */
 }
-
 .results-table th {
     text-align: left;
     padding: 15px 12px;
@@ -892,28 +797,23 @@
     font-size: 14px;
     white-space: nowrap;
 }
-
 .results-table td {
     padding: 12px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     font-size: 14px;
 }
-
 .results-table tr:hover {
     background: rgba(255,255,255,0.05);
 }
-
 .results-table tr:last-child td {
     border-bottom: none;
 }
-
 .player-info {
     display: flex;
     align-items: center;
     gap: 10px;
     min-width: 150px;
 }
-
 .player-avatar {
     width: 32px;
     height: 32px;
@@ -926,7 +826,6 @@
     flex-shrink: 0;
     backdrop-filter: blur(5px);
 }
-
 .player-name {
     font-weight: 500;
     white-space: nowrap;
@@ -934,7 +833,6 @@
     text-overflow: ellipsis;
     max-width: 100px;
 }
-
 .medal {
     width: 24px;
     height: 24px;
@@ -947,318 +845,540 @@
     margin-right: 8px;
     flex-shrink: 0;
 }
-
 .medal.gold {
     background: linear-gradient(135deg, #FFD700, #FFEC8B);
     color: #000;
 }
-
 .medal.silver {
     background: linear-gradient(135deg, #C0C0C0, #E8E8E8);
     color: #000;
 }
-
 .medal.bronze {
     background: linear-gradient(135deg, #CD7F32, #E8B886);
     color: #000;
 }
-
 .score-excellent { color: #4CAF50; font-weight: 600; }
 .score-good { color: #FFC107; font-weight: 600; }
 .score-average { color: #FF9800; font-weight: 600; }
 .score-poor { color: #F44336; font-weight: 600; }
-
-
         .share-results {
             text-align: center;
             margin-top: 20px;
         }
-
         .action-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
         }
-
         /* Адаптивность */
         @media (max-width: 768px) {
             .tournaments-grid {
                 grid-template-columns: 1fr;
             }
-            
+           
             .lobby-header, .results-header {
                 flex-direction: column;
                 text-align: center;
             }
-            
+           
             .participants-grid {
                 grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
-            
+           
             .participant-avatar {
                 width: 60px;
                 height: 60px;
                 font-size: 20px;
             }
-
             .filters-grid {
                 grid-template-columns: 1fr;
             }
         }
-
         /* Анимации */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .fade-in {
             animation: fadeIn 0.5s ease-out;
         }
-
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
-        
+       
         .pulse {
             animation: pulse 2s infinite;
         }
-
 /* КОМПАКТНЫЙ ВАРИАНТ ТАБЛИЦЫ ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
 .results-table.compact td,
 .results-table.compact th {
     padding: 10px 8px;
     font-size: 13px;
 }
-
 .results-table.compact .player-info {
     min-width: 120px;
 }
-
 .results-table.compact .player-avatar {
     width: 28px;
     height: 28px;
     font-size: 12px;
 }
-
 .results-table.compact .player-name {
     max-width: 80px;
 }
-
 .results-table.compact .medal {
     width: 20px;
     height: 20px;
     font-size: 10px;
     margin-right: 6px;
 }
-
 .share-results {
     text-align: center;
     margin-top: 20px;
     position: relative;
     z-index: 2;
 }
-
 .action-buttons {
     display: flex;
     gap: 10px;
     justify-content: center;
     flex-wrap: wrap;
 }
-
-/* АДАПТИВНОСТЬ */
+/* Стили для планшетов (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+   
+    /* Сетка турниров для планшетов */
+    .tournaments-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 25px;
+    }
+   
+    .tournament-card {
+        padding: 28px;
+        border-radius: 22px;
+    }
+   
+    .tournament-title {
+        font-size: 20px;
+    }
+   
+    .tournament-description {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+   
+    /* Увеличение фильтров */
+    .tournament-filters {
+        padding: 30px;
+        border-radius: 22px;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+   
+    .filter-group {
+        margin-bottom: 25px;
+    }
+   
+    .filter-label {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+   
+    .select-trigger {
+        padding: 16px 22px;
+        font-size: 16px;
+        border-radius: 18px;
+    }
+   
+    .select-option {
+        padding: 16px 22px;
+        font-size: 15px;
+    }
+   
+    /* Увеличение лобби */
+    .lobby-container {
+        padding: 35px;
+        border-radius: 28px;
+        margin-bottom: 25px;
+    }
+   
+    .lobby-title {
+        font-size: 26px;
+    }
+   
+    .lobby-info {
+        gap: 20px;
+    }
+   
+    .lobby-code {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 18px;
+    }
+   
+    /* Увеличение участников */
+    .participants-grid {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 25px;
+    }
+   
+    .participant-avatar {
+        width: 70px;
+        height: 70px;
+        font-size: 26px;
+        border-width: 3px;
+    }
+   
+    .participant-avatar.host::before {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+    }
+   
+    .participant-name {
+        font-size: 14px;
+    }
+   
+    .participant-status {
+        font-size: 12px;
+    }
+   
+    .add-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+    }
+   
+    /* Увеличение кнопок управления */
+    .lobby-controls {
+        gap: 20px;
+    }
+   
+    .ready-btn, .start-btn, .settings-btn {
+        padding: 14px 35px;
+        font-size: 16px;
+        border-radius: 28px;
+        min-width: 160px;
+    }
+   
+    /* Увеличение таблицы результатов */
+    .results-container {
+        padding: 30px;
+        border-radius: 28px;
+    }
+   
+    .results-title {
+        font-size: 26px;
+    }
+   
+    .results-stats {
+        gap: 25px;
+    }
+   
+    .stat-value {
+        font-size: 20px;
+    }
+   
+    .stat-label {
+        font-size: 13px;
+    }
+   
+    /* Увеличение таблицы */
+    .results-table {
+        min-width: auto;
+    }
+   
+    .results-table th {
+        padding: 18px 15px;
+        font-size: 15px;
+    }
+   
+    .results-table td {
+        padding: 15px;
+        font-size: 15px;
+    }
+   
+    .player-info {
+        min-width: 180px;
+    }
+   
+    .player-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+   
+    .player-name {
+        max-width: 130px;
+        font-size: 15px;
+    }
+   
+    .medal {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+    }
+   
+    /* Увеличение кнопок действий */
+    .action-buttons {
+        gap: 15px;
+    }
+   
+    .action-buttons button {
+        padding: 14px 30px;
+        font-size: 16px;
+        border-radius: 20px;
+        min-width: 180px;
+    }
+   
+    /* Поиск */
+    .search-input {
+        padding: 14px 16px 14px 50px;
+        font-size: 16px;
+        border-radius: 15px;
+    }
+   
+    .search-icon {
+        left: 20px;
+        top: 58px;
+        font-size: 18px;
+    }
+}
+/* Дополнительные стили для планшетов в горизонтальной ориентации */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .tournaments-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+    }
+   
+    .participants-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 20px;
+    }
+}
+/* Стили для больших планшетов (1024px - 1200px) */
+@media (min-width: 1024px) and (max-width: 1200px) {
+   
+    .tournaments-grid {
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 30px;
+    }
+   
+    .tournament-card {
+        padding: 28px;
+    }
+   
+    .tournament-title {
+        font-size: 21px;
+    }
+   
+    .lobby-container, .results-container {
+        padding: 40px;
+    }
+   
+    .participants-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 30px;
+    }
+   
+    .participant-avatar {
+        width: 75px;
+        height: 75px;
+        font-size: 28px;
+    }
+}
+/* А ТЕПЕРЬ МЕДИА-ЗАПРОСЫ ДЛЯ МОБИЛЬНЫХ (после планшетных) */
+/* Мобильные устройства (до 768px) */
 @media (max-width: 768px) {
     .container {
-        padding-bottom: 100px;
+        padding: 0 15px 80px;
     }
-    
+   
     .tournaments-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+   
     .tournament-card {
         padding: 20px;
     }
-    
-    .filters-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
+   
+    .tournament-title {
+        font-size: 18px;
     }
-    
-    .lobby-header, .results-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
+   
+    .tournament-description {
+        font-size: 14px;
     }
-    
+   
+    .lobby-container, .results-container {
+        padding: 20px;
+    }
+   
+    .lobby-title, .results-title {
+        font-size: 22px;
+    }
+   
     .participants-grid {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
         gap: 15px;
     }
-    
+   
     .participant-avatar {
         width: 60px;
         height: 60px;
         font-size: 20px;
     }
-    
+   
     .lobby-controls {
         flex-direction: column;
         align-items: center;
     }
-    
+   
     .ready-btn, .start-btn, .settings-btn {
         width: 100%;
         max-width: 300px;
     }
-    
-    .results-stats {
-        gap: 15px;
+   
+    /* Стили для выпадающих списков на мобильных */
+    .select-dropdown.fixed-position {
+        position: fixed;
+        top: auto !important;
+        bottom: 20px;
+        left: 20px !important;
+        right: 20px !important;
+        max-height: 50vh;
+        border-radius: 15px;
+        transform: translateY(100%);
+        margin: 0;
+        z-index: 1000001;
     }
-    
-    .stat-item {
-        flex: 1;
+   
+    .liquid-select.open .select-dropdown.fixed-position {
+        transform: translateY(0);
     }
-    
-    .stat-value {
-        font-size: 16px;
+   
+    .select-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 100000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
     }
-    
-    .stat-label {
-        font-size: 11px;
+   
+    .liquid-select.open ~ .select-overlay {
+        opacity: 1;
+        visibility: visible;
     }
 }
-
+/* Очень маленькие мобильные (до 480px) */
 @media (max-width: 480px) {
     .container {
-        padding-bottom: 100px;
+        padding: 0 10px 70px;
     }
-    
+   
     .tournament-filters {
         padding: 20px;
     }
-    
+   
     .tournament-card {
         padding: 15px;
     }
-    
+   
     .tournament-title {
         font-size: 16px;
     }
-    
+   
     .tournament-description {
         font-size: 13px;
     }
-    
+   
     .lobby-container, .results-container {
-        padding: 20px;
+        padding: 15px;
         border-radius: 20px;
     }
-    
+   
     .lobby-title, .results-title {
         font-size: 20px;
     }
-    
+   
     .participants-grid {
         grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
         gap: 12px;
     }
-    
+   
     .participant-avatar {
         width: 55px;
         height: 55px;
         font-size: 18px;
     }
-    
-    
-    /* Активируем компактную таблицу на маленьких экранах */
-    .results-table {
-        min-width: 500px;
+   
+    .select-trigger {
+        padding: 14px 16px;
     }
-    
-    .results-table.compact {
-        min-width: 400px;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .action-buttons button {
-        width: 100%;
-        max-width: 280px;
+   
+    .select-option {
+        padding: 14px 16px;
     }
 }
-
-@media (max-width: 360px) {
-    .participants-grid {
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-        gap: 10px;
+/* Для больших экранов (>1200px) */
+@media (min-width: 1201px) {
+    .container {
+        padding: 0 40px;
     }
-    
-    .participant-avatar {
-        width: 50px;
-        height: 50px;
+    .tournaments-grid {
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 30px;
+    }
+    .tournament-card {
+        padding: 30px;
+    }
+    .tournament-title {
+        font-size: 22px;
+    }
+    .tournament-description {
         font-size: 16px;
     }
-    
-    .participant-name {
-        font-size: 10px;
+    .lobby-container, .results-container {
+        padding: 40px;
     }
-    
-    .results-table {
-        min-width: 350px;
+    .lobby-title, .results-title {
+        font-size: 28px;
     }
-    
-    .results-table.compact {
-        min-width: 320px;
+    .participants-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 30px;
     }
-    
-    .results-table.compact td,
-    .results-table.compact th {
-        padding: 8px 6px;
-        font-size: 12px;
+    .participant-avatar {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
     }
-}
-
-/* Анимации */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.pulse {
-    animation: pulse 2s infinite;
-}
-
-/* Скрытие скроллбара для таблицы */
-.results-table-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.results-table-container::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-}
-
-.results-table-container::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.3);
-    border-radius: 3px;
-}
-
-.results-table-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.5);
+    .ready-btn, .start-btn, .settings-btn {
+        padding: 14px 40px;
+        font-size: 18px;
+    }
+    .results-table th {
+        font-size: 16px;
+        padding: 18px 15px;
+    }
+    .results-table td {
+        font-size: 16px;
+        padding: 15px;
+    }
+    .player-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    .medal {
+        width: 30px;
+        height: 30px;
+    }
 }

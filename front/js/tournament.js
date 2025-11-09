@@ -395,7 +395,7 @@ function showNotification(message) {
     document.body.appendChild(notification);
     
     setTimeout(() => {
-        notification.style.animation = 'centerFadeOut 0.3s ease forwards';
+        notification.style.style.animation = 'centerFadeOut 0.3s ease forwards';
         setTimeout(() => {
             notification.remove();
         }, 300);
