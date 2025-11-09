@@ -318,20 +318,30 @@ function setupEventListeners() {
         } catch (error) {
             console.error('Ошибка сохранения:', error);
         }
-        
-        // Анимация закрытия
+
+        // Плавно закрываем модал и затем перенаправляем на основную страницу.
+        // Ранее редирект выполнялся только когда welcome_modal запускался как
+        // отдельная страница, что приводило к расхождению состояния при
+        // встроенном вызове из main.html — в итоге показывался "демо" блок
+        // и модал открывался повторно. Чтобы избежать этого, всегда
+        // переходим на main.html после успешной регистрации.
         const modal = document.querySelector('.welcome-modal-overlay');
-        modal.style.opacity = '0';
-        modal.style.transition = 'opacity 0.5s ease';
-        
+        if (modal) {
+            modal.style.opacity = '0';
+            modal.style.transition = 'opacity 0.35s ease';
+        }
+
         setTimeout(() => {
-            modal.remove();
-            console.log('Данные сохранены:', userData);
-            // Если модальное окно запущено как отдельная страница — перенаправим
-            if (!window.ConspectiumApp) {
-                window.location.href = '/front/html/main.html';
+            try {
+                if (modal && modal.parentNode) modal.remove();
+            } catch (e) {
+                // ignore
             }
-        }, 500);
+            console.log('Данные сохранены:', userData);
+            // Перенаправляем на основную страницу, чтобы приложение
+            // корректно инициализировало состояние (token/user из localStorage).
+            window.location.href = '/front/html/main.html';
+        }, 350);
     });
     
     // Клавиши для навигации
