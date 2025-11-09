@@ -182,13 +182,22 @@
     overflow: hidden;
     width: 100%;
     min-height: 500px;
-    max-height: none;
+    max-height: none; /* Убираем ограничение максимальной высоты */
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.35),
         inset 0 -1px 0 rgba(0, 0, 0, 0.03);
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+.question-item.expanded ~ .preview {
+    min-height: calc(100vh + 10px); /* На 10px больше высоты экрана */
+    height: auto;
+    max-height: none;
+    overflow: visible;
+
 }
 
 .quiz-head {
@@ -224,6 +233,12 @@
     position: relative;
     overflow: visible;
     border-radius: 20px;
+    min-height: 400px; /* Минимальная высота для нормального отображения */
+}
+
+.question-item.expanded ~ .preview .questions-container {
+    min-height: calc(100vh - 100px);
+    height: auto;
 }
 
 .questions-container::-webkit-scrollbar {
@@ -315,19 +330,20 @@
     overflow: hidden;
 }
 
-/* КОНТЕЙНЕР ОТВЕТОВ В РАСКРЫТОМ СОСТОЯНИИ - ВАЖНО! */
 .question-item.expanded .answers-container {
     opacity: 1;
     transform: translateY(0) scale(1);
     max-height: none;
     padding: 0 20px 20px 20px;
     overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-/* ВАРИАНТЫ ОТВЕТОВ В СВЕРНУТОМ СОСТОЯНИИ */
 .answer-option {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 12px;
     cursor: pointer;
     padding: 8px 0;
@@ -336,28 +352,35 @@
     transition: all 0.4s ease;
     background: transparent;
     border: none;
+    width: 100%;
 }
 
-/* ВАРИАНТЫ ОТВЕТОВ В РАСКРЫТОМ СОСТОЯНИИ - ВАЖНО! */
 .question-item.expanded .answer-option {
     background: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.1) 0%,
-        rgba(255, 255, 255, 0.05) 50%,
-        rgba(255, 255, 255, 0.1) 100%
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.06) 50%,
+        rgba(255, 255, 255, 0.12) 100%
     );
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 15px;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
+    backdrop-filter: blur(15px);
+    -webkit-backpackdrop-filter: blur(15px);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 0;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     opacity: 1;
     transform: translateX(0);
     box-shadow: 
-        0 2px 12px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 6px 25px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    min-height: 70px;
+    height: auto;
+    overflow: hidden;
 }
 
 .question-item.expanded .answer-option:hover {
@@ -376,12 +399,11 @@
 
 /* ЧЕКБОКСЫ */
 .checkmark {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border: 2px solid rgba(255, 255, 255, 0.7);
     border-radius: 50%;
-    margin-right: 12px;
-    margin-top: 0;
+    margin-right: 16px;
     position: relative;
     flex-shrink: 0;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -389,7 +411,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Центрируем по вертикали */
+    align-self: center;
+    margin-top: 0;
 }
+
 
 .answer-option input[type="radio"] {
     position: absolute;
@@ -433,16 +459,24 @@
 
 .answer-text {
     color: #fff;
-    font-size: 15px;
-    line-height: 1.4;
+    font-size: 16px;
+    line-height: 1.5;
     flex: 1;
+    /* Правильный перенос текста */
     word-wrap: break-word;
     overflow-wrap: break-word;
-    transition: color 0.3s ease;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-    min-height: auto;
-    height: auto;
+    word-break: break-word;
     white-space: normal;
+    hyphens: auto;
+    min-width: 0;
+    transition: color 0.3s ease;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    font-weight: 500;
+    /* Выравнивание по центру */
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
 }
 
 .answer-option:hover .answer-text {
@@ -495,10 +529,10 @@
     margin: 0 auto;
     min-height: auto;
     height: auto;
-    max-height: none; /* УБИРАЕМ ограничение высоты */
+    max-height: none;
     position: relative;
     z-index: 2;
-    overflow: visible; /* Оставляем visible */
+    overflow: visible;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
 }
@@ -523,26 +557,65 @@
     background: rgba(255, 255, 255, 0.5);
 }
 
-/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ - ОБНОВЛЯЕМ ВЫСОТУ */
-@media (max-width: 768px) {
+/* АДАПТИВНОСТЬ ДЛЯ IPAD И ПЛАНШЕТОВ */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .preview {
+        min-height: 600px; /* Увеличиваем минимальную высоту для планшетов */
+    }
+    
+    .question-item.expanded ~ .preview {
+        min-height: calc(100vh + 20px); /* Еще больше места для iPad */
+    }
+    
     .question-item.expanded .question-content {
-        padding: 60px 15px 120px 15px;
-        max-height: calc(100vh - 180px); /* Меньшая высота на мобильных */
+        max-width: 90%; /* Шире контент */
     }
 }
 
-@media (max-width: 480px) {
-    .question-item.expanded .question-content {
-        padding: 50px 10px 110px 10px;
-        max-height: calc(100vh - 160px); /* Еще меньше на маленьких экранах */
+/* АДАПТИВНОСТЬ ДЛЯ БОЛЬШИХ ЭКРАНОВ */
+@media (min-width: 1025px) {
+    .preview {
+        min-height: 550px;
     }
+    
+    .question-item.expanded ~ .preview {
+        min-height: calc(100vh + 15px);
+    }
+    
+    .question-item.expanded .question-content {
+        max-width: 850px;
+    }
+}
+
+/* ОБЕСПЕЧИВАЕМ ПРОКРУТКУ ДЛЯ ДЛИННЫХ ВОПРОСОВ */
+.question-item.expanded .answers-container {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* УБЕДИТЕСЬ ЧТО КНОПКИ НАХОДЯТСЯ НА СВОЕМ МЕСТЕ */
+body.question-expanded .primary-btn {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 10px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 1003 !important;
+}
+
+/* СТРЕЛКИ НАВИГАЦИИ ДОЛЖНЫ БЫТЬ ВИДИМЫ */
+.question-item.expanded ~ .nav-arrow {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1600;
 }
 
 /* УБЕДИТЕСЬ ЧТО ВСЕ ЭЛЕМЕНТЫ ВИДИМЫ */
 .question-item.expanded {
-    overflow-y: auto !important; /* Разрешаем скролл для всего вопроса */
+    overflow-y: auto !important;
+    min-height: 100vh;
+    height: auto;
 }
-
 .question-item.expanded .question-text {
     font-size: clamp(20px, 5vw, 24px);
     padding: 30px 50px 25px 50px;
@@ -638,7 +711,7 @@
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     display: flex;
-    align-items: flex-start;
+    align-items: flex-start; /* Изменено с center на flex-start */
     padding: 18px 20px;
     margin-bottom: 0;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -652,6 +725,14 @@
     min-height: 60px;
     height: auto;
     overflow: visible;
+    /* Добавляем для правильного переноса */
+    flex-wrap: nowrap;
+}
+
+.question-item.expanded {
+    overflow-y: auto !important;
+    min-height: 100vh;
+    height: auto;
 }
 
 .question-item.expanded .answer-option:hover {
@@ -670,7 +751,6 @@
 }
 
 .question-item.expanded .checkmark {
-    margin-top: 4px;
     width: 24px;
     height: 24px;
     border: 2px solid rgba(255, 255, 255, 0.7);
@@ -683,6 +763,48 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Центрируем относительно первой строки текста */
+    margin-top: 0;
+    align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+    .question-item.expanded .answer-option {
+        padding: 15px;
+        border-radius: 16px;
+        align-items: flex-start;
+    }
+    
+    .question-item.expanded .answer-text {
+        font-size: 15px;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    
+    .question-item.expanded .checkmark {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .question-item.expanded .answer-option {
+        padding: 12px;
+        border-radius: 14px;
+        min-height: 50px;
+    }
+    
+    .question-item.expanded .checkmark {
+        width: 18px;
+        height: 18px;
+        margin-right: 10px;
+    }
+    
+    .question-item.expanded .answer-text {
+        font-size: 14px;
+        line-height: 1.4;
+    }
 }
 
 .question-item.expanded .answer-text {
@@ -692,14 +814,16 @@
     flex: 1;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    word-break: break-word;
     transition: all 0.3s ease;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     font-weight: 500;
     white-space: normal;
     min-height: auto;
     height: auto;
+    /* Текст начинается с того же уровня, что и чекбокс */
+    padding-top: 0;
     align-self: flex-start;
-    padding-top: 2px;
 }
 
 /* СКРЫВАЕМ ДРУГИЕ ВОПРОСЫ КОГДА ОДИН РАСКРЫТ */
@@ -984,6 +1108,8 @@
     .question-item.expanded .answer-option {
         padding: 15px;
         border-radius: 16px;
+        align-items: flex-start;
+        min-height: 55px;
     }
     
     .question-item.expanded .answer-text {
@@ -1168,6 +1294,63 @@ body.question-expanded .primary-btn {
     display: none;
 }
 
+/* АДАПТИВНОСТЬ ДЛЯ IPAD И ПЛАНШЕТОВ */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .question-item.expanded .question-content {
+        max-width: 90%;
+        min-height: calc(100vh - 150px); /* Меньше отступов на планшетах */
+    }
+}
+
+/* АДАПТИВНОСТЬ ДЛЯ БОЛЬШИХ ЭКРАНОВ */
+@media (min-width: 1025px) {
+    .question-item.expanded .question-content {
+        max-width: 850px;
+        min-height: calc(100vh - 220px); /* Больше места для контента */
+    }
+}
+
+/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ */
+@media (max-width: 768px) {
+    .question-item.expanded .question-content {
+        min-height: calc(100vh - 180px);
+    }
+}
+
+@media (max-width: 480px) {
+    .question-item.expanded .question-content {
+        min-height: calc(100vh - 160px);
+    }
+}
+
+/* ОБЕСПЕЧИВАЕМ ПРОКРУТКУ ДЛЯ ОЧЕНЬ ДЛИННЫХ ВОПРОСОВ */
+.question-item.expanded .answers-container {
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: auto;
+    height: auto;
+}
+
+/* УБЕДИТЕСЬ ЧТО ВСЕ ЭЛЕМЕНТЫ В КОНТЕЙНЕРЕ ВИДИМЫ */
+.question-item.expanded .question-content * {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* СТРЕЛКИ НАВИГАЦИИ ДОЛЖНЫ БЫТЬ ВИДИМЫ */
+.question-item.expanded ~ .nav-arrow {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1600;
+}
+
+.question-item.expanded ~ .primary-btn {
+    display: none !important;
+}
+
+body.question-expanded .primary-btn {
+    display: none !important;
+}
 
 /* СТИЛИ ДЛЯ ИСТОРИИ ПРОХОЖДЕНИЙ */
 .quiz-history {

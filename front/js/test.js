@@ -224,7 +224,7 @@ function createNavigationElements() {
         document.addEventListener('keydown', handleKeyDown);
     }
 
-   function openExpandedQuestion(question) {
+function openExpandedQuestion(question) {
     // Закрываем предыдущий открытый вопрос
     if (expanded && expanded !== question) {
         closeExpandedQuestion();
@@ -239,12 +239,21 @@ function createNavigationElements() {
     // Добавляем крестик
     addCloseButtonToQuestion(question);
 
+    hideSubmitButton();
+
     // Показываем навигацию
     showNavigation();
 
     // Прокручиваем к верху
     window.scrollTo(0, 0);
+    
+    // Принудительно обновляем высоту preview
+    const preview = document.querySelector('.preview');
+    if (preview) {
+        preview.style.minHeight = 'calc(100vh + 10px)';
+    }
 }
+
 
 function closeExpandedQuestion() {
     if (expanded) {
@@ -259,7 +268,31 @@ function closeExpandedQuestion() {
         document.body.classList.remove('question-expanded');
         document.body.classList.remove('history-hidden'); // Убираем класс для показа истории
         
+        // Восстанавливаем нормальную высоту preview
+        const preview = document.querySelector('.preview');
+        if (preview) {
+            preview.style.minHeight = '';
+        }
+        
         hideNavigation();
+    }
+}
+
+function hideSubmitButton() {
+    const submitBtn = document.getElementById('submitQuizBtn');
+    if (submitBtn) {
+        submitBtn.style.display = 'none';
+        submitBtn.style.opacity = '0';
+        submitBtn.style.visibility = 'hidden';
+    }
+}
+
+function showSubmitButton() {
+    const submitBtn = document.getElementById('submitQuizBtn');
+    if (submitBtn) {
+        submitBtn.style.display = 'flex';
+        submitBtn.style.opacity = '1';
+        submitBtn.style.visibility = 'visible';
     }
 }
 
