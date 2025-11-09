@@ -946,35 +946,45 @@ function initConspectCreatePage(app) {
     }
 
     // Функция для скрытия анимации создания конспекта
-    function hideConspectCreateAnimation() {
-        const elements = window.conspectCreateAnimation;
+function hideConspectCreateAnimation() {
+    const elements = window.conspectCreateAnimation;
+    
+    if (!elements) return;
+    
+    if (elements.overlay) {
+        elements.overlay.style.opacity = '0';
+        elements.overlay.style.transition = 'opacity 0.5s ease';
         
-        if (!elements) return;
-        
-        if (elements.overlay) {
-            elements.overlay.style.opacity = '0';
-            elements.overlay.style.transition = 'opacity 0.5s ease';
-            
-            setTimeout(() => {
-                if (elements.overlay.parentNode) {
-                    elements.overlay.parentNode.removeChild(elements.overlay);
-                }
-            }, 500);
-        }
-        
-        try {
-            if (window._prevBodyOverflow !== undefined) {
-                document.body.style.overflow = window._prevBodyOverflow || '';
-                window._prevBodyOverflow = undefined;
-            } else {
-                document.body.style.overflow = '';
+        setTimeout(() => {
+            if (elements.overlay.parentNode) {
+                elements.overlay.parentNode.removeChild(elements.overlay);
             }
-        } catch (e) {
-            // ignore
-        }
-
-        window.conspectCreateAnimation = null;
+        }, 500);
     }
+    
+    // Восстанавливаем скролл
+    try {
+        if (window._prevBodyOverflow !== undefined) {
+            document.body.style.overflow = window._prevBodyOverflow || '';
+            document.body.style.height = window._prevBodyHeight || '';
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+        }
+        
+        // Восстанавливаем скролл для html
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.height = '';
+    } catch (e) {
+        // ignore
+        document.body.style.overflow = '';
+        document.body.style.height = '';
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.height = '';
+    }
+
+    window.conspectCreateAnimation = null;
+}
 
     async function loadConspectDetails(app, conspectId) {
         try {

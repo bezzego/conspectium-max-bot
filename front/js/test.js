@@ -274,6 +274,9 @@ function closeExpandedQuestion() {
             preview.style.minHeight = '';
         }
         
+        // ВАЖНО: Восстанавливаем кнопку завершения теста
+        showSubmitButton();
+        
         hideNavigation();
     }
 }
@@ -293,6 +296,12 @@ function showSubmitButton() {
         submitBtn.style.display = 'flex';
         submitBtn.style.opacity = '1';
         submitBtn.style.visibility = 'visible';
+        submitBtn.style.position = 'relative'; // Возвращаем нормальное позиционирование
+        submitBtn.style.bottom = 'auto';
+        submitBtn.style.left = 'auto';
+        submitBtn.style.transform = 'none';
+        submitBtn.style.margin = '20px auto'; // Добавляем отступы
+        submitBtn.style.maxWidth = '760px';
     }
 }
 

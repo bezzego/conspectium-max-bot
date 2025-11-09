@@ -928,7 +928,7 @@ body.question-expanded .primary-btn {
 /* КНОПКА ЗАВЕРШЕНИЯ ТЕСТА */
 .primary-btn {
     font-family: 'Manrope', sans-serif;
-    width: calc(100% - 40px);
+    width: 100%;
     max-width: 760px;
     padding: clamp(16px, 4vw, 20px);
     background: linear-gradient(
@@ -950,11 +950,11 @@ body.question-expanded .primary-btn {
     justify-content: center;
     gap: 10px;
     transition: all 0.3s;
-    margin: 2px 0; 
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin: 20px auto; /* Изменено с fixed на auto */
+    position: relative; /* Изменено с fixed на relative */
+    bottom: auto; /* Убираем фиксированное позиционирование */
+    left: auto;
+    transform: none; /* Убираем трансформацию */
     box-sizing: border-box;
     z-index: 1002;
     box-shadow: 
@@ -970,7 +970,7 @@ body.question-expanded .primary-btn {
         rgba(248, 213, 87, 0.22) 50%,
         rgba(245, 212, 92, 0.35) 100%
     );
-    transform: translateX(-50%) translateY(-2px);
+    transform: translateY(-2px); /* Убираем translateX */
     box-shadow: 
         0 12px 40px rgba(245, 216, 110, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.5),
@@ -1133,7 +1133,6 @@ body.question-expanded .primary-btn {
     .nav-arrow.next { right: 20px; }
     
     .primary-btn {
-        width: calc(100% - 30px);
         padding: 14px 20px;
         font-size: 16px;
     }
@@ -1210,10 +1209,25 @@ body.question-expanded .primary-btn {
     .nav-arrow.next { right: 15px; }
     
     .primary-btn {
-        width: calc(100% - 20px);
         padding: 12px 18px;
         font-size: 15px;
         border-radius: 40px;
+    }
+}
+
+@media (min-height: 900px) {
+        .nav-arrow {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 500px;
+    }
+}
+
+@media (min-height: 800px) {
+        .nav-arrow {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 140px;
     }
 }
 
@@ -1278,15 +1292,6 @@ body.question-expanded .primary-btn {
 .question-item.expanded * {
     overflow: visible !important;
     max-height: none !important;
-}
-
-body.question-expanded .primary-btn {
-     display: flex !important;
-     position: fixed !important;
-     bottom: 10px !important;
-     left: 50% !important;
-     transform: translateX(-50%) !important;
-     z-index: 1003 !important;
 }
 
 /* Скрываем блок результатов в полноэкранном режиме */
