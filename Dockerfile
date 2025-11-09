@@ -1,11 +1,13 @@
-# syntax=docker/dockerfile:1
-FROM python:3.11-slim
+# ===========================
+#   Stage 1 — Build deps
+# ===========================
+FROM python:3.11-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
-# Install system dependencies
+# System deps
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
@@ -14,27 +16,45 @@ RUN apt-get update \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install poetry
-RUN pip install --upgrade pip setuptools wheel \
-    && pip install poetry
+# Upgrade pip + install poetry
+RUN pip install --upgrade pip setuptools wheel && pip install poetry
 
-# Copy project metadata first to leverage Docker layer cache
+# Copy poetry files
 COPY pyproject.toml poetry.lock* /app/
 
-# Install python dependencies using poetry
+# Install deps into /packages to reuse later
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-root --no-interaction --no-ansi
+    && poetry install --without dev --no-root --no-ansi --no-interaction
 
-# Copy application code
+# ===========================
+#   Stage 2 — Runtime image
+# ===========================
+FROM python:3.11-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+# Install system deps needed at runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy python deps from builder
+
+COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
+
+# Install gunicorn explicitly
+RUN pip install gunicorn
+
+# Copy app code
 COPY . /app
+COPY .env /app/.env
 
-# Add entrypoint and make it executable
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
-
+# Entry point
+ENV PORT=8000
 EXPOSE 8000
 
-ENV PORT=8000
-
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# ✅ Prod server: Gunicorn + Uvicorn workers
+CMD ["gunicorn", "app.main:app", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "4"]

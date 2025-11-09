@@ -39,7 +39,6 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     def _startup() -> None:
-        init_db()
         Path(settings.audio_storage_dir).mkdir(parents=True, exist_ok=True)
 
     return app

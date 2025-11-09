@@ -11,8 +11,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db() -> None:
     from app import models  # noqa: F401  # Ensure models are imported for Alembic
-
-    Base.metadata.create_all(bind=engine)
+    # Database schema creation is fully handled by Alembic migrations.
+    # No direct table or enum creation here.
+    pass
 
 
 def get_db() -> Session:
