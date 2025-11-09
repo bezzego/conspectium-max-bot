@@ -653,7 +653,7 @@
         inset 0 -1px 0 rgba(179, 152, 46, 0.2);
     overflow: hidden;
     width: calc(100% - 40px);
-    max-width: 760px;
+    max-width: 770px;
     padding: clamp(16px, 4vw, 20px);
     box-sizing: border-box;
     z-index: 1000; /* Увеличил z-index чтобы была поверх всего */
