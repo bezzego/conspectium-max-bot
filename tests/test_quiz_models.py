@@ -21,8 +21,8 @@ def test_deleting_quiz_removes_results() -> None:
 
     with Session(engine) as session:
         user = User(
-            telegram_id=123456,
             username="tester",
+            display_name="tester",
             first_name="Test",
             last_name="User",
             last_login_at=datetime.utcnow(),

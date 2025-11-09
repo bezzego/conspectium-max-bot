@@ -6,7 +6,13 @@ from sqlalchemy.orm import relationship
 from app.models.base import Base
 
 
-class TelegramSession(Base):
+class UserSession(Base):
+    __tablename__ = 'user_session'
+    """Generic user session for web authentication.
+
+    Replaced legacy TelegramSession with a neutral session model named
+    UserSession so the app doesn't depend on Telegram-specific concepts.
+    """
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
     token_jti = Column(String(64), unique=True, nullable=False, index=True)

@@ -48,4 +48,4 @@ class TelegramAuthService:
         return data
 
 
-telegram_auth_service = TelegramAuthService(settings.telegram_bot_token)
+# Telegram auth service removed for web-only flow. Keep class for reference only.

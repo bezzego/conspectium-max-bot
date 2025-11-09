@@ -6,7 +6,8 @@ from pydantic import BaseModel, ConfigDict
 
 class UserBase(BaseModel):
     id: int
-    telegram_id: int
+    # legacy field removed from public API; kept for DB compatibility only
+    telegram_id: Optional[int] = None
     username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -26,13 +27,11 @@ class UserRead(UserBase):
     last_login_at: datetime
 
 
-class TelegramAuthRequest(BaseModel):
-    init_data: str
-
-
-class DevLoginRequest(BaseModel):
-    username: Optional[str] = "Demo User"
-    telegram_id: Optional[int] = None
+class RegisterRequest(BaseModel):
+    display_name: str
+    gender: Optional[str] = None
+    avatar_id: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 class AuthToken(BaseModel):
