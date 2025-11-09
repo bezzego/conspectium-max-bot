@@ -137,14 +137,13 @@
 
 @media (max-width: 410px) {
     .top-bar {
-        width: calc(100% - 20px);
         padding: 8px 12px;
         margin-bottom: 12px;
     }
     
     .logo {
         height: 50px;
-        width: 210px;
+        width: 220px;
     }
 }
 
@@ -511,29 +510,6 @@
     );
 }
 
-
-/* Стили для секции preview с конспектами */
-.preview {
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.1) 0%,
-        rgba(255, 255, 255, 0.05) 50%,
-        rgba(255, 255, 255, 0.1) 100%
-    );
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    /* padding: 20px; */
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-}
-
 /* Контейнер для бликов в preview */
 .preview {
     background: linear-gradient(
@@ -547,6 +523,7 @@
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.25);
     padding: 10px;
+    min-height: 240px;
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
@@ -623,6 +600,14 @@
     }
 }
 
+@media (min-height: 768px) {
+    .preview {
+        height: 500px;
+    }
+}
+
+
+
 /* Стили для кнопки загрузки аудио с liquid glass эффектом */
 .upload-btn.liquid-glass {
     position: fixed;
@@ -647,10 +632,6 @@
     justify-content: center;
     gap: 10px;
     transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 
-        0 8px 32px rgba(245, 216, 110, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4),
-        inset 0 -1px 0 rgba(179, 152, 46, 0.2);
     overflow: hidden;
     width: calc(100% - 40px);
     max-width: 770px;

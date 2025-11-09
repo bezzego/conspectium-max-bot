@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: conspectium
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      # If DATABASE_URL isn't provided in .env, default to postgres service
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/conspectium}
+      AUDIO_STORAGE_DIR: /app/var/audio
+      GUNICORN_WORKERS: 4
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./var/audio:/app/var/audio
+    depends_on:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

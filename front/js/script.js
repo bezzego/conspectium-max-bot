@@ -668,20 +668,39 @@ function showVariantChoiceModal({ title } = {}) {
         }
     }
 
-    async function loadMainConspects(app) {
-        const container = document.getElementById('mainConspects');
-        if (!container) return;
+async function loadMainConspects(app) {
+    const container = document.getElementById('mainConspects');
+    if (!container) return;
 
-        container.textContent = 'Загружаем конспекты...';
-        try {
-            const data = await app.authFetch('/conspects');
-            renderConspectList(container, data.items.slice(0, 10));
-            attachConspectDetailsHandlers(app, container);
-        } catch (err) {
-            console.error(err);
-            container.textContent = 'Не удалось загрузить конспекты.';
-        }
+    // Устанавливаем стили для текста загрузки
+    container.style.cssText = `
+        color: #fff;
+        text-align: center;
+        padding: 40px 20px;
+        font-size: 16px;
+        font-weight: 500;
+    `;
+    
+    container.textContent = 'Загружаем конспекты...';
+    
+    try {
+        const data = await app.authFetch('/conspects');
+        // Убираем стили загрузки перед рендером конспектов
+        container.style.cssText = '';
+        renderConspectList(container, data.items.slice(0, 10));
+        attachConspectDetailsHandlers(app, container);
+    } catch (err) {
+        console.error(err);
+        container.style.cssText = `
+            color: #fff;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 16px;
+            font-weight: 500;
+        `;
+        container.textContent = 'Не удалось загрузить конспекты.';
     }
+}
 
     // Conspect list -----------------------------------------------------
     async function initConspectListPage(app) {
