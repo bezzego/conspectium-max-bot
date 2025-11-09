@@ -234,10 +234,13 @@ function openExpandedQuestion(question) {
     question.classList.add('expanded');
     expanded = question;
     document.body.classList.add('question-expanded');
-    document.body.classList.add('history-hidden'); // Добавляем класс для скрытия истории
+    document.body.classList.add('history-hidden');
 
     // Добавляем крестик
     addCloseButtonToQuestion(question);
+
+    // Принудительно запускаем анимацию
+    forceQuestionAnimation(question);
 
     hideSubmitButton();
 
@@ -343,32 +346,74 @@ function showHistory() {
 
 
 
-    function navigateQuestions(delta) {
-        if (!expanded) return;
-        
-        const items = Array.from(document.querySelectorAll('.question-item'));
-        const currentIndex = items.indexOf(expanded);
-        if (currentIndex === -1) return;
-        
-        const targetIndex = currentIndex + delta;
-        if (targetIndex < 0 || targetIndex >= items.length) return;
+   function navigateQuestions(delta) {
+    if (!expanded) return;
+    
+    const items = Array.from(document.querySelectorAll('.question-item'));
+    const currentIndex = items.indexOf(expanded);
+    if (currentIndex === -1) return;
+    
+    const targetIndex = currentIndex + delta;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
 
-        // Закрываем текущий вопрос
-        expanded.classList.remove('expanded');
-        
-        // Открываем новый вопрос
-        const targetQuestion = items[targetIndex];
-        targetQuestion.classList.add('expanded');
-        expanded = targetQuestion;
+    // Закрываем текущий вопрос
+    expanded.classList.remove('expanded');
+    
+    // Открываем новый вопрос
+    const targetQuestion = items[targetIndex];
+    targetQuestion.classList.add('expanded');
+    expanded = targetQuestion;
 
-        // Добавляем крестик к новому вопросу
-        addCloseButtonToQuestion(targetQuestion);
+    // Добавляем крестик к новому вопросу
+    addCloseButtonToQuestion(targetQuestion);
 
-        // История остается скрытой (уже скрыта при первом открытии)
-        
-        // Обновляем навигацию
-        showNavigation();
+    // Принудительно запускаем анимацию появления
+    forceQuestionAnimation(targetQuestion);
+
+    // История остается скрытой (уже скрыта при первом открытии)
+    
+    // Обновляем навигацию
+    showNavigation();
+}
+
+function forceQuestionAnimation(question) {
+    // Принудительно перезапускаем анимацию
+    const questionContent = question.querySelector('.question-content');
+    const answersContainer = question.querySelector('.answers-container');
+    
+    if (questionContent) {
+        // Сбрасываем трансформации для перезапуска анимации
+        questionContent.style.animation = 'none';
+        questionContent.offsetHeight; // Принудительный reflow
+        questionContent.style.animation = null;
     }
+    
+    if (answersContainer) {
+        // Сбрасываем стили для контейнера ответов
+        answersContainer.style.opacity = '0';
+        answersContainer.style.transform = 'translateY(-10px) scale(0.95)';
+        
+        // Принудительно запускаем анимацию после небольшой задержки
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                answersContainer.style.opacity = '1';
+                answersContainer.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    }
+    
+    // Также принудительно показываем варианты ответов
+    const answerOptions = question.querySelectorAll('.answer-option');
+    answerOptions.forEach((option, index) => {
+        option.style.opacity = '0';
+        option.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            option.style.opacity = '1';
+            option.style.transform = 'translateX(0)';
+        }, 100 + (index * 50)); // Ступенчатая анимация
+    });
+}
 
     function addCloseButtonToQuestion(question) {
     const questionText = question.querySelector('.question-text');
