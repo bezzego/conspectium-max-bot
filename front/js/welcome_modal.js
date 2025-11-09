@@ -32,23 +32,33 @@ const ITEM_SPACING = 145;
 
 async function persistProfile(app, payload) {
     if (!app) return;
-    if (typeof app.updateProfile === 'function') {
-        return app.updateProfile(payload);
+    // If the main application is present, prefer its registration/profile API.
+    if (typeof app.registerUser === 'function') {
+        return app.registerUser(payload);
     }
-    const user = await app.authFetch('/auth/me', {
-        method: 'PATCH',
+
+    // Fallback: call the public register endpoint directly. This is used when
+    // welcome modal is opened as a standalone page (no global app object).
+    const response = await fetch('/api/auth/register', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     });
-    if (app.state) {
-        app.state.user = user;
+
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Не удалось зарегистрировать пользователя');
     }
+
+    const data = await response.json();
     try {
-        localStorage.setItem('conspectium_user', JSON.stringify(user));
+        localStorage.setItem('conspectium_token', data.token.access_token);
+        localStorage.setItem('conspectium_user', JSON.stringify(data.user));
     } catch (error) {
-        console.warn('Не удалось обновить кэш профиля', error);
+        console.warn('Не удалось сохранить данные сессии', error);
     }
-    return user;
+
+    return data.user;
 }
 
 // Рендер аватарок
@@ -317,7 +327,10 @@ function setupEventListeners() {
         setTimeout(() => {
             modal.remove();
             console.log('Данные сохранены:', userData);
-            // window.location.href = '/main.html'; // Раскомментируй для редиректа
+            // Если модальное окно запущено как отдельная страница — перенаправим
+            if (!window.ConspectiumApp) {
+                window.location.href = '/front/html/main.html';
+            }
         }, 500);
     });
     

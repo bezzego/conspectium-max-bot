@@ -9,7 +9,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.models.session import TelegramSession
+from app.models.session import UserSession
 from app.models.user import User
 from app.services.security import token_service
 
@@ -38,8 +38,8 @@ def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session token")
 
     session = (
-        db.query(TelegramSession)
-        .filter(TelegramSession.token_jti == jti, TelegramSession.expires_at > datetime.utcnow())
+        db.query(UserSession)
+        .filter(UserSession.token_jti == jti, UserSession.expires_at > datetime.utcnow())
         .one_or_none()
     )
     if session is None:
@@ -56,9 +56,9 @@ def get_current_user(
     return user
 
 
-def create_session(db: Session, user: User, expire_minutes: int) -> TelegramSession:
+def create_session(db: Session, user: User, expire_minutes: int) -> UserSession:
     token_jti = secrets.token_hex(16)
-    session = TelegramSession(
+    session = UserSession(
         user_id=user.id,
         token_jti=token_jti,
         created_at=datetime.utcnow(),

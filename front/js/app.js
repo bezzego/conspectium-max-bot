@@ -2,8 +2,7 @@
     const API_BASE = '/api';
     const TOKEN_KEY = 'conspectium_token';
     const USER_KEY = 'conspectium_user';
-    const DEV_PROFILE_KEY = 'conspectium_dev_profile';
-    const DEV_PROFILE_IDS_KEY = 'conspectium_dev_ids';
+    // Dev profile keys removed for web-only flow
 
     const state = {
         token: localStorage.getItem(TOKEN_KEY) || null,
@@ -34,91 +33,7 @@
         }
     }
 
-    function allocateDevTelegramId() {
-        let usedIds = [];
-        const raw = localStorage.getItem(DEV_PROFILE_IDS_KEY);
-        if (raw) {
-            try {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed)) {
-                    usedIds = parsed.filter((value) => Number.isInteger(value));
-                }
-            } catch (err) {
-                console.warn('Failed to parse dev id pool', err);
-            }
-        }
-        const usedSet = new Set(usedIds);
-
-        let candidate = null;
-        for (let attempt = 0; attempt < 50; attempt += 1) {
-            const randomId = Math.floor(1000000 + Math.random() * 9000000);
-            if (!usedSet.has(randomId)) {
-                candidate = randomId;
-                break;
-            }
-        }
-
-        if (candidate === null) {
-            candidate = Math.floor(1000000 + Math.random() * 9000000);
-            usedIds = [];
-        }
-
-        usedIds.push(candidate);
-        try {
-            localStorage.setItem(DEV_PROFILE_IDS_KEY, JSON.stringify(usedIds));
-        } catch (err) {
-            console.warn('Failed to persist dev id pool', err);
-        }
-
-        return candidate;
-    }
-
-    function getDevProfile() {
-        const cached = localStorage.getItem(DEV_PROFILE_KEY);
-        if (cached) {
-            try {
-                const parsed = JSON.parse(cached);
-                if (parsed?.username && parsed?.telegram_id) {
-                    return parsed;
-                }
-            } catch (err) {
-                console.warn('Failed to parse dev profile', err);
-                localStorage.removeItem(DEV_PROFILE_KEY);
-            }
-        }
-
-        const randomSuffix = (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2))
-            .replace(/[^a-zA-Z0-9]/g, '')
-            .slice(-6)
-            .toUpperCase();
-        const profile = {
-            username: `Demo User ${randomSuffix}`,
-            telegram_id: allocateDevTelegramId(),
-        };
-        localStorage.setItem(DEV_PROFILE_KEY, JSON.stringify(profile));
-        return profile;
-    }
-
-    async function devLogin() {
-        const profile = getDevProfile();
-        const response = await fetch(`${API_BASE}/auth/dev-login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(profile),
-        });
-
-        if (!response.ok) {
-            throw new Error('Dev-login failed');
-        }
-
-        const data = await response.json();
-        state.token = data.token.access_token;
-        state.user = data.user;
-        localStorage.setItem(TOKEN_KEY, state.token);
-        setUser(state.user);
-    }
+    // Dev-login removed — web-only registration via welcome modal is required
 
     async function fetchCurrentUser() {
         const response = await authFetch('/auth/me', { _internalCall: true });
@@ -128,17 +43,28 @@
     }
 
     async function ensureAuth() {
-        if (!state.token) {
-            await devLogin();
+        // If we have no token and no cached user, redirect to onboarding page
+        // so the user can register. In development flows there is still
+        // a dev-login available, but for normal web usage we require explicit
+        // registration (welcome modal).
+        if (!state.token && !state.user) {
+            // Navigate to the onboarding modal/page which will call /auth/register
+            window.location.href = '/front/html/welcome_modal.html';
+            // stop further execution — onboarding takes over
+            return state;
         }
 
-        if (!state.user) {
+        // If we have a token but no cached user, try to fetch user. On failure
+        // clear auth state and show onboarding so the user can register.
+        if (state.token && !state.user) {
             try {
                 await fetchCurrentUser();
             } catch (err) {
-                console.error('Failed to fetch current user, retrying dev login', err);
+                console.error('Failed to fetch current user', err);
                 clearAuthState();
-                await devLogin();
+                // Redirect to onboarding to register a fresh user
+                window.location.href = '/front/html/welcome_modal.html';
+                return state;
             }
         }
 
@@ -366,6 +292,29 @@
         return user;
     }
 
+    async function registerUser(payload) {
+        // payload: { display_name, gender, avatar_id, avatar_url }
+        const response = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || 'Registration failed');
+        }
+
+        const data = await response.json();
+        state.token = data.token.access_token;
+        state.user = data.user;
+        localStorage.setItem(TOKEN_KEY, state.token);
+        setUser(state.user);
+        return data.user;
+    }
+
     async function generateConspectVariant(conspectId, variant) {
         if (!variant) {
             throw new Error('Не выбран тип варианта');
@@ -456,6 +405,7 @@
         createQuizFromConspect,
         createManualQuiz,
         updateProfile,
+        registerUser,
         deleteQuiz,
         generateConspectVariant,
         downloadAudioSource,

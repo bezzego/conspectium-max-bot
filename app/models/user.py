@@ -1,13 +1,17 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Column, DateTime, Integer, String, UniqueConstraint
+import sqlalchemy as sa
+from sqlalchemy import Column, DateTime, Integer, String, Boolean
 
 from app.models.base import Base
 
 
 class User(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    telegram_id = Column(BigInteger, unique=True, nullable=False, index=True)
+    email = Column(String(255), nullable=True, index=True)
+    password_hash = Column(String(255), nullable=True)
+    full_name = Column(String(255), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True, server_default=sa.true())
     username = Column(String(255), nullable=True)
     first_name = Column(String(255), nullable=True)
     last_name = Column(String(255), nullable=True)
@@ -25,4 +29,5 @@ class User(Base):
         DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
-    __table_args__ = (UniqueConstraint("telegram_id", name="uq_users_telegram_id"),)
+    # No unique constraint on telegram_id anymore — site authentication is independent
+    # of Telegram. Email uniqueness is enforced by migrations when present.
