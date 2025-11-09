@@ -169,198 +169,378 @@ window.goBack = goBack;
         });
     }
 
-    function ensureVariantChoiceStyles() {
-        if (variantChoiceStylesInjected) {
-            return;
-        }
-        const style = document.createElement('style');
-        style.id = 'variant-choice-styles';
-        style.textContent = `
+   function ensureVariantChoiceStyles() {
+    if (variantChoiceStylesInjected) {
+        return;
+    }
+    const style = document.createElement('style');
+    style.id = 'variant-choice-styles';
+    style.textContent = `
 .variant-choice-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.7);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 12000;
     padding: 20px;
+    backdrop-filter: blur(10px);
 }
 .variant-choice-modal {
     width: 100%;
-    max-width: 420px;
-    background: #1f2027;
-    border-radius: 20px;
-    padding: 24px;
+    max-width: 440px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.15) 100%
+    );
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 28px;
     color: #fff;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    box-shadow: 
+        0 20px 60px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+.variant-choice-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 30%,
+        transparent 70%
+    );
+    border-radius: 24px;
+    opacity: 0.6;
+    pointer-events: none;
 }
 .variant-choice-modal h3 {
     margin: 0 0 8px 0;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 .variant-choice-subtitle {
-    margin: 0 0 16px 0;
-    color: rgba(255,255,255,0.65);
-    font-size: 14px;
+    margin: 0 0 20px 0;
+    color: rgba(255,255,255,0.75);
+    font-size: 15px;
+    text-align: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 .variant-choice-options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+    margin-bottom: 8px;
 }
 .variant-choice-option {
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 14px;
-    padding: 14px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 18px;
     display: flex;
-    gap: 12px;
+    gap: 14px;
     cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
 }
-.variant-choice-option input {
-    margin-top: 5px;
+.variant-choice-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 30%,
+        transparent 70%
+    );
+    border-radius: 16px;
+    opacity: 0.5;
+}
+.variant-choice-option:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 8px 24px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .variant-choice-option.active {
-    border-color: rgba(245,216,110,0.7);
-    background: rgba(245,216,110,0.08);
+    border-color: rgba(245, 216, 110, 0.6);
+    background: linear-gradient(
+        135deg,
+        rgba(245, 216, 110, 0.15) 0%,
+        rgba(245, 216, 110, 0.08) 50%,
+        rgba(245, 216, 110, 0.15) 100%
+    );
+    box-shadow: 
+        0 8px 24px rgba(245, 216, 110, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.variant-choice-option input {
+    margin-top: 3px;
+    transform: scale(1.2);
+    accent-color: #f5d86e;
+    cursor: pointer;
 }
 .variant-choice-option label {
     cursor: pointer;
     flex: 1;
+    margin: 0;
 }
 .variant-choice-option-title {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
 }
 .variant-choice-option-desc {
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
-    margin-top: 4px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.4;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    cursor: pointer;
 }
 .variant-choice-actions {
-    margin-top: 20px;
+    margin-top: 24px;
     display: flex;
-    gap: 12px;
+    gap: 14px;
 }
 .variant-choice-btn {
     flex: 1;
     border: none;
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-size: 15px;
+    border-radius: 16px;
+    padding: 16px 20px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+.variant-choice-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 30%,
+        transparent 70%
+    );
+    border-radius: 16px;
+    opacity: 0.6;
 }
 .variant-choice-btn.cancel {
-    background: rgba(255,255,255,0.08);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.15);
     color: #fff;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+.variant-choice-btn.cancel:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.15) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 20px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 .variant-choice-btn.primary {
-    background: linear-gradient(135deg, #ffd76f, #f0b349);
-    color: #1f1f1f;
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.5) 0%,
+        rgba(240, 193, 25, 0.4) 50%,
+        rgba(243, 196, 24, 0.5) 100%
+    );
+    border: 1px solid rgba(245, 216, 110, 0.4);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 
+        0 4px 16px rgba(245, 216, 110, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.2);
+}
+.variant-choice-btn.primary:hover:not(:disabled) {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.6) 0%,
+        rgba(248, 213, 87, 0.5) 50%,
+        rgba(245, 212, 92, 0.6) 100%
+    );
+    border-color: rgba(245, 216, 110, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 24px rgba(245, 216, 110, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .variant-choice-btn.primary:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none;
 }
-        `;
-        document.head.appendChild(style);
-        variantChoiceStylesInjected = true;
-    }
+    `;
+    document.head.appendChild(style);
+    variantChoiceStylesInjected = true;
+}
 
-    function showVariantChoiceModal({ title } = {}) {
-        ensureVariantChoiceStyles();
-        return new Promise((resolve) => {
-            const overlay = document.createElement('div');
-            overlay.className = 'variant-choice-overlay';
-            const optionsMarkup = VARIANT_ORDER.map((key) => {
-                const descriptions = {
-                    full: 'Максимально подробный конспект со всеми деталями.',
-                    brief: 'Сбалансированный обзор основных идей.',
-                    compressed: 'Самая сжатая выжимка фактов.',
-                };
-                return `
-                    <label class="variant-choice-option" data-variant="${key}">
-                        <input type="radio" name="variantChoice" value="${key}">
-                        <div>
-                            <div class="variant-choice-option-title">${VARIANT_LABELS[key]}</div>
-                            <div class="variant-choice-option-desc">${descriptions[key]}</div>
-                        </div>
-                    </label>
-                `;
-            }).join('');
-
-            overlay.innerHTML = `
-                <div class="variant-choice-modal">
-                    <h3>Выбери формат конспекта</h3>
-                    ${title ? `<p class="variant-choice-subtitle">${escapeHtml(title)}</p>` : ''}
-                    <div class="variant-choice-options">
-                        ${optionsMarkup}
+function showVariantChoiceModal({ title } = {}) {
+    ensureVariantChoiceStyles();
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'variant-choice-overlay';
+        const optionsMarkup = VARIANT_ORDER.map((key) => {
+            const descriptions = {
+                full: 'Максимально подробный конспект со всеми деталями.',
+                brief: 'Сбалансированный обзор основных идей.',
+                compressed: 'Самая сжатая выжимка фактов.',
+            };
+            return `
+                <label class="variant-choice-option" data-variant="${key}">
+                    <input type="radio" name="variantChoice" value="${key}">
+                    <div>
+                        <div class="variant-choice-option-title">${VARIANT_LABELS[key]}</div>
+                        <div class="variant-choice-option-desc">${descriptions[key]}</div>
                     </div>
-                    <div class="variant-choice-actions">
-                        <button type="button" class="variant-choice-btn cancel">Отмена</button>
-                        <button type="button" class="variant-choice-btn primary" disabled>Продолжить</button>
-                    </div>
-                </div>
+                </label>
             `;
+        }).join('');
 
-            document.body.appendChild(overlay);
+        overlay.innerHTML = `
+            <div class="variant-choice-modal">
+                <h3>Выбери формат конспекта</h3>
+                ${title ? `<p class="variant-choice-subtitle">${escapeHtml(title)}</p>` : ''}
+                <div class="variant-choice-options">
+                    ${optionsMarkup}
+                </div>
+                <div class="variant-choice-actions">
+                    <button type="button" class="variant-choice-btn cancel">Отмена</button>
+                    <button type="button" class="variant-choice-btn primary" disabled>Продолжить</button>
+                </div>
+            </div>
+        `;
 
-            const optionNodes = Array.from(overlay.querySelectorAll('.variant-choice-option'));
-            const radios = overlay.querySelectorAll('input[name="variantChoice"]');
-            const cancelBtn = overlay.querySelector('.variant-choice-btn.cancel');
-            const confirmBtn = overlay.querySelector('.variant-choice-btn.primary');
-            let selectedValue = null;
+        document.body.appendChild(overlay);
 
-            const cleanup = () => {
-                overlay.remove();
-            };
+        const optionNodes = Array.from(overlay.querySelectorAll('.variant-choice-option'));
+        const radios = overlay.querySelectorAll('input[name="variantChoice"]');
+        const cancelBtn = overlay.querySelector('.variant-choice-btn.cancel');
+        const confirmBtn = overlay.querySelector('.variant-choice-btn.primary');
+        let selectedValue = null;
 
-            const selectOption = (value, element) => {
-                selectedValue = value;
-                confirmBtn.disabled = !selectedValue;
-                optionNodes.forEach((node) => node.classList.toggle('active', node === element));
-                const radio = element.querySelector('input');
-                if (radio) {
-                    radio.checked = true;
-                }
-            };
+        const cleanup = () => {
+            overlay.remove();
+        };
 
-            const defaultOption =
-                optionNodes.find((node) => node.dataset.variant === 'brief') || optionNodes[0];
-            if (defaultOption) {
-                selectOption(defaultOption.dataset.variant, defaultOption);
+        const selectOption = (value, element) => {
+            selectedValue = value;
+            confirmBtn.disabled = !selectedValue;
+            optionNodes.forEach((node) => node.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Гарантируем, что радио-кнопка выбрана
+            const radio = element.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
             }
+        };
 
-            optionNodes.forEach((option) => {
-                option.addEventListener('click', () => {
+        // Автовыбор опции по умолчанию
+        const defaultOption = optionNodes.find((node) => node.dataset.variant === 'brief') || optionNodes[0];
+        if (defaultOption) {
+            selectOption(defaultOption.dataset.variant, defaultOption);
+        }
+
+        // Обработчики для выбора опции
+        optionNodes.forEach((option) => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                selectOption(option.dataset.variant, option);
+            });
+
+            // Также обрабатываем клики по дочерним элементам
+            const title = option.querySelector('.variant-choice-option-title');
+            const desc = option.querySelector('.variant-choice-option-desc');
+            if (title) {
+                title.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     selectOption(option.dataset.variant, option);
                 });
-            });
+            }
+            if (desc) {
+                desc.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    selectOption(option.dataset.variant, option);
+                });
+            }
+        });
 
-            cancelBtn.addEventListener('click', () => {
+        cancelBtn.addEventListener('click', () => {
+            cleanup();
+            resolve(null);
+        });
+
+        confirmBtn.addEventListener('click', () => {
+            if (!selectedValue) {
+                return;
+            }
+            cleanup();
+            resolve(selectedValue);
+        });
+
+        overlay.addEventListener('click', (event) => {
+            if (event.target === overlay) {
                 cleanup();
                 resolve(null);
-            });
-
-            confirmBtn.addEventListener('click', () => {
-                if (!selectedValue) {
-                    return;
-                }
-                cleanup();
-                resolve(selectedValue);
-            });
-
-            overlay.addEventListener('click', (event) => {
-                if (event.target === overlay) {
-                    cleanup();
-                    resolve(null);
-                }
-            });
+            }
         });
-    }
+
+    });
+}
 
     function setupUploadHandlers(app) {
         if (uploadHandlersAttached) {
@@ -393,7 +573,7 @@ window.goBack = goBack;
         const handleTriggerClick = async (event) => {
             event.preventDefault();
             const title =
-                event.currentTarget?.dataset?.variantPrompt || 'Выбери полноту конспекта';
+                event.currentTarget?.dataset?.variantPrompt || 'Выбрать можно только один';
             const variant = await requestVariant(title);
             if (!variant) {
                 return;
@@ -414,7 +594,7 @@ window.goBack = goBack;
                 }
                 event.preventDefault();
                 event.stopImmediatePropagation();
-                const variant = await requestVariant('Выбери полноту конспекта');
+                const variant = await requestVariant('Выбрать можно только один');
                 if (!variant) {
                     return;
                 }

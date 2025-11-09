@@ -47,5 +47,18 @@
     <script src="/front/js/conspect_list.js" defer></script>
     <script src="/front/js/liquid_glass.js" defer></script>
 
+
+        <script>
+        // Дополнительный скрипт для гарантии правильного позиционирования
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadBtn = document.getElementById('uploadAudioButton');
+            if (uploadBtn) {
+                uploadBtn.style.bottom = 'auto';
+                uploadBtn.style.left = 'auto';
+                uploadBtn.style.transform = 'none';
+                uploadBtn.style.marginTop = '15px';
+            }
+        });
+    </script>
 </body>
 </html>

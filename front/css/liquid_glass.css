@@ -57,8 +57,8 @@
 
 .logo {
     margin-top: 5px;
-    height: 50px;
-    width: 250px;
+    height: 60px;
+    width: 270px;
     object-fit: contain;
     filter: brightness(0) invert(1);
     transition: all 0.4s ease;
@@ -110,6 +110,7 @@
         width: calc(100%);
         max-width: min(1000px, 85vw);
         padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 28px);
+        height: 90px;
     }
 }
 
@@ -119,6 +120,8 @@
         width: calc(100%);
         max-width: min(1000px, 80vw);
         padding: 14px clamp(24px, 4vw, 32px);
+        height: 90px;
+
     }
 }
 
@@ -140,16 +143,24 @@
     }
     
     .logo {
-        height: 45px;
-        width: 200px;
+        height: 50px;
+        width: 210px;
+    }
+}
+
+@media (max-width: 410px) {
+    
+    .back-btn i {
+        font-size: 25px;
+        margin-right: 10px;
     }
 }
 
 /* MAIN.HTML */
 
-/* Контейнер для горизонтального скролла */
+/* Обновляем контейнер для скролла действий */
 .actions-scroll-container {
-    margin-bottom: 80px; /* Отступ для кнопки загрузки аудио */
+    margin-bottom: 0; /* убираем нижний отступ */
     position: relative;
 }
 
@@ -167,34 +178,30 @@
     display: none;
 }
 
-/* Убедитесь что кнопка загрузки аудио фиксирована внизу */
 .upload-btn.liquid-glass {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    /* остальные стили остаются без изменений */
+    position: relative; /* меняем с fixed на relative */
+    bottom: auto; /* убираем фиксированное позиционирование */
+    left: auto; /* убираем фиксированное позиционирование */
+    transform: none; /* убираем трансформацию */
+    margin-top: 15px; /* добавляем отступ сверху 15px */
+    width: 100%; /* растягиваем на всю ширину контейнера */
+    max-width: none; /* убираем ограничение максимальной ширины */
 }
 
 /* Адаптивность для мобильных */
 @media (max-width: 768px) {
     .actions-scroll-container {
-        margin-bottom: 70px; /* Меньший отступ на мобильных */
+        margin-bottom: 0;
     }
     
-    .actions-scroll {
-        gap: 8px; /* Меньший отступ на мобильных */
+    .upload-btn.liquid-glass {
+        margin-top: 12px; /* немного уменьшаем отступ на мобильных */
     }
 }
 
 @media (max-width: 480px) {
-    .actions-scroll-container {
-        margin-bottom: 65px;
-    }
-    
-    .actions-scroll {
-        gap: 6px;
+    .upload-btn.liquid-glass {
+        margin-top: 10px; /* еще немного уменьшаем на очень маленьких экранах */
     }
 }
 
@@ -621,7 +628,6 @@
     position: fixed;
     bottom: 10px; /* Увеличил отступ от низа */
     left: 50%;
-    transform: translateX(-50%);
     background: linear-gradient(
         135deg,
         rgba(243, 194, 17, 0.377) 0%,

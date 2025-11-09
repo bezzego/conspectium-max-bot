@@ -33,9 +33,21 @@
   }
 }
 
-@media (max-height: 750px)  {
+@media (max-height: 686px)  {
   .preview {
-    max-height: 200px;
+    max-height: 260px;
+  }
+}
+
+@media (max-height: 800px)  {
+  .preview {
+    max-height: 320px;
+  }
+}
+
+@media (max-height: 833px)  {
+  .preview {
+    max-height: 400px;
   }
 }
 
