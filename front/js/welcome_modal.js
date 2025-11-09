@@ -31,14 +31,14 @@ let lastTime = 0;
 const ITEM_SPACING = 145;
 
 async function persistProfile(app, payload) {
-    if (!app) return;
-    // If the main application is present, prefer its registration/profile API.
-    if (typeof app.registerUser === 'function') {
+    // If the main application is present and exposes registerUser, prefer it.
+    if (app && typeof app.registerUser === 'function') {
         return app.registerUser(payload);
     }
 
-    // Fallback: call the public register endpoint directly. This is used when
-    // welcome modal is opened as a standalone page (no global app object).
+    // Otherwise, call the public register endpoint directly. This covers the
+    // standalone welcome_modal page or cases when the application object is
+    // present but its registerUser failed and we want a fallback.
     const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -285,7 +285,10 @@ function setupEventListeners() {
     
     // Кнопка подтверждения
     confirmBtn.addEventListener('click', async () => {
-        if (!validateForm()) return;
+        console.debug('[welcome_modal] confirm click - validating form');
+        const valid = validateForm();
+        console.debug('[welcome_modal] form valid:', valid, 'name:', nameInput.value, 'gender:', selectedGender);
+        if (!valid) return;
 
         const userData = {
             name: nameInput.value.trim(),
@@ -295,8 +298,10 @@ function setupEventListeners() {
         };
 
         const app = window.ConspectiumApp;
+        console.debug('[welcome_modal] ConspectiumApp present:', !!app);
         if (app) {
             try {
+                console.debug('[welcome_modal] using app.registerUser');
                 app.showLoading('Сохраняем профиль...');
                 await persistProfile(app, {
                     display_name: userData.name,
@@ -305,10 +310,36 @@ function setupEventListeners() {
                     avatar_url: userData.avatar?.url,
                 });
                 app.hideLoading();
+                console.debug('[welcome_modal] persistProfile (via app) completed');
             } catch (error) {
-                console.error(error);
-                app.hideLoading();
-                app.notify(error.message || 'Не удалось сохранить профиль', 'error');
+                console.error('[welcome_modal] persistProfile via app failed', error);
+                try { app.hideLoading(); } catch (e) {}
+                try { app.notify(error.message || 'Не удалось сохранить профиль', 'error'); } catch (e) {}
+                // proceed to fallback below to attempt direct registration
+            }
+        }
+
+        // If app-based registration didn't produce a token, attempt direct
+        // registration fallback to ensure we have a session token stored.
+        if (!localStorage.getItem('conspectium_token')) {
+            console.debug('[welcome_modal] no token found after app.registerUser; trying direct fallback');
+            try {
+                await persistProfile(null, {
+                    display_name: userData.name,
+                    gender: userData.gender,
+                    avatar_id: userData.avatar?.id,
+                    avatar_url: userData.avatar?.url,
+                });
+                console.debug('[welcome_modal] fallback direct registration succeeded');
+            } catch (err) {
+                console.error('[welcome_modal] fallback direct registration failed', err);
+                // Show an error to the user and stop
+                const appNotify = window.ConspectiumApp?.notify;
+                if (typeof appNotify === 'function') {
+                    try { appNotify('Не удалось зарегистрировать пользователя', 'error'); } catch (e) {}
+                } else {
+                    alert('Не удалось зарегистрировать пользователя: ' + (err?.message || err));
+                }
                 return;
             }
         }
@@ -318,6 +349,8 @@ function setupEventListeners() {
         } catch (error) {
             console.error('Ошибка сохранения:', error);
         }
+
+        console.debug('[welcome_modal] finished persistProfile; localStorage token:', localStorage.getItem('conspectium_token'));
 
         // Плавно закрываем модал и затем перенаправляем на основную страницу.
         // Ранее редирект выполнялся только когда welcome_modal запускался как

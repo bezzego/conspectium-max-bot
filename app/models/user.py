@@ -11,12 +11,10 @@ class User(Base):
     email = Column(String(255), nullable=True, index=True)
     password_hash = Column(String(255), nullable=True)
     full_name = Column(String(255), nullable=True)
-    is_active = Column(Boolean, nullable=False, default=True, server_default=sa.true())
-    username = Column(String(255), nullable=True)
     first_name = Column(String(255), nullable=True)
     last_name = Column(String(255), nullable=True)
     language_code = Column(String(16), nullable=True)
-    photo_url = Column(String(1024), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True, server_default=sa.true())
 
     display_name = Column(String(255), nullable=True)
     gender = Column(String(32), nullable=True)

@@ -8,7 +8,6 @@ class UserBase(BaseModel):
     id: int
     # legacy field removed from public API; kept for DB compatibility only
     telegram_id: Optional[int] = None
-    username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     language_code: Optional[str] = None

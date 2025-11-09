@@ -73,7 +73,11 @@
 
     async function authFetch(path, options = {}) {
         const { _internalCall, ...requestOptions } = options;
-        await ensureAuth();
+        // If this is an internal call used by ensureAuth (e.g. fetching /auth/me),
+        // skip calling ensureAuth again to avoid recursion.
+        if (!_internalCall) {
+            await ensureAuth();
+        }
 
         const headers = options.headers ? { ...options.headers } : {};
         headers['Authorization'] = `Bearer ${state.token}`;
