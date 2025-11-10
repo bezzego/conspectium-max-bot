@@ -621,7 +621,7 @@ function showVariantChoiceModal({ title } = {}) {
             state.pendingVariant = null;
             
             // Показываем красивый лоадер вместо app.showLoading
-            showConspectLoadingAnimation('Загружаем аудио...');
+            showConspectLoadingAnimation('Загружаем аудио...', 'Это может занять несколько минут для длинных аудио.');
             
             const audio = await app.uploadAudio(file);
             
