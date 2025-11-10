@@ -344,9 +344,7 @@ function showHistory() {
     }
 }
 
-
-
-   function navigateQuestions(delta) {
+function navigateQuestions(delta) {
     if (!expanded) return;
     
     const items = Array.from(document.querySelectorAll('.question-item'));
@@ -359,6 +357,10 @@ function showHistory() {
     // Закрываем текущий вопрос
     expanded.classList.remove('expanded');
     
+    // Сбрасываем стили текущего вопроса
+    expanded.style.transform = '';
+    expanded.style.webkitTransform = '';
+    
     // Открываем новый вопрос
     const targetQuestion = items[targetIndex];
     targetQuestion.classList.add('expanded');
@@ -367,51 +369,129 @@ function showHistory() {
     // Добавляем крестик к новому вопросу
     addCloseButtonToQuestion(targetQuestion);
 
-    // Принудительно запускаем анимацию появления
-    forceQuestionAnimation(targetQuestion);
+    // Принудительно запускаем анимацию с задержкой для мобильных
+    setTimeout(() => {
+        forceQuestionAnimation(targetQuestion);
+    }, 50);
 
-    // История остается скрытой (уже скрыта при первом открытии)
-    
     // Обновляем навигацию
     showNavigation();
+    
+    // Дополнительная перерисовка для мобильных
+    setTimeout(() => {
+        void targetQuestion.offsetWidth;
+    }, 100);
+}
+
+// Функция для принудительной перерисовки на мобильных устройствах
+function forceMobileRepaint(element) {
+    if (!element) return;
+    
+    // Несколько методов для гарантированной перерисовки
+    element.style.display = 'none';
+    element.offsetHeight; // reflow
+    element.style.display = '';
+    
+    // Дополнительные методы для Webkit
+    element.style.webkitTransform = 'translateZ(0)';
+    element.style.transform = 'translateZ(0)';
+    
+    // Принудительный reflow
+    void element.offsetWidth;
+}
+
+// Обнови функцию openExpandedQuestion для мобильных
+function openExpandedQuestion(question) {
+    // Закрываем предыдущий открытый вопрос
+    if (expanded && expanded !== question) {
+        closeExpandedQuestion();
+    }
+
+    // Открываем новый вопрос
+    question.classList.add('expanded');
+    expanded = question;
+    document.body.classList.add('question-expanded');
+    document.body.classList.add('history-hidden');
+
+    // Добавляем крестик
+    addCloseButtonToQuestion(question);
+
+    // Для мобильных - принудительная перерисовка
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        setTimeout(() => {
+            forceMobileRepaint(question);
+            forceQuestionAnimation(question);
+        }, 100);
+    } else {
+        forceQuestionAnimation(question);
+    }
+
+    hideSubmitButton();
+    showNavigation();
+    window.scrollTo(0, 0);
+    
+    const preview = document.querySelector('.preview');
+    if (preview) {
+        preview.style.minHeight = 'calc(100vh + 10px)';
+    }
 }
 
 function forceQuestionAnimation(question) {
-    // Принудительно перезапускаем анимацию
+    // Принудительно активируем GPU-ускорение для всего вопроса
+    question.style.transform = 'translateZ(0)';
+    question.style.webkitTransform = 'translateZ(0)';
+    
+    // Принудительно перезапускаем анимацию для контента
     const questionContent = question.querySelector('.question-content');
-    const answersContainer = question.querySelector('.answers-container');
-    
     if (questionContent) {
-        // Сбрасываем трансформации для перезапуска анимации
-        questionContent.style.animation = 'none';
-        questionContent.offsetHeight; // Принудительный reflow
-        questionContent.style.animation = null;
-    }
-    
-    if (answersContainer) {
-        // Сбрасываем стили для контейнера ответов
-        answersContainer.style.opacity = '0';
-        answersContainer.style.transform = 'translateY(-10px) scale(0.95)';
+        questionContent.style.willChange = 'transform, opacity';
+        questionContent.style.transform = 'translateZ(0)';
+        questionContent.style.webkitTransform = 'translateZ(0)';
         
-        // Принудительно запускаем анимацию после небольшой задержки
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                answersContainer.style.opacity = '1';
-                answersContainer.style.transform = 'translateY(0) scale(1)';
-            });
-        });
+        // Сбрасываем и перезапускаем анимацию
+        questionContent.style.animation = 'none';
+        void questionContent.offsetWidth; // Принудительный reflow
+        questionContent.style.animation = 'slideInContent 0.5s ease-out 0.1s both';
     }
     
-    // Также принудительно показываем варианты ответов
+    // Принудительно показываем контейнер ответов
+    const answersContainer = question.querySelector('.answers-container');
+    if (answersContainer) {
+        answersContainer.style.willChange = 'transform, opacity';
+        answersContainer.style.transform = 'translateZ(0) translateY(0) scale(1)';
+        answersContainer.style.webkitTransform = 'translateZ(0) translateY(0) scale(1)';
+        answersContainer.style.opacity = '1';
+        
+        // Принудительный reflow для контейнера ответов
+        void answersContainer.offsetWidth;
+    }
+    
+    // Принудительно показываем варианты ответов
     const answerOptions = question.querySelectorAll('.answer-option');
     answerOptions.forEach((option, index) => {
-        option.style.opacity = '0';
-        option.style.transform = 'translateX(-20px)';
+        option.style.willChange = 'transform, opacity';
+        option.style.transform = 'translateZ(0) translateX(0)';
+        option.style.webkitTransform = 'translateZ(0) translateX(0)';
+        option.style.opacity = '1';
         
-        setTimeout(() => {
-            option.style.opacity = '1';
-            option.style.transform = 'translateX(0)';
-        }, 100 + (index * 50)); // Ступенчатая анимация
+        // Принудительный reflow для каждого варианта
+        void option.offsetWidth;
+    });
+    
+    // Дополнительная перерисовка через requestAnimationFrame
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            // Принудительно обновляем стили еще раз
+            if (questionContent) {
+                questionContent.style.opacity = '1';
+            }
+            if (answersContainer) {
+                answersContainer.style.opacity = '1';
+            }
+            answerOptions.forEach(option => {
+                option.style.opacity = '1';
+            });
+        });
     });
 }
 

@@ -508,7 +508,11 @@
     padding: 0;
     border: none;
     box-shadow: none;
-    animation: fadeInQuestion 0.4s ease-out forwards !important; /* Добавляем forwards */
+    animation: fadeInQuestion 0.4s ease-out forwards !important;
+    /* Принудительная активация GPU */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, opacity;
 }
 
 @keyframes fadeInQuestion {
@@ -542,6 +546,13 @@
     overflow: visible;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
+    animation: slideInContent 0.5s ease-out 0.1s both;
+    /* Принудительная активация GPU */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, opacity;
+    /* Гарантируем видимость */
+    opacity: 1 !important;
 }
 
 /* Стилизация скроллбара для Webkit браузеров */
@@ -596,8 +607,9 @@
 
 /* ОБЕСПЕЧИВАЕМ ПРОКРУТКУ ДЛЯ ДЛИННЫХ ВОПРОСОВ */
 .question-item.expanded .answers-container {
-    opacity: 1 !important; /* Принудительно показываем */
-    transform: translateY(0) scale(1) !important; /* Принудительно сбрасываем трансформацию */
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+    -webkit-transform: translateY(0) scale(1) !important;
     max-height: none !important;
     padding: 0 20px 20px 20px;
     overflow: visible;
@@ -605,6 +617,10 @@
     flex-direction: column;
     gap: 12px;
     transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    /* Принудительная активация GPU */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, opacity;
 }
 
 /* УБЕДИТЕСЬ ЧТО КНОПКИ НАХОДЯТСЯ НА СВОЕМ МЕСТЕ */
@@ -714,6 +730,9 @@ body.question-expanded .primary-btn {
 }
 
 .question-item.expanded .answer-option {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+    -webkit-transform: translateX(0) !important;
     background: linear-gradient(
         135deg,
         rgba(255, 255, 255, 0.12) 0%,
@@ -725,12 +744,10 @@ body.question-expanded .primary-btn {
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     display: flex;
-    align-items: flex-start; /* Изменено с center на flex-start */
+    align-items: flex-start;
     padding: 18px 20px;
     margin-bottom: 0;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    opacity: 1;
-    transform: translateX(0);
     box-shadow: 
         0 6px 25px rgba(0, 0, 0, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -739,9 +756,13 @@ body.question-expanded .primary-btn {
     min-height: 60px;
     height: auto;
     overflow: visible;
-    /* Добавляем для правильного переноса */
     flex-wrap: nowrap;
+    /* Принудительная активация GPU */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, opacity;
 }
+
 
 .question-item.expanded {
     overflow-y: auto !important;
@@ -799,6 +820,31 @@ body.question-expanded .primary-btn {
         width: 20px;
         height: 20px;
         margin-right: 12px;
+    }
+}
+
+/* Медиа-запросы для мобильных устройств */
+@media (max-width: 768px) {
+    .question-item.expanded {
+        -webkit-overflow-scrolling: touch;
+        /* ЗАМЕНИ на это: */
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        perspective: 1000px;
+    }
+    
+    .question-item.expanded .question-content {
+        /* Принудительная перерисовка для iOS */
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+    
+    .question-item.expanded .answers-container {
+        /* Принудительная перерисовка для iOS */
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
     }
 }
 
