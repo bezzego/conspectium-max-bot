@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка теста - Apple Liquid Glass</title>
+    <style>
+        /* developed © Maxuiux */
+
+        :root {
+            --yellow: #f5d86e;
+            --bg-dark: #333;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 20px;
+        }
+
+        /* Кнопка для демонстрации */
+        .demo-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 18px 36px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Модальное окно */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background: rgba(40, 40, 40, 0.7);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 45px 40px;
+            width: 90%;
+            max-width: 440px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transform: scale(0.9) translateY(30px);
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Эффекты жидкого стекла */
+        .modal-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.08) 30%,
+                transparent 70%
+            );
+            border-radius: 28px;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .liquid-reflections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 28px;
+            overflow: hidden;
+        }
+
+        .modal-container:hover .liquid-reflections {
+            opacity: 1;
+        }
+
+        /* Заголовок */
+        .modal-title {
+            font-size: 26px;
+            font-weight: 700;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 35px;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Контейнер для значения */
+        .value-container {
+            position: relative;
+            height: 120px;
+            margin-bottom: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .value-display {
+            font-size: 72px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+            transition: all 0.2s ease;
+        }
+
+        /* Контейнер для слайдера */
+        .slider-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 320px;
+            height: 10px;
+            background: #D6D6DA;
+            border-radius: 999px;
+        }
+
+        .slider-progress {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(117deg, var(--yellow) 0%, #e6c95a 100%);
+            border-radius: 999px;
+            width: 0%;
+            z-index: 1;
+        }
+
+        .slider-thumb-glass {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 65px;
+            height: 42px;
+            border-radius: 999px;
+            cursor: pointer;
+            z-index: 2;
+            background-color: #fff;
+            box-shadow: 0 1px 8px 0 rgba(0, 30, 63, 0.1), 0 0 2px 0 rgba(0, 9, 20, 0.1);
+            overflow: hidden;
+            transition: transform 0.15s ease, height 0.15s ease;
+        }
+
+        .slider-thumb-glass-filter {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            backdrop-filter: blur(0.6px);
+            -webkit-backdrop-filter: blur(0.6px);
+            filter: url(#mini-liquid-lens);
+        }
+
+        .slider-thumb-glass-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .slider-thumb-glass-specular {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            border-radius: inherit;
+            box-shadow:
+                inset 1px 1px 0 rgba(245, 216, 110, 0.3),
+                inset 1px 3px 0 rgba(179, 152, 46, 0.1),
+                inset 0 0 22px rgb(255 255 255 / 60%),
+                inset -1px -1px 0 rgba(245, 216, 110, 0.2);
+        }
+
+        .slider-thumb-glass-filter,
+        .slider-thumb-glass-overlay,
+        .slider-thumb-glass-specular {
+            opacity: 0;
+        }
+
+        .slider-thumb-glass.active {
+            background-color: transparent;
+            box-shadow: none;
+        }
+
+        .slider-thumb-glass.active .slider-thumb-glass-filter,
+        .slider-thumb-glass.active .slider-thumb-glass-overlay,
+        .slider-thumb-glass.active .slider-thumb-glass-specular {
+            opacity: 1;
+        }
+
+        .slider-thumb-glass:active {
+            transform: translate(-50%, -50%) scaleY(0.98) scaleX(1.1);
+        }
+
+        /* Кнопка создания в стиле upload-btn */
+        .create-btn.liquid-glass {
+            position: relative;
+            background: linear-gradient(
+                135deg,
+                rgba(243, 194, 17, 0.377) 0%,
+                rgba(240, 193, 25, 0.295) 50%,
+                rgba(243, 196, 24, 0.377) 100%
+            );
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 50px;
+            border: 1px solid rgba(245, 216, 110, 0.25);
+            color: #fff;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow: hidden;
+            width: 100%;
+            padding: 20px 30px;
+            box-sizing: border-box;
+            z-index: 2;
+            font-size: 18px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Контейнер для бликов в кнопке */
+        .create-btn.liquid-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.25) 30%,
+                transparent 70%
+            );
+            border-radius: 50px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Эффект градиентной рамки для кнопки */
+        .create-btn.liquid-glass::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.25),
+                rgba(245, 216, 110, 0.15),
+                rgba(255, 255, 255, 0.25),
+                rgba(245, 216, 110, 0.15)
+            );
+            border-radius: 52px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .create-btn.liquid-glass:hover::after {
+            opacity: 1;
+        }
+
+        /* Эффекты при наведении на кнопку */
+        .create-btn.liquid-glass:hover {
+            transform: scale(1.03);
+            background: linear-gradient(
+                135deg,
+                rgba(245, 213, 99, 0.45) 0%,
+                rgba(248, 213, 87, 0.32) 50%,
+                rgba(245, 212, 92, 0.45) 100%
+            );
+            border: 1px solid rgba(245, 216, 110, 0.35);
+            box-shadow: 
+                0 15px 45px rgba(245, 216, 110, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(179, 152, 46, 0.2);
+        }
+
+        /* Плавная анимация цифры */
+        @keyframes smoothNumberChange {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .smooth-number-change {
+            animation: smoothNumberChange 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Кнопка для демонстрации открытия модального окна -->
+    <button class="demo-btn" id="openModalBtn">Настроить количество вопросов</button>
+
+    <!-- Модальное окно -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container">
+            <div class="liquid-reflections"></div>
+            <h2 class="modal-title">Количество вопросов</h2>
+            
+            <div class="value-container">
+                <div class="value-display" id="valueDisplay">8</div>
+            </div>
+            
+            <!-- Обертка для центрирования слайдера -->
+            <div class="slider-wrapper">
+                <div class="slider-container" id="slider">
+                    <div class="slider-progress" id="progress"></div>
+                    <div class="slider-thumb-glass" id="thumb">
+                        <div class="slider-thumb-glass-filter"></div>
+                        <div class="slider-thumb-glass-overlay"></div>
+                        <div class="slider-thumb-glass-specular"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="create-btn liquid-glass" id="createBtn">
+                Создать тест
+            </button>
+        </div>
+    </div>
+
+    <svg width="0" height="0">
+        <filter id="mini-liquid-lens" x="-50%" y="-50%" width="200%" height="200%">
+            <feImage x="0" y="0" result="normalMap" xlink:href="data:image/svg+xml;utf8,
+            <svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'>
+                <radialGradient id='invmap' cx='50%' cy='50%' r='75%'>
+                    <stop offset='0%' stop-color='rgb(128,128,255)'/>
+                    <stop offset='90%' stop-color='rgb(255,255,255)'/>
+                </radialGradient>
+                <rect width='100%' height='100%' fill='url(#invmap)'/>
+            </svg>" />
+            <feDisplacementMap in="SourceGraphic" in2="normalMap" scale="-252" xChannelSelector="R" yChannelSelector="G"
+                result="displaced" />
+            <feMerge>
+                <feMergeNode in="displaced" />
+            </feMerge>
+        </filter>
+    </svg>
+
+    <script>
+        // developed © Maxuiux
+
+        ;(() => {
+            // Элементы модального окна
+            const modalOverlay = document.getElementById('modalOverlay');
+            const openModalBtn = document.getElementById('openModalBtn');
+            const createBtn = document.getElementById('createBtn');
+            
+            // Элементы слайдера
+            const slider = document.getElementById('slider');
+            const progress = document.getElementById('progress');
+            const thumb = document.getElementById('thumb');
+            const valueDisplay = document.getElementById('valueDisplay');
+
+            let isDragging = false
+            let sliderRect = slider.getBoundingClientRect()
+            let currentValue = 8; // Начальное значение
+
+            // Функция для обновления значения и отображения
+            const updateValue = (percent) => {
+                // Преобразуем проценты в значение от 1 до 20
+                const newValue = Math.round(1 + (percent / 100) * 19);
+                
+                // Если значение изменилось
+                if (newValue !== currentValue) {
+                    currentValue = newValue;
+                    
+                    // Плавное обновление значения
+                    valueDisplay.textContent = currentValue;
+                    valueDisplay.classList.add('smooth-number-change');
+                    
+                    // Убираем класс анимации после завершения
+                    setTimeout(() => {
+                        valueDisplay.classList.remove('smooth-number-change');
+                    }, 300);
+                }
+            };
+
+            const updateThumbAndProgress = (percent) => {
+                percent = Math.max(0, Math.min(100, percent))
+                const px = (percent / 100) * sliderRect.width
+                progress.style.width = `${percent}%`
+                thumb.style.left = `${px}px`
+                
+                // Обновляем отображаемое значение
+                updateValue(percent);
+            }
+
+            const getPercentFromClientX = (clientX) => {
+                const offsetX = clientX - sliderRect.left
+                return (offsetX / sliderRect.width) * 100
+            }
+
+            const onMove = (clientX) => {
+                const percent = getPercentFromClientX(clientX)
+                updateThumbAndProgress(percent)
+            }
+
+            const onMouseDown = (e) => {
+                isDragging = true
+                sliderRect = slider.getBoundingClientRect()
+                onMove(e.clientX)
+                thumb.classList.add('active')
+            }
+
+            const onTouchStart = (e) => {
+                isDragging = true
+                sliderRect = slider.getBoundingClientRect()
+                onMove(e.touches[0].clientX)
+                thumb.classList.add('active')
+            }
+
+            const onMouseMove = (e) => {
+                if (isDragging) onMove(e.clientX)
+            }
+
+            const onTouchMove = (e) => {
+                if (isDragging) onMove(e.touches[0].clientX)
+            }
+
+            const stopDrag = () => {
+                isDragging = false
+                thumb.classList.remove('active')
+            }
+
+            const initSlider = (initialValue = 35) => {
+                sliderRect = slider.getBoundingClientRect()
+                updateThumbAndProgress(initialValue)
+            }
+
+            // Функции для работы с модальным окном
+            const openModal = () => {
+                modalOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeModal = () => {
+                modalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+
+            const handleCreate = () => {
+                // Здесь будет логика создания теста
+                alert(`Создан тест с ${currentValue} вопросами!`);
+                closeModal();
+            };
+
+            // Events
+            thumb.addEventListener('mousedown', onMouseDown)
+            thumb.addEventListener('touchstart', onTouchStart, { passive: true })
+
+            document.addEventListener('mousemove', onMouseMove)
+            document.addEventListener('mouseup', stopDrag)
+            document.addEventListener('touchmove', onTouchMove, { passive: false })
+            document.addEventListener('touchend', stopDrag)
+
+            slider.addEventListener('mousedown', (e) => {
+                sliderRect = slider.getBoundingClientRect()
+                onMove(e.clientX)
+            })
+
+            slider.addEventListener(
+                'touchstart',
+                (e) => {
+                    sliderRect = slider.getBoundingClientRect()
+                    onMove(e.touches[0].clientX)
+                },
+                { passive: true }
+            )
+
+            // Инициализация событий модального окна
+            openModalBtn.addEventListener('click', openModal);
+            createBtn.addEventListener('click', handleCreate);
+            
+            // Закрытие модального окна при клике вне его
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            // Инициализация
+            initSlider(35); // Начальное значение соответствует 8 вопросам
+        })();
+    </script>
+</body>
+</html>
