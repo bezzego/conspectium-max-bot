@@ -352,12 +352,6 @@ function setupEventListeners() {
 
         console.debug('[welcome_modal] finished persistProfile; localStorage token:', localStorage.getItem('conspectium_token'));
 
-        // Плавно закрываем модал и затем перенаправляем на основную страницу.
-        // Ранее редирект выполнялся только когда welcome_modal запускался как
-        // отдельная страница, что приводило к расхождению состояния при
-        // встроенном вызове из main.html — в итоге показывался "демо" блок
-        // и модал открывался повторно. Чтобы избежать этого, всегда
-        // переходим на main.html после успешной регистрации.
         const modal = document.querySelector('.welcome-modal-overlay');
         if (modal) {
             modal.style.opacity = '0';
@@ -371,8 +365,7 @@ function setupEventListeners() {
                 // ignore
             }
             console.log('Данные сохранены:', userData);
-            // Перенаправляем на основную страницу, чтобы приложение
-            // корректно инициализировало состояние (token/user из localStorage).
+
             window.location.href = '/front/html/main.html';
         }, 350);
     });

@@ -589,62 +589,247 @@ function forceQuestionAnimation(question) {
         }
     }
 
-    async function submitQuiz(app, quizId) {
-        const questions = quizState.questions;
-        if (!questions.length) {
-            app.notify('В этом тесте пока нет вопросов', 'info');
-            return;
-        }
-
-        const answers = [];
-
-        questions.forEach((question) => {
-            const checked = document.querySelector(`input[name="question-${question.id}"]:checked`);
-            if (checked) {
-                answers.push(Number(checked.value));
-            }
-        });
-
-        if (!answers.length) {
-            app.notify('Выбери ответы к вопросам', 'info');
-            return;
-        }
-
-        try {
-            app.showLoading('Считаем результат...');
-            const [result] = await Promise.all([
-                app.authFetch(`/quizzes/${quizId}/results`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ answers }),
-                }),
-                new Promise((resolve) => setTimeout(resolve, 4000)),
-            ]);
-
-            app.hideLoading();
-
-            const submitBtn = document.getElementById('submitQuizBtn');
-            if (submitBtn) {
-                submitBtn.style.display = 'none';
-            }
-
-            quizState.results = [
-                result,
-                ...quizState.results.filter((item) => item.id !== result.id),
-            ].slice(0, 20);
-
-            renderLatestResultPanel();
-            renderHistory(quizState.results);
-            displayAnswerFeedback(questions);
-
-            const scoreValue = typeof result.score === 'number' ? Math.round(result.score) : 0;
-            app.notify(`Тест завершён! Результат: ${scoreValue}%`, 'success');
-        } catch (err) {
-            console.error(err);
-            app.hideLoading();
-            app.notify(err.message || 'Не удалось сохранить результат', 'error');
-        }
+   async function submitQuiz(app, quizId) {
+    const questions = quizState.questions;
+    if (!questions.length) {
+        app.notify('В этом тесте пока нет вопросов', 'info');
+        return;
     }
+
+    const answers = [];
+
+    questions.forEach((question) => {
+        const checked = document.querySelector(`input[name="question-${question.id}"]:checked`);
+        if (checked) {
+            answers.push(Number(checked.value));
+        }
+    });
+
+    if (!answers.length) {
+        app.notify('Выбери ответы к вопросам', 'info');
+        return;
+    }
+
+    // Блокируем скролл
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    try {
+        // Показываем красивый лоадер
+        showQuizResultsLoader();
+        
+        const [result] = await Promise.all([
+            app.authFetch(`/quizzes/${quizId}/results`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answers }),
+            }),
+            new Promise((resolve) => setTimeout(resolve, 4000)),
+        ]);
+
+        // Скрываем лоадер
+        hideQuizResultsLoader();
+
+        const submitBtn = document.getElementById('submitQuizBtn');
+        if (submitBtn) {
+            submitBtn.style.display = 'none';
+        }
+
+        quizState.results = [
+            result,
+            ...quizState.results.filter((item) => item.id !== result.id),
+        ].slice(0, 20);
+
+        renderLatestResultPanel();
+        renderHistory(quizState.results);
+        displayAnswerFeedback(questions);
+
+        const scoreValue = typeof result.score === 'number' ? Math.round(result.score) : 0;
+        app.notify(`Тест завершён! Результат: ${scoreValue}%`, 'success');
+    } catch (err) {
+        console.error(err);
+        hideQuizResultsLoader();
+        app.notify(err.message || 'Не удалось сохранить результат', 'error');
+    } finally {
+        // Разблокируем скролл
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+    }
+}
+
+function showQuizResultsLoader() {
+    const loaderHtml = `
+        <div class="quiz-results-loader-overlay">
+            <div class="quiz-results-loader">
+                <div class="loader-circle">
+                    <div class="spinner"></div>
+                    <div class="pulse"></div>
+                </div>
+                <div class="loader-content">
+                    <h3>Считаем результат...</h3>
+                    <p>Анализируем твои ответы</p>
+                </div>
+                <div class="liquid-reflection"></div>
+            </div>
+        </div>
+        <style>
+            .quiz-results-loader-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(20px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                opacity: 0;
+                animation: fadeIn 0.3s ease forwards;
+            }
+
+            @keyframes fadeIn {
+                to { opacity: 1; }
+            }
+
+            .quiz-results-loader {
+                background: linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.15) 0%,
+                    rgba(255, 255, 255, 0.08) 50%,
+                    rgba(255, 255, 255, 0.15) 100%
+                );
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+                border-radius: 24px;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                padding: 40px 30px;
+                text-align: center;
+                color: white;
+                max-width: 320px;
+                width: 90%;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 
+                    0 20px 60px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            }
+
+            .quiz-results-loader::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    135deg,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.1) 50%,
+                    transparent 100%
+                );
+                border-radius: 24px;
+                opacity: 0.6;
+            }
+
+            .loader-circle {
+                position: relative;
+                width: 80px;
+                height: 80px;
+                margin: 0 auto 20px;
+            }
+
+            .spinner {
+                width: 100%;
+                height: 100%;
+                border: 3px solid rgba(255, 255, 255, 0.1);
+                border-top: 3px solid #f5d86e;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .pulse {
+                width: 60px;
+                height: 60px;
+                background: rgba(245, 216, 110, 0.2);
+                border-radius: 50%;
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                animation: pulse 2s ease-in-out infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            @keyframes pulse {
+                0%, 100% { 
+                    transform: scale(1);
+                    opacity: 0.5;
+                }
+                50% { 
+                    transform: scale(1.1);
+                    opacity: 0.8;
+                }
+            }
+
+            .loader-content h3 {
+                margin: 0 0 8px 0;
+                font-size: 20px;
+                font-weight: 700;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            }
+
+            .loader-content p {
+                margin: 0;
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 15px;
+                text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .liquid-reflection {
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(
+                    45deg,
+                    transparent 30%,
+                    rgba(255, 255, 255, 0.05) 50%,
+                    transparent 70%
+                );
+                animation: reflectionMove 3s linear infinite;
+                pointer-events: none;
+            }
+
+            @keyframes reflectionMove {
+                0% { transform: translateX(-100%) translateY(-100%) rotate(0deg); }
+                100% { transform: translateX(100%) translateY(100%) rotate(360deg); }
+            }
+        </style>
+    `;
+
+    const loaderContainer = document.createElement('div');
+    loaderContainer.innerHTML = loaderHtml;
+    document.body.appendChild(loaderContainer);
+    
+    window.quizResultsLoader = loaderContainer;
+}
+
+function hideQuizResultsLoader() {
+    if (window.quizResultsLoader) {
+        window.quizResultsLoader.remove();
+        window.quizResultsLoader = null;
+    }
+}
 
     function renderLatestResultPanel() {
         const resultEl = document.getElementById('quizResult');

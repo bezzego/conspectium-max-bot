@@ -542,102 +542,294 @@ function showVariantChoiceModal({ title } = {}) {
     });
 }
 
-    function setupUploadHandlers(app) {
-        if (uploadHandlersAttached) {
+   function setupUploadHandlers(app) {
+    if (uploadHandlersAttached) {
+        return;
+    }
+    const inputs = Array.from(document.querySelectorAll('#audioUploadInput'));
+    const triggers = Array.from(document.querySelectorAll('#uploadAudioButton'));
+    if (!inputs.length) {
+        return;
+    }
+    uploadHandlersAttached = true;
+
+    const targetInput = inputs[0];
+    const state = {
+        pendingVariant: null,
+        skipNextClick: false,
+    };
+
+    const requestVariant = async (title) => {
+        const variant = await showVariantChoiceModal({ title });
+        state.pendingVariant = variant || null;
+        return variant;
+    };
+
+    const openFilePicker = () => {
+        state.skipNextClick = true;
+        targetInput.click();
+    };
+
+    const handleTriggerClick = async (event) => {
+        event.preventDefault();
+        const title =
+            event.currentTarget?.dataset?.variantPrompt || 'Выбрать можно только один';
+        const variant = await requestVariant(title);
+        if (!variant) {
             return;
         }
-        const inputs = Array.from(document.querySelectorAll('#audioUploadInput'));
-        const triggers = Array.from(document.querySelectorAll('#uploadAudioButton'));
-        if (!inputs.length) {
-            return;
-        }
-        uploadHandlersAttached = true;
+        openFilePicker();
+    };
 
-        const targetInput = inputs[0];
-        const state = {
-            pendingVariant: null,
-            skipNextClick: false,
-        };
+    triggers.forEach((trigger) => {
+        trigger.addEventListener('click', handleTriggerClick);
+    });
 
-        const requestVariant = async (title) => {
-            const variant = await showVariantChoiceModal({ title });
-            state.pendingVariant = variant || null;
-            return variant;
-        };
-
-        const openFilePicker = () => {
-            state.skipNextClick = true;
-            targetInput.click();
-        };
-
-        const handleTriggerClick = async (event) => {
+    targetInput.addEventListener(
+        'click',
+        async (event) => {
+            if (state.skipNextClick) {
+                state.skipNextClick = false;
+                return;
+            }
             event.preventDefault();
-            const title =
-                event.currentTarget?.dataset?.variantPrompt || 'Выбрать можно только один';
-            const variant = await requestVariant(title);
+            event.stopImmediatePropagation();
+            const variant = await requestVariant('Выбрать можно только один');
             if (!variant) {
                 return;
             }
             openFilePicker();
-        };
+        },
+        true,
+    );
 
-        triggers.forEach((trigger) => {
-            trigger.addEventListener('click', handleTriggerClick);
-        });
-
-        targetInput.addEventListener(
-            'click',
-            async (event) => {
-                if (state.skipNextClick) {
-                    state.skipNextClick = false;
-                    return;
-                }
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                const variant = await requestVariant('Выбрать можно только один');
-                if (!variant) {
-                    return;
-                }
-                openFilePicker();
-            },
-            true,
-        );
-
-        targetInput.addEventListener('change', async () => {
-            if (!targetInput.files || !targetInput.files.length) {
+    targetInput.addEventListener('change', async () => {
+        if (!targetInput.files || !targetInput.files.length) {
+            return;
+        }
+        const file = targetInput.files[0];
+        let loader = null;
+        try {
+            let variant = state.pendingVariant;
+            if (!variant) {
+                variant = await requestVariant(file.name);
+            }
+            if (!variant) {
+                targetInput.value = '';
                 return;
             }
-            const file = targetInput.files[0];
-            try {
-                let variant = state.pendingVariant;
-                if (!variant) {
-                    variant = await requestVariant(file.name);
-                }
-                if (!variant) {
-                    targetInput.value = '';
-                    return;
-                }
-                state.pendingVariant = null;
-                app.showLoading('Загружаем аудио...');
-                const audio = await app.uploadAudio(file);
-                app.showLoading('Создаём конспект... Это может занять несколько минут для длинных аудио.');
-                const conspect = await app.createConspectFromAudio(audio.id, file.name, {
-                    variants: [variant],
-                });
-                app.hideLoading();
-                app.notify('Конспект готов!', 'success');
-                refreshConspectData(app, conspect.id);
-                showConspectModal(conspect, { initialVariant: variant });
-            } catch (err) {
-                console.error(err);
-                app.hideLoading();
-                app.notify(err.message || 'Не удалось обработать аудио', 'error');
-            } finally {
-                targetInput.value = '';
-                state.pendingVariant = null;
+            state.pendingVariant = null;
+            
+            // Показываем красивый лоадер вместо app.showLoading
+            showAudioUploadLoader('Загружаем аудио...');
+            
+            const audio = await app.uploadAudio(file);
+            
+            // Обновляем лоадер для создания конспекта
+            hideAudioUploadLoader();
+            showAudioUploadLoader('Создаём конспект...', 'Это может занять несколько минут для длинных аудио.');
+            
+            const conspect = await app.createConspectFromAudio(audio.id, file.name, {
+                variants: [variant],
+            });
+            
+            hideAudioUploadLoader();
+            app.notify('Конспект готов!', 'success');
+            refreshConspectData(app, conspect.id);
+            showConspectModal(conspect, { initialVariant: variant });
+        } catch (err) {
+            console.error(err);
+            hideAudioUploadLoader();
+            app.notify(err.message || 'Не удалось обработать аудио', 'error');
+        } finally {
+            targetInput.value = '';
+            state.pendingVariant = null;
+        }
+    });
+}
+
+function showAudioUploadLoader(message = 'Загружаем...', subMessage = '') {
+    const loaderHtml = `
+        <div class="audio-upload-loader-overlay">
+            <div class="audio-upload-loader">
+                <div class="loader-circle">
+                    <div class="spinner"></div>
+                    <div class="pulse"></div>
+                </div>
+                <div class="loader-content">
+                    <h3>${escapeHtml(message)}</h3>
+                    ${subMessage ? `<p>${escapeHtml(subMessage)}</p>` : ''}
+                </div>
+                <div class="liquid-reflection"></div>
+            </div>
+        </div>
+        <style>
+            .audio-upload-loader-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(20px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                opacity: 0;
+                animation: fadeIn 0.3s ease forwards;
             }
-        });
+
+            @keyframes fadeIn {
+                to { opacity: 1; }
+            }
+
+            .audio-upload-loader {
+                background: linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.15) 0%,
+                    rgba(255, 255, 255, 0.08) 50%,
+                    rgba(255, 255, 255, 0.15) 100%
+                );
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+                border-radius: 24px;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                padding: 40px 30px;
+                text-align: center;
+                color: white;
+                max-width: 320px;
+                width: 90%;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 
+                    0 20px 60px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            }
+
+            .audio-upload-loader::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    135deg,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.1) 50%,
+                    transparent 100%
+                );
+                border-radius: 24px;
+                opacity: 0.6;
+            }
+
+            .loader-circle {
+                position: relative;
+                width: 80px;
+                height: 80px;
+                margin: 0 auto 20px;
+            }
+
+            .spinner {
+                width: 100%;
+                height: 100%;
+                border: 3px solid rgba(255, 255, 255, 0.1);
+                border-top: 3px solid #f5d86e;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .pulse {
+                width: 60px;
+                height: 60px;
+                background: rgba(245, 216, 110, 0.2);
+                border-radius: 50%;
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                animation: pulse 2s ease-in-out infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            @keyframes pulse {
+                0%, 100% { 
+                    transform: scale(1);
+                    opacity: 0.5;
+                }
+                50% { 
+                    transform: scale(1.1);
+                    opacity: 0.8;
+                }
+            }
+
+            .loader-content h3 {
+                margin: 0 0 8px 0;
+                font-size: 20px;
+                font-weight: 700;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            }
+
+            .loader-content p {
+                margin: 0;
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 15px;
+                text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .liquid-reflection {
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(
+                    45deg,
+                    transparent 30%,
+                    rgba(255, 255, 255, 0.05) 50%,
+                    transparent 70%
+                );
+                animation: reflectionMove 3s linear infinite;
+                pointer-events: none;
+            }
+
+            @keyframes reflectionMove {
+                0% { transform: translateX(-100%) translateY(-100%) rotate(0deg); }
+                100% { transform: translateX(100%) translateY(100%) rotate(360deg); }
+            }
+        </style>
+    `;
+
+    const loaderContainer = document.createElement('div');
+    loaderContainer.innerHTML = loaderHtml;
+    document.body.appendChild(loaderContainer);
+    
+    // Блокируем скролл
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    window.audioUploadLoader = loaderContainer;
+}
+
+function hideAudioUploadLoader() {
+    if (window.audioUploadLoader) {
+        // Разблокируем скролл
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        
+        window.audioUploadLoader.remove();
+        window.audioUploadLoader = null;
     }
+}
+
 
     async function refreshConspectData(app, conspectId) {
         if (document.getElementById('mainConspects')) {
@@ -692,7 +884,7 @@ async function loadMainConspects(app) {
     } catch (err) {
         console.error(err);
         container.style.cssText = `
-            color: #fff;
+            color: #ffffffff;
             text-align: center;
             padding: 40px 20px;
             font-size: 16px;
@@ -1089,6 +1281,10 @@ function hideConspectCreateAnimation() {
 
 function showConspectModal(conspect, options = {}) {
     closeConspectModal();
+
+        // Блокируем скролл фона
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
     const modalStyles = `
         /* Liquid Glass стили для модального окна - минимальные блики */
@@ -1798,7 +1994,11 @@ function copyConspectToClipboard(conspect, variantKey, markdown) {
 
 
 
-    function closeConspectModal() {
+function closeConspectModal() {
+        // Разблокируем скролл фона
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+
         if (conspectModalOverlay) {
             conspectModalOverlay.classList.remove('visible');
             setTimeout(() => {
