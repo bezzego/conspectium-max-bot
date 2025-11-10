@@ -621,13 +621,13 @@ function showVariantChoiceModal({ title } = {}) {
             state.pendingVariant = null;
             
             // Показываем красивый лоадер вместо app.showLoading
-            showAudioUploadLoader('Загружаем аудио...');
+            showConspectLoadingAnimation('Загружаем аудио...');
             
             const audio = await app.uploadAudio(file);
             
             // Обновляем лоадер для создания конспекта
             hideAudioUploadLoader();
-            showAudioUploadLoader('Создаём конспект...', 'Это может занять несколько минут для длинных аудио.');
+            showConspectLoadingAnimation('Создаём конспект...', 'Это может занять несколько минут для длинных аудио.');
             
             const conspect = await app.createConspectFromAudio(audio.id, file.name, {
                 variants: [variant],
