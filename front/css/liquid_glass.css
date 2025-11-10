@@ -521,7 +521,8 @@
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.25);
     padding: 10px;
-    min-height: 240px;
+    min-height: 250px;
+    height: 700px;
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
@@ -598,11 +599,6 @@
     }
 }
 
-@media (min-height: 768px) {
-    .preview {
-        height: 500px;
-    }
-}
 
 
 

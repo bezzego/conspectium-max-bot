@@ -50,15 +50,10 @@
 
 @media (max-height: 800px)  {
   .preview {
-    max-height: 320px;
+    max-height: 290px;
   }
 }
 
-@media (max-height: 833px)  {
-  .preview {
-    max-height: 400px;
-  }
-}
 
 .conspect-list {
     flex: 1;

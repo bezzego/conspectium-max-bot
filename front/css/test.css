@@ -827,7 +827,6 @@ body.question-expanded .primary-btn {
 @media (max-width: 768px) {
     .question-item.expanded {
         -webkit-overflow-scrolling: touch;
-        /* ЗАМЕНИ на это: */
         transform: translate3d(0, 0, 0);
         -webkit-transform: translate3d(0, 0, 0);
         backface-visibility: hidden;
