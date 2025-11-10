@@ -1,0 +1,301 @@
+/* Кастомный слайдер в стиле liquid glass */
+.custom-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    outline: none;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.custom-slider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 30%,
+        transparent 70%
+    );
+    border-radius: 10px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Заполненная часть слайдера (Webkit) */
+.custom-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.6) 0%,
+        rgba(240, 193, 25, 0.5) 50%,
+        rgba(243, 196, 24, 0.6) 100%
+    );
+    border-radius: 10px;
+    border: none;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.2);
+}
+
+/* Ползунок (Webkit) */
+.custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(255, 255, 255, 0.7) 50%,
+        rgba(255, 255, 255, 0.9) 100%
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        0 0 0 2px rgba(245, 216, 110, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.custom-slider::-webkit-slider-thumb::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+.custom-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.3),
+        0 0 0 3px rgba(245, 216, 110, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.custom-slider::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.25),
+        0 0 0 3px rgba(245, 216, 110, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Для Firefox */
+.custom-slider::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.custom-slider::-moz-range-progress {
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.6) 0%,
+        rgba(240, 193, 25, 0.5) 50%,
+        rgba(243, 196, 24, 0.6) 100%
+    );
+    border-radius: 10px;
+    height: 6px;
+}
+
+.custom-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(255, 255, 255, 0.7) 50%,
+        rgba(255, 255, 255, 0.9) 100%
+    );
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        0 0 0 2px rgba(245, 216, 110, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.custom-slider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.3),
+        0 0 0 3px rgba(245, 216, 110, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.custom-slider::-moz-range-thumb:active {
+    transform: scale(1.1);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.25),
+        0 0 0 3px rgba(245, 216, 110, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Контейнер для слайдера с дополнительными элементами */
+.slider-container {
+    position: relative;
+    margin: 20px 0;
+    padding: 15px 20px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.04) 50%,
+        rgba(255, 255, 255, 0.08) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.slider-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.06) 30%,
+        transparent 70%
+    );
+    border-radius: 16px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Подпись слайдера */
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.slider-value {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .custom-slider {
+        height: 5px;
+    }
+    
+    .custom-slider::-webkit-slider-thumb {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .custom-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .slider-container {
+        padding: 12px 16px;
+        margin: 15px 0;
+    }
+    
+    .slider-label {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+    
+    .slider-value {
+        font-size: 12px;
+        padding: 3px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .custom-slider {
+        height: 4px;
+    }
+    
+    .custom-slider::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .custom-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .slider-container {
+        padding: 10px 14px;
+        margin: 12px 0;
+    }
+}
