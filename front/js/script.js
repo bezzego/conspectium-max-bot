@@ -880,107 +880,110 @@ function initConspectCreatePage(app) {
     }
 }
 
-    // Функция для показа анимации создания конспекта
-    function showConspectCreateAnimation() {
-        if (window.conspectCreateAnimation) return;
+function showConspectCreateAnimation() {
+    if (window.conspectCreateAnimation) return;
 
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.className = 'loading-overlay';
-        loadingOverlay.style.opacity = '0';
-        loadingOverlay.style.transition = 'opacity 0.25s ease';
-        loadingOverlay.style.zIndex = '20000';
-        loadingOverlay.style.pointerEvents = 'auto';
-        
-        loadingOverlay.innerHTML = `
-            <div class="loading-content">
-                <div class="loader">
-                    <div style="--i: 1"></div>
-                    <div style="--i: 2"></div>
-                    <div style="--i: 3"></div>
-                    <div style="--i: 4"></div>
-                </div>
-                
-                <div class="loading-text">Нейросеть создает конспект..</div>
-                
-                <div class="noise"></div>
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(70, 70, 70, 0.85);
+        backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        overflow: hidden; /* Добавляем это */
+    `;
+    
+    loadingOverlay.innerHTML = `
+        <div class="loading-content">
+            <div class="loader">
+                <div style="--i: 1"></div>
+                <div style="--i: 2"></div>
+                <div style="--i: 3"></div>
+                <div style="--i: 4"></div>
             </div>
-            <div class="hackflow-signature" style="opacity: 0;">by HackFlow</div>
-        `;
-        
-        document.body.appendChild(loadingOverlay);
+            
+            <div class="loading-text">Нейросеть создает конспект..</div>
+            
+            <div class="noise"></div>
+        </div>
+        <div class="hackflow-signature" style="opacity: 0;">by HackFlow</div>
+    `;
+    
+    // БЛОКИРУЕМ СКРОЛЛ ПЕРЕД ДОБАВЛЕНИЕМ В DOM
+    const scrollY = window.scrollY;
+    document.body.style.cssText = `
+        overflow: hidden !important;
+        position: fixed;
+        top: -${scrollY}px;
+        left: 0;
+        right: 0;
+        height: 100vh;
+    `;
+    
+    document.documentElement.style.overflow = 'hidden !important';
+    
+    document.body.appendChild(loadingOverlay);
 
-        try {
-            window._prevBodyOverflow = document.body.style.overflow;
-        } catch (e) {
-            window._prevBodyOverflow = '';
+    // Сохраняем позицию скролла
+    window._scrollY = scrollY;
+
+    requestAnimationFrame(() => {
+        loadingOverlay.style.opacity = '1';
+    });
+
+    // Появление подписи через 0.5 секунды
+    setTimeout(() => {
+        const signature = loadingOverlay.querySelector('.hackflow-signature');
+        if (signature) {
+            signature.style.opacity = '1';
+            signature.style.transition = 'opacity 0.5s ease';
         }
-        document.body.style.overflow = 'hidden';
+    }, 500);
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                loadingOverlay.style.opacity = '1';
-            });
-        });
+    // Исчезновение подписи за 1 секунду до конца (через 5 секунд от начала)
+    setTimeout(() => {
+        const signature = loadingOverlay.querySelector('.hackflow-signature');
+        if (signature) {
+            signature.style.opacity = '0';
+            signature.style.transition = 'opacity 0.5s ease';
+        }
+    }, 5000);
+    
+    window.conspectCreateAnimation = {
+        overlay: loadingOverlay
+    };
+}
 
-        // Появление подписи через 0.5 секунды
-        setTimeout(() => {
-            const signature = loadingOverlay.querySelector('.hackflow-signature');
-            if (signature) {
-                signature.style.opacity = '1';
-                signature.style.transition = 'opacity 0.5s ease';
-            }
-        }, 500);
-
-        // Исчезновение подписи за 1 секунду до конца (через 5 секунд от начала)
-        setTimeout(() => {
-            const signature = loadingOverlay.querySelector('.hackflow-signature');
-            if (signature) {
-                signature.style.opacity = '0';
-                signature.style.transition = 'opacity 0.5s ease';
-            }
-        }, 5000);
-        
-        window.conspectCreateAnimation = {
-            overlay: loadingOverlay
-        };
-    }
-
-    // Функция для скрытия анимации создания конспекта
 function hideConspectCreateAnimation() {
     const elements = window.conspectCreateAnimation;
     
     if (!elements) return;
     
+    // ВОССТАНАВЛИВАЕМ СКРОЛЛ ДО УДАЛЕНИЯ ОВЕРЛЕЯ
+    document.body.style.cssText = '';
+    document.documentElement.style.overflow = '';
+    
+    // Восстанавливаем позицию скролла
+    if (window._scrollY !== undefined) {
+        window.scrollTo(0, window._scrollY);
+        window._scrollY = undefined;
+    }
+    
     if (elements.overlay) {
         elements.overlay.style.opacity = '0';
-        elements.overlay.style.transition = 'opacity 0.5s ease';
-        
         setTimeout(() => {
             if (elements.overlay.parentNode) {
                 elements.overlay.parentNode.removeChild(elements.overlay);
             }
         }, 500);
-    }
-    
-    // Восстанавливаем скролл
-    try {
-        if (window._prevBodyOverflow !== undefined) {
-            document.body.style.overflow = window._prevBodyOverflow || '';
-            document.body.style.height = window._prevBodyHeight || '';
-        } else {
-            document.body.style.overflow = '';
-            document.body.style.height = '';
-        }
-        
-        // Восстанавливаем скролл для html
-        document.documentElement.style.overflow = '';
-        document.documentElement.style.height = '';
-    } catch (e) {
-        // ignore
-        document.body.style.overflow = '';
-        document.body.style.height = '';
-        document.documentElement.style.overflow = '';
-        document.documentElement.style.height = '';
     }
 
     window.conspectCreateAnimation = null;
