@@ -1,0 +1,561 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,400i,700");
+    
+:root {
+    --font-color: #333;
+    --dp-size: 8rem;
+    --padding-size: 2rem;
+    --opener-size: 2.5rem;
+    --dot-size: 0.4rem;
+}
+
+body {
+    font-size: 16px;
+    color: var(--font-color);
+    font-family: Montserrat, sans-serif;
+    background-image: var(--font-color);
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    color: #fff;
+    width: 100%;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 0 auto; 
+}
+
+.top-bar {
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.377) 0%,     
+        rgba(240, 193, 25, 0.295) 50%,   
+        rgba(243, 196, 24, 0.377) 100%    
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 24px);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: min(1000px, 95vw);
+    box-sizing: border-box;
+    height: 75px;
+}
+
+.back-btn {
+    position: absolute;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+    font-size: 30px;
+    border-radius: 50%;
+    border: none;
+    z-index: 10;
+}
+
+.back-btn-placeholder {
+    display: none;
+}
+
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.logo {
+    height: 60px;
+    width: 270px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    transition: all 0.4s ease;
+}
+
+.logo-link:hover .logo {
+    transform: scale(1.05);
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+.top-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 30%,
+        transparent 70%
+    );
+    border-radius: 50px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.logo-link:hover .logo {
+    transform: scale(1.05);
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+/* Адаптивность для планшетов */
+@media (min-width: 768px) {
+.top-bar {
+    width: calc(100%);
+    max-width: min(1000px, 85vw);
+    padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 28px);
+    height: 90px;
+}
+}
+
+@media (min-width: 924px) {
+.top-bar {
+    width: calc(100%);
+    max-width: min(1000px, 80vw);
+    padding: 14px clamp(24px, 4vw, 32px);
+    height: 90px;
+
+}
+}
+
+@media (max-width: 480px) {
+.top-bar {
+    max-width: min(1000px, 95vw);
+    padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
+    margin-bottom: 15px;
+}
+
+}
+
+@media (max-width: 410px) {
+.top-bar {
+    padding: 12px 22px;
+    margin-bottom: 12px;
+}
+
+.logo {
+    height: 50px;
+    width: 220px;
+}
+}
+
+@media (max-width: 410px) {
+
+.back-btn i {
+    font-size: 25px;
+    margin-right: 10px;
+}
+}
+
+
+.title {
+    font-family: Montserrat, sans-serif;
+    font-size: 28px;
+    font-weight: 300;
+    text-align: center;
+    margin-bottom: 15px;
+}
+    
+.card {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.22) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 2rem;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    position: relative;
+    margin-top: 20px;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.12) 30%,
+        transparent 70%
+    );
+    border-radius: 20px;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.card:hover::after {
+    opacity: 1;
+}
+
+.card .banner {
+    background-image: url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1350&q=80);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 11rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.card .banner svg {
+    background-color: white;
+    width: var(--dp-size);
+    height: var(--dp-size);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    transform: translateY(50%);
+    transition: transform 200ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.card .banner svg:hover {
+    transform: translateY(50%) scale(1.3);
+}
+
+.card .menu {
+    width: 100%;
+    height: 5.5rem;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.card .menu .opener {
+    width: var(--opener-size);
+    height: var(--opener-size);
+    position: relative;
+    border-radius: 50%;
+    transition: background-color 100ms ease-in-out;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.card .menu .opener:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.card .menu .opener span {
+    background-color: #fff;
+    width: var(--dot-size);
+    height: var(--dot-size);
+    position: absolute;
+    top: 0;
+    left: calc(50% - var(--dot-size) / 2);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.card .menu .opener span:nth-child(1) {
+    top: 0.45rem;
+}
+
+.card .menu .opener span:nth-child(2) {
+    top: 1.05rem;
+}
+
+.card .menu .opener span:nth-child(3) {
+    top: 1.65rem;
+}
+
+/* Стили для выпадающего меню */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 1rem;
+    background: linear-gradient(
+        135deg,
+        rgba(65, 64, 64, 0.733) 0%,
+        rgba(58, 58, 58, 0.685) 50%,
+        rgba(63, 63, 63, 0.678) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 1rem;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.5rem 0;
+    min-width: 180px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.dropdown-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 30%,
+        transparent 70%
+    );
+    border-radius: 1rem;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.dropdown-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-menu li {
+    margin: 0;
+    position: relative;
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.2rem;
+    color: #fff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+/* Полоски под первыми двумя пунктами */
+.dropdown-menu li:not(:last-child) a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1.2rem;
+    right: 1.2rem;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+}
+
+.dropdown-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-menu a:first-child:hover {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+
+.dropdown-menu a:last-child:hover {
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+}
+
+.card h2.name {
+    text-align: center;
+    padding: 0 var(--padding-size) 0.5rem;
+    margin: 0;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.card .title {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 0 var(--padding-size) 1.2rem;
+}
+
+.card .desc {
+    text-align: justify;
+    padding: 0 var(--padding-size) 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card .actions {
+    padding: 0 var(--padding-size) 2.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.card .actions .follow-info {
+    padding: 0 0 1rem;
+    display: flex;
+}
+
+.card .actions .follow-info h2 {
+    text-align: center;
+    width: 50%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.card .actions .follow-info h2 a {
+    text-decoration: none;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.8rem;
+    transition: background-color 100ms ease-in-out;
+}
+
+.card .actions .follow-info h2 a span {
+    color: #fff;
+    font-weight: bold;
+    transform-origin: bottom;
+    transform: scaleY(1.3);
+    transition: color 100ms ease-in-out;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.card .actions .follow-info h2 a small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    font-weight: normal;
+}
+
+.card .actions .follow-info h2 a:hover {
+    background-color: rgba(242, 242, 242, 0.2);
+}
+
+.card .actions .follow-info h2 a:hover span {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.card .actions .follow-btn button {
+    color: #fff;
+    font: inherit;
+    font-weight: bold;
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.377) 0%,
+        rgba(240, 193, 25, 0.295) 50%,
+        rgba(243, 196, 24, 0.377) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    width: 100%;
+    border: 1px solid rgba(245, 216, 110, 0.3);
+    padding: 1rem;
+    outline: none;
+    box-sizing: border-box;
+    border-radius: 1.5rem / 50%;
+    transition: all 200ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.card .actions .follow-btn button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 30%,
+        transparent 70%
+    );
+    border-radius: 50px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.card .actions .follow-btn button:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    border: 1px solid rgba(245, 216, 110, 0.4);
+    transform: scale(1.05);
+    box-shadow: 
+        0 12px 40px rgba(245, 216, 110, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.25);
+}
+
+.card .actions .follow-btn button:active {
+    background: linear-gradient(
+        135deg,
+        rgba(232, 162, 0, 0.4) 0%,
+        rgba(232, 162, 0, 0.3) 50%,
+        rgba(232, 162, 0, 0.4) 100%
+    );
+    transform: scale(1);
+}
