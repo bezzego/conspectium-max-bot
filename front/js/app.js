@@ -167,15 +167,54 @@
     async function pollJob(jobId, { intervalMs = 2000, timeoutMs = 600000 } = {}) {
         const started = Date.now();
         const noTimeout = timeoutMs === null || timeoutMs === undefined;
+        let lastStatus = null;
+        let consecutiveErrors = 0;
+        const maxConsecutiveErrors = 5;
+        
         while (noTimeout || Date.now() - started < timeoutMs) {
-            const data = await authFetch(`/jobs/${jobId}`);
-            if (data.status === 'completed') {
-                return data;
+            try {
+                const data = await authFetch(`/jobs/${jobId}`);
+                consecutiveErrors = 0; // Сбрасываем счетчик ошибок при успешном запросе
+                
+                // Проверяем статус задачи
+                if (data.status === 'completed') {
+                    // Если задача завершена, но конспект еще не готов, проверяем конспект напрямую
+                    if (data.conspect_id) {
+                        try {
+                            const conspect = await authFetch(`/conspects/${data.conspect_id}`);
+                            if (conspect.status === 'ready' || conspect.status === 'failed') {
+                                return data;
+                            }
+                            // Если конспект еще обрабатывается, продолжаем опрос
+                        } catch (err) {
+                            // Если конспект не найден, но задача завершена, возвращаем данные задачи
+                            console.warn('Конспект не найден, но задача завершена:', err);
+                            return data;
+                        }
+                    } else {
+                        return data;
+                    }
+                }
+                
+                if (data.status === 'failed') {
+                    throw new Error(data.error || 'Задача завершилась с ошибкой');
+                }
+                
+                // Если статус не изменился, продолжаем опрос
+                if (data.status === lastStatus) {
+                    // Ничего не делаем, просто продолжаем
+                }
+                lastStatus = data.status;
+                
+                await new Promise((resolve) => setTimeout(resolve, intervalMs));
+            } catch (err) {
+                consecutiveErrors++;
+                if (consecutiveErrors >= maxConsecutiveErrors) {
+                    throw new Error(`Не удалось получить статус задачи после ${maxConsecutiveErrors} попыток: ${err.message}`);
+                }
+                // При ошибке ждем немного дольше перед повтором
+                await new Promise((resolve) => setTimeout(resolve, intervalMs * 2));
             }
-            if (data.status === 'failed') {
-                throw new Error(data.error || 'Задача завершилась с ошибкой');
-            }
-            await new Promise((resolve) => setTimeout(resolve, intervalMs));
         }
         throw new Error('Превышено время ожидания. Проверь статус задачи в разделе конспектов чуть позже.');
     }

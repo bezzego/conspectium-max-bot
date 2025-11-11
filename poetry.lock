@@ -45,7 +45,7 @@ files = [
 ]
 
 [package.dependencies]
-idna = ">=2.8"
+idna = ">=2.8"2
 sniffio = ">=1.1"
 typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 

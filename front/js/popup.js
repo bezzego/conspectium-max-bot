@@ -124,6 +124,12 @@ function detectContentType(url) {
 
 // Функция для создания popup окна
 function createTestPopup() {
+    // Проверяем, не открыт ли уже popup
+    const existingPopup = document.querySelector('.popup-overlay');
+    if (existingPopup) {
+        return; // Popup уже открыт
+    }
+    
     // Создаем overlay (фон)
     const overlay = document.createElement('div');
     overlay.className = 'popup-overlay';
@@ -196,9 +202,12 @@ function createTestPopup() {
             
             // Открываем соответствующую страницу
             if (contentType === 'conspect') {
-                window.location.href = `/front/html/conspect_shared.html?token=${token}`;
+                window.location.href = `/front/html/conspect_shared.html?token=${encodeURIComponent(token)}`;
             } else if (contentType === 'quiz') {
-                window.location.href = `/front/html/quiz_shared.html?token=${token}`;
+                window.location.href = `/front/html/quiz_shared.html?token=${encodeURIComponent(token)}`;
+            } else {
+                // Если тип не определен, пробуем как конспект
+                window.location.href = `/front/html/conspect_shared.html?token=${encodeURIComponent(token)}`;
             }
         } catch (err) {
             console.error('Ошибка при обработке ссылки:', err);
@@ -656,16 +665,36 @@ const styleSheet = document.createElement('style');
 styleSheet.textContent = popupStyles;
 document.head.appendChild(styleSheet);
 
+// Флаг для предотвращения множественных обработчиков
+let popupHandlersAttached = false;
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Предотвращаем добавление множественных обработчиков
+    if (popupHandlersAttached) {
+        return;
+    }
+    
     const linkCards = document.querySelectorAll('.action-card');
     
     linkCards.forEach(card => {
         const span = card.querySelector('span');
         if (span && span.textContent.includes('Скинули ссылку?')) {
-            card.addEventListener('click', function(e) {
+            // Удаляем старые обработчики, если они есть
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+            
+            newCard.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
+                // Проверяем, не открыт ли уже popup
+                const existingPopup = document.querySelector('.popup-overlay');
+                if (existingPopup) {
+                    return; // Popup уже открыт
+                }
                 createTestPopup();
             });
         }
     });
+    
+    popupHandlersAttached = true;
 });

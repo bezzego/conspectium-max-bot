@@ -52,20 +52,27 @@
 
             try {
                 const quiz = await app.getSharedQuiz(token);
+                
+                if (!quiz) {
+                    throw new Error('Тест не найден');
+                }
+                
                 document.getElementById('loadingState').style.display = 'none';
                 
                 // Перенаправляем на страницу теста с quizId из токена
-                // Или отображаем тест напрямую
                 if (quiz && quiz.id) {
-                    window.location.href = `test.html?quizId=${quiz.id}&shared=true`;
+                    // Используем абсолютный путь для надежности
+                    const testUrl = `/front/html/test.html?quizId=${encodeURIComponent(quiz.id)}&shared=true`;
+                    window.location.href = testUrl;
                 } else {
-                    throw new Error('Неверный формат данных теста');
+                    throw new Error('Неверный формат данных теста: отсутствует ID');
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Ошибка при загрузке теста:', err);
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('errorState').style.display = 'block';
-                document.getElementById('errorMessage').textContent = err.message || 'Не удалось загрузить тест';
+                const errorMessage = err.message || 'Не удалось загрузить тест';
+                document.getElementById('errorMessage').textContent = errorMessage;
             }
         });
     </script>
