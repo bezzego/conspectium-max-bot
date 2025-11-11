@@ -74,6 +74,54 @@ function showCustomAlert(message) {
     });
 }
 
+// Функция для извлечения токена из ссылки
+function extractTokenFromUrl(url) {
+    try {
+        // Пытаемся распарсить URL
+        const urlObj = new URL(url);
+        // Проверяем параметр token
+        const token = urlObj.searchParams.get('token');
+        if (token) {
+            return token;
+        }
+        // Если token в пути (например, /share/TOKEN)
+        const pathParts = urlObj.pathname.split('/');
+        const tokenIndex = pathParts.indexOf('share');
+        if (tokenIndex !== -1 && pathParts[tokenIndex + 1]) {
+            return pathParts[tokenIndex + 1];
+        }
+        // Если token в конце пути
+        const lastPart = pathParts[pathParts.length - 1];
+        if (lastPart && lastPart.length > 10) {
+            return lastPart;
+        }
+    } catch (e) {
+        // Если не удалось распарсить как URL, пытаемся извлечь токен из строки
+        const tokenMatch = url.match(/token[=:]?([a-zA-Z0-9_-]+)/i);
+        if (tokenMatch) {
+            return tokenMatch[1];
+        }
+        // Пытаемся найти токен в конце строки
+        const parts = url.split(/[?&#]/);
+        for (const part of parts) {
+            if (part.includes('token=')) {
+                return part.split('token=')[1].split('&')[0];
+            }
+        }
+    }
+    return null;
+}
+
+// Функция для определения типа контента по URL
+function detectContentType(url) {
+    if (url.includes('conspect') || url.includes('conspect_shared')) {
+        return 'conspect';
+    } else if (url.includes('quiz') || url.includes('test') || url.includes('quiz_shared')) {
+        return 'quiz';
+    }
+    return null;
+}
+
 // Функция для создания popup окна
 function createTestPopup() {
     // Создаем overlay (фон)
@@ -88,19 +136,19 @@ function createTestPopup() {
     popup.innerHTML = `
         <div class="popup-content">
             <div class="popup-header">
-                <h3>Хочешь загрузить тест?</h3>
-                <p>Добавьте ссылку в отведённое поле</p>
+                <h3>Скинули ссылку?</h3>
+                <p>Вставьте ссылку на конспект или тест</p>
                 
                 <div class="input-container">
                     <input type="text" 
                         class="url-input" 
-                        placeholder="https://api.konspektium.bot/export/quiz/"
-                        id="testUrlInput">
+                        placeholder="https://conspectium-hackflow.ru/front/html/conspect_shared.html?token=..."
+                        id="shareUrlInput">
                 </div>
             </div>
             
-            <button class="go-to-test-btn" id="goToTestBtn">
-                Перейти к тесту!
+            <button class="go-to-test-btn" id="goToShareBtn">
+                Открыть
             </button>
         </div>
     `;
@@ -111,7 +159,9 @@ function createTestPopup() {
     
     // Функции для закрытия
     function closePopup() {
-        document.body.removeChild(overlay);
+        if (overlay.parentNode) {
+            document.body.removeChild(overlay);
+        }
     }
     
     // Закрытие по клику на overlay
@@ -122,24 +172,61 @@ function createTestPopup() {
     });
     
     // Закрытие по клику на кнопку
-    const goToTestBtn = document.getElementById('goToTestBtn');
-    goToTestBtn.addEventListener('click', function() {
-        const url = document.getElementById('testUrlInput').value.trim();
-        if (url) {
-            // Здесь можно добавить логику перехода по ссылке
-            console.log('Переход по ссылке:', url);
-            closePopup();
-        } else {
+    const goToShareBtn = document.getElementById('goToShareBtn');
+    goToShareBtn.addEventListener('click', async function() {
+        const url = document.getElementById('shareUrlInput').value.trim();
+        if (!url) {
             showCustomAlert('Пожалуйста, введите ссылку');
+            return;
+        }
+        
+        try {
+            // Извлекаем токен из ссылки
+            const token = extractTokenFromUrl(url);
+            if (!token) {
+                showCustomAlert('Не удалось найти токен в ссылке. Проверьте правильность ссылки.');
+                return;
+            }
+            
+            // Определяем тип контента
+            const contentType = detectContentType(url) || 'conspect'; // По умолчанию конспект
+            
+            // Закрываем popup
+            closePopup();
+            
+            // Открываем соответствующую страницу
+            if (contentType === 'conspect') {
+                window.location.href = `/front/html/conspect_shared.html?token=${token}`;
+            } else if (contentType === 'quiz') {
+                window.location.href = `/front/html/quiz_shared.html?token=${token}`;
+            }
+        } catch (err) {
+            console.error('Ошибка при обработке ссылки:', err);
+            showCustomAlert('Не удалось обработать ссылку. Проверьте правильность ссылки.');
+        }
+    });
+    
+    // Обработка Enter в поле ввода
+    const urlInput = document.getElementById('shareUrlInput');
+    urlInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            goToShareBtn.click();
         }
     });
     
     // Закрытие по нажатию Escape
-    document.addEventListener('keydown', function(e) {
+    const escapeHandler = function(e) {
         if (e.key === 'Escape') {
             closePopup();
+            document.removeEventListener('keydown', escapeHandler);
         }
-    });
+    };
+    document.addEventListener('keydown', escapeHandler);
+    
+    // Фокус на поле ввода
+    setTimeout(() => {
+        urlInput.focus();
+    }, 100);
 }
 
 // Добавляем стили для popup

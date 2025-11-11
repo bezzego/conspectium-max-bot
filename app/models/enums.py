@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class AudioSourceType(str, Enum):
-    UPLOAD = "upload"
-    TELEGRAM_VOICE = "telegram_voice"
+    UPLOAD = "uploaded"
+    TELEGRAM_VOICE = "microphone"
     EXTERNAL_URL = "external_url"
 
 

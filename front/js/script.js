@@ -2188,6 +2188,11 @@ function showConspectModal(conspect, options = {}) {
                                 <i class="fas fa-copy"></i>
                             </button>
                             ${
+                                !options.isPublic && conspect.id
+                                    ? `<button class="meta-copy-btn share-btn" data-conspect-id="${conspect.id}" title="Поделиться конспектом"><i class="fas fa-share"></i></button>`
+                                    : ''
+                            }
+                            ${
                                 conspect.audio_source_id
                                     ? `<button class="meta-copy-btn download-btn" data-audio-id="${conspect.audio_source_id}" title="Скачать аудио"><i class="fas fa-download"></i></button>`
                                     : ''
@@ -2221,8 +2226,10 @@ function showConspectModal(conspect, options = {}) {
     const summaryContainer = conspectModalOverlay.querySelector('.modal-summary');
     const variantToggle = conspectModalOverlay.querySelector('.modal-variant-toggle');
     const copyButton = conspectModalOverlay.querySelector('.meta-copy-btn.copy-btn');
+    const shareButton = conspectModalOverlay.querySelector('.meta-copy-btn.share-btn');
     const downloadButton = conspectModalOverlay.querySelector('.meta-copy-btn.download-btn');
     const originalCopyHtml = copyButton ? copyButton.innerHTML : '';
+    const originalShareHtml = shareButton ? shareButton.innerHTML : '';
     let currentVariantKey = determineDefaultVariant(options.initialVariant);
     let currentVariantMarkdown =
         variantState[currentVariantKey] || (currentVariantKey === 'summary' ? activeConspect.summary : '');
@@ -2333,6 +2340,36 @@ function showConspectModal(conspect, options = {}) {
                     console.error('Ошибка копирования: ', err);
                     appInstance?.notify('Не удалось скопировать конспект', 'error');
                 });
+        });
+    }
+
+    if (shareButton && appInstance) {
+        shareButton.addEventListener('click', async () => {
+            try {
+                const conspectId = Number(shareButton.dataset.conspectId);
+                if (!conspectId) {
+                    appInstance.notify('Не удалось определить конспект', 'error');
+                    return;
+                }
+                
+                appInstance.showLoading('Генерируем ссылку...');
+                const shareToken = await appInstance.getShareToken('conspect', conspectId);
+                const shareUrl = `${window.location.origin}/front/html/conspect_shared.html?token=${shareToken}`;
+                await navigator.clipboard.writeText(shareUrl);
+                appInstance.hideLoading();
+                appInstance.notify('Ссылка скопирована в буфер обмена!', 'success');
+                
+                shareButton.innerHTML = '<i class="fas fa-check"></i>';
+                shareButton.classList.add('copied');
+                setTimeout(() => {
+                    shareButton.innerHTML = originalShareHtml;
+                    shareButton.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error(err);
+                appInstance.hideLoading();
+                appInstance.notify(err.message || 'Не удалось создать ссылку', 'error');
+            }
         });
     }
 
