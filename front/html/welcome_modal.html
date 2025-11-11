@@ -11,103 +11,130 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/welcome_modal.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-
-<!-- Modal -->
-<div class="welcome-modal-overlay">
-    <div class="welcome-modal">
-        <div class="welcome-header">
-            <h2>Привет! Введи свои данные</h2>
-            <p>Они нужны для дальнейшего использования</p>
-        </div>
-
-        <div class="avatar-section">
-            <div class="avatar-carousel-container">
-                <div class="avatar-track" id="avatarTrack"></div>
-                <div class="avatar-center-indicator"></div>
-            </div>
-            <div class="avatar-dots" id="dots"></div>
-        </div>
-
-        <div class="form" id="registerForm">
-            <div class="input-group">
-                <input id="email-input" type="email" placeholder="Email" required>
-                <i class="fas fa-envelope input-icon"></i>
-                <span class="error-message" id="email-error"></span>
-            </div>
-
-            <div class="input-group">
-                <input id="nickname-input" type="text" placeholder="Никнейм" maxlength="50" required>
-                <i class="fas fa-at input-icon"></i>
-                <span class="error-message" id="nickname-error"></span>
-            </div>
-
-            <div class="input-group">
-                <input id="password-input" type="password" placeholder="Пароль (минимум 6 символов)" required>
-                <i class="fas fa-lock input-icon"></i>
-                <span class="error-message" id="password-error"></span>
-            </div>
-
-            <div class="input-group">
-                <input id="username-input" type="text" placeholder="Введи своё имя (необязательно)" maxlength="20">
-                <i class="fas fa-user input-icon"></i>
-            </div>
-
-            <div class="gender-selection">
-                <div class="gender-option">
-                    <input type="radio" id="gender-male" name="gender" value="male">
-                    <label for="gender-male" class="gender-btn">
-                        <i class="fas fa-mars"></i>
-                        <span>Мужской</span>
-                    </label>
-                </div>
-                <div class="gender-option">
-                    <input type="radio" id="gender-female" name="gender" value="female">
-                    <label for="gender-female" class="gender-btn">
-                        <i class="fas fa-venus"></i>
-                        <span>Женский</span>
-                    </label>
-                </div>
-            </div>
-
-            <button id="confirmBtn" class="confirm-btn" disabled>
-                <i class="fas fa-check"></i>
-                <span>Зарегистрироваться</span>
-            </button>
-
-            <div class="auth-switch">
-                <span>У меня уже есть аккаунт</span>
-                <button id="switchToLoginBtn" class="link-btn">Войти</button>
-            </div>
-        </div>
-
-        <!-- Форма входа -->
-        <div class="form" id="loginForm" style="display: none;">
-            <div class="input-group">
-                <input id="login-input" type="text" placeholder="Email или никнейм" required>
-                <i class="fas fa-user input-icon"></i>
-                <span class="error-message" id="login-error"></span>
-            </div>
-
-            <div class="input-group">
-                <input id="login-password-input" type="password" placeholder="Пароль" required>
-                <i class="fas fa-lock input-icon"></i>
-                <span class="error-message" id="login-password-error"></span>
-            </div>
-
-            <button id="loginBtn" class="confirm-btn">
-                <i class="fas fa-sign-in-alt"></i>
-                <span>Войти</span>
-            </button>
-
-            <div class="auth-switch">
-                <span>Нет аккаунта?</span>
-                <button id="switchToRegisterBtn" class="link-btn">Зарегистрироваться</button>
-            </div>
-        </div>
+  <div class="wrapper">
+    <!-- Прогресс-бар -->
+    <div class="progress-bar">
+      <div class="progress-step active" id="step1" data-page="1">1</div>
+      <div class="progress-step" id="step2" data-page="2">2</div>
+      <div class="progress-step" id="step3" data-page="3">3</div>
     </div>
-</div>
+
+    <!-- Контейнер для форм -->
+    <div class="form-container">
+      <!-- Страница 1: Основная информация -->
+      <div class="form-page" id="page1">
+        <h2>Регистрация</h2>
+        
+        <div class="input-field">
+          <input type="email" id="email-input" required autocomplete="email">
+          <label for="email-input">Email</label>
+          <span class="error-message" id="email-error"></span>
+        </div>
+        
+        <div class="input-field">
+          <input type="text" id="nickname-input" required autocomplete="username" maxlength="50">
+          <label for="nickname-input">Никнейм</label>
+          <span class="error-message" id="nickname-error"></span>
+        </div>
+
+        <div class="input-field">
+          <input type="text" id="username-input" autocomplete="name" maxlength="20">
+          <label for="username-input">Имя (необязательно)</label>
+        </div>
+
+        <button type="button" id="next1" class="liquid-glass">Дальше</button>
+
+        <div class="auth-switch">
+          <span>У меня уже есть аккаунт</span>
+          <button id="switchToLoginBtn" class="link-btn">Войти</button>
+        </div>
+      </div>
+
+      <!-- Страница 2: Пароль -->
+      <div class="form-page hidden" id="page2">
+        <h2>Создайте пароль</h2>
+        
+        <div class="input-field">
+          <input type="password" id="password-input" required autocomplete="new-password">
+          <label for="password-input">Пароль</label>
+          <span class="error-message" id="password-error"></span>
+        </div>
+
+        <div class="input-field">
+          <input type="password" id="password-input" required autocomplete="new-password">
+          <label for="password-input">Пароль</label>
+          <span class="error-message" id="password-error"></span>
+        </div>
+
+        <button type="button" id="next2" class="liquid-glass">Дальше</button>
+      </div>
+
+      <!-- Страница 3: Аватар и пол -->
+      <div class="form-page hidden" id="page3">
+        
+        <div class="avatar-section">
+          <div class="avatar-carousel-container">
+            <div class="avatar-track" id="avatarTrack"></div>
+            <div class="avatar-center-indicator"></div>
+          </div>
+          <div class="avatar-dots" id="dots"></div>
+        </div>
+
+        <div class="gender-buttons">
+          <button type="button" class="gender-btn" data-gender="male">
+            <i class="fas fa-mars"></i>
+            <span>Мужской</span>
+          </button>
+          <button type="button" class="gender-btn" data-gender="female">
+            <i class="fas fa-venus"></i>
+            <span>Женский</span>
+          </button>
+        </div>
+
+        <button type="button" id="registerBtn" class="liquid-glass" disabled>
+          <i class="fas fa-check"></i>
+          <span>Зарегистрироваться</span>
+        </button>
+      </div>
+
+      <!-- Форма входа -->
+      <div class="form-page hidden" id="loginPage">
+        <h2>Вход в аккаунт</h2>
+        
+        <div class="input-field">
+          <input type="text" id="login-input" required autocomplete="username">
+          <label for="login-input">Email или никнейм</label>
+          <span class="error-message" id="login-error"></span>
+        </div>
+        
+        <div class="input-field">
+          <input type="password" id="login-password-input" required autocomplete="current-password">
+          <label for="login-password-input">Пароль</label>
+          <span class="error-message" id="login-password-error"></span>
+        </div>
+
+        <button type="button" id="loginBtn" class="liquid-glass">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Войти</span>
+        </button>
+
+        <div class="auth-switch">
+          <span>Нет аккаунта?</span>
+          <button id="switchToRegisterBtn" class="link-btn">Зарегистрироваться</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-text">
+      by HackFlow
+    </div>
+  </div>
 
 <script src="/front/js/script.js"></script>
 <script src="/front/js/welcome_modal.js"></script>
