@@ -13,6 +13,10 @@ from app.schemas.conspect import (
 )
 from app.schemas.job import JobRead
 from app.services.generation import generation_service
+from app.services.sharing import (
+    get_conspect_by_share_token,
+    get_or_create_share_token_conspect,
+)
 
 router = APIRouter()
 
@@ -40,6 +44,42 @@ def create_conspect(
 
     background_tasks.add_task(generation_service.process_conspect_job, job.id)
     return JobRead.model_validate(job)
+
+
+@router.post("/{conspect_id}/share-token", summary="Получить или создать токен для шаринга")
+def get_share_token(
+    conspect_id: int,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> dict[str, str]:
+    """Генерирует или возвращает существующий share_token для конспекта"""
+    token = get_or_create_share_token_conspect(db, conspect_id, user.id)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Конспект не найден"
+        )
+    return {"share_token": token}
+
+
+@router.get("/share/{share_token}", response_model=ConspectRead, summary="Получить конспект по публичной ссылке")
+def get_shared_conspect(
+    share_token: str,
+    db: Session = Depends(deps.get_db_session),
+) -> ConspectRead:
+    """Получает конспект по публичному токену (без авторизации)"""
+    conspect = get_conspect_by_share_token(db, share_token)
+    if not conspect:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Конспект не найден"
+        )
+    if conspect.status != ConspectStatus.READY:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Конспект еще не готов"
+        )
+    return _serialize_conspect(conspect)
 
 
 @router.get("", response_model=ConspectListResponse)

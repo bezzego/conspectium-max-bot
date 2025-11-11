@@ -18,6 +18,10 @@ from app.schemas.quiz import (
     QuizUpdateRequest,
 )
 from app.services.generation import generation_service
+from app.services.sharing import (
+    get_or_create_share_token_quiz,
+    get_quiz_by_share_token,
+)
 
 router = APIRouter()
 
@@ -176,6 +180,118 @@ def delete_quiz(
 
     db.delete(quiz)
     db.commit()
+
+
+@router.post("/{quiz_id}/share-token", summary="Получить или создать токен для шаринга")
+def get_share_token(
+    quiz_id: int,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> dict[str, str]:
+    """Генерирует или возвращает существующий share_token для теста"""
+    token = get_or_create_share_token_quiz(db, quiz_id, user.id)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Тест не найден"
+        )
+    return {"share_token": token}
+
+
+@router.post("/{quiz_id}/publish-tournament", response_model=QuizSummaryRead, summary="Опубликовать тест в турнире")
+def publish_to_tournament(
+    quiz_id: int,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> QuizSummaryRead:
+    """Публикует тест в турнире (делает его доступным для других пользователей)"""
+    quiz = (
+        db.query(Quiz)
+        .filter(Quiz.id == quiz_id, Quiz.user_id == user.id)
+        .one_or_none()
+    )
+    if quiz is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тест не найден")
+    
+    if quiz.status != QuizStatus.READY:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Тест еще не готов"
+        )
+    
+    # Создаем share_token, если его еще нет
+    if not quiz.share_token:
+        from app.services.sharing import generate_share_token
+        max_attempts = 10
+        for _ in range(max_attempts):
+            token = generate_share_token()
+            existing = db.query(Quiz).filter(Quiz.share_token == token).first()
+            if not existing:
+                quiz.share_token = token
+                break
+    
+    quiz.is_public_tournament = True
+    db.add(quiz)
+    db.commit()
+    db.refresh(quiz)
+    
+    latest_result = (
+        db.query(QuizResult)
+        .filter(QuizResult.quiz_id == quiz.id, QuizResult.user_id == user.id)
+        .order_by(QuizResult.created_at.desc())
+        .first()
+    )
+    summary = QuizSummaryRead.model_validate(quiz)
+    if latest_result:
+        summary = summary.model_copy(
+            update={"latest_result": QuizResultRead.model_validate(latest_result)}
+        )
+    return summary
+
+
+@router.get("/share/{share_token}", response_model=QuizRead, summary="Получить тест по публичной ссылке")
+def get_shared_quiz(
+    share_token: str,
+    db: Session = Depends(deps.get_db_session),
+) -> QuizRead:
+    """Получает тест по публичному токену (без авторизации)"""
+    quiz = get_quiz_by_share_token(db, share_token)
+    if not quiz:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Тест не найден"
+        )
+    if quiz.status != QuizStatus.READY:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Тест еще не готов"
+        )
+    
+    quiz_read = QuizRead.model_validate(quiz)
+    # Для публичных тестов не показываем результаты других пользователей
+    return quiz_read.model_copy(update={"results": [], "latest_result": None})
+
+
+@router.get("/tournament/public", response_model=QuizListResponse, summary="Список публичных тестов для турнира")
+def list_public_tournament_quizzes(
+    db: Session = Depends(deps.get_db_session),
+    limit: int = 50,
+    offset: int = 0,
+) -> QuizListResponse:
+    """Получает список публичных тестов для турнира"""
+    quizzes = (
+        db.query(Quiz)
+        .filter(
+            Quiz.is_public_tournament == True,  # noqa: E712
+            Quiz.status == QuizStatus.READY,
+        )
+        .order_by(Quiz.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+    items = [QuizSummaryRead.model_validate(quiz) for quiz in quizzes]
+    return QuizListResponse(items=items)
 
 
 @router.post("/{quiz_id}/results", response_model=QuizResultRead, status_code=status.HTTP_201_CREATED)

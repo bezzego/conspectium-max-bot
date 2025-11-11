@@ -1179,6 +1179,13 @@ function hideConspectLoadingAnimation() {
 
     // Main page ---------------------------------------------------------
     async function initMainPage(app) {
+        // Загружаем медали
+        try {
+            const medals = await app.getMyMedals();
+            displayMedals(medals);
+        } catch (err) {
+            console.error('Failed to load medals:', err);
+        }
         await loadMainConspects(app);
         const card = document.getElementById('audioActionCard');
         if (card) {
@@ -1328,6 +1335,22 @@ async function loadMainConspects(app) {
         document.dispatchEvent(new CustomEvent('conspects:selectable-updated', {
             detail: { context: container.id || 'choose', items },
         }));
+    }
+
+    function displayMedals(medals) {
+        const display = document.getElementById('medalsDisplay');
+        if (!display) return;
+        
+        if (medals.total_medals === 0) {
+            display.style.display = 'none';
+            return;
+        }
+        
+        display.style.display = 'block';
+        document.getElementById('goldCount').textContent = medals.gold_count || 0;
+        document.getElementById('silverCount').textContent = medals.silver_count || 0;
+        document.getElementById('bronzeCount').textContent = medals.bronze_count || 0;
+        document.getElementById('totalMedals').textContent = medals.total_medals || 0;
     }
 
    // Conspect create ---------------------------------------------------
@@ -1578,8 +1601,23 @@ async function loadConspectDetails(app, conspectId) {
 
         const shareBtn = document.getElementById('shareQuizBtn');
         if (shareBtn) {
-            shareBtn.addEventListener('click', () => {
-                window.ConspectiumApp.notify('Уже скоро добавим!', 'info');
+            shareBtn.addEventListener('click', async () => {
+                const app = window.ConspectiumApp;
+                if (!app) return;
+                
+                // Показываем модальное окно для выбора теста
+                try {
+                    await app.ready();
+                    const quizzes = await app.authFetch('/quizzes');
+                    if (!quizzes.items || quizzes.items.length === 0) {
+                        app.notify('У тебя пока нет тестов для шаринга', 'info');
+                        return;
+                    }
+                    showQuizShareModal(app, quizzes.items);
+                } catch (err) {
+                    console.error(err);
+                    app.notify('Не удалось загрузить список тестов', 'error');
+                }
             });
         }
     }
@@ -2350,6 +2388,61 @@ function closeConspectModal() {
 
     window.closeConspectModal = closeConspectModal;
 })();
+
+function showQuizShareModal(app, quizzes) {
+    const existingModal = document.querySelector('.quiz-share-modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'quiz-share-modal-overlay';
+    modalOverlay.innerHTML = `
+        <div class="quiz-share-modal">
+            <div class="modal-header">
+                <h2>Выбери тест для шаринга</h2>
+                <button class="close-btn" onclick="this.closest('.quiz-share-modal-overlay').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="quiz-list" id="shareQuizList"></div>
+            </div>
+        </div>
+    `;
+
+    const quizList = modalOverlay.querySelector('#shareQuizList');
+    quizzes.forEach(quiz => {
+        const item = document.createElement('div');
+        item.className = 'quiz-share-item';
+        item.innerHTML = `
+            <div class="quiz-title">${quiz.title || 'Без названия'}</div>
+            <button class="share-btn" data-quiz-id="${quiz.id}">
+                <i class="fas fa-share"></i> Поделиться
+            </button>
+        `;
+        const shareBtn = item.querySelector('.share-btn');
+        shareBtn.addEventListener('click', async () => {
+            try {
+                app.showLoading('Генерируем ссылку...');
+                const shareToken = await app.getShareToken('quiz', quiz.id);
+                const shareUrl = `${window.location.origin}/front/html/quiz_shared.html?token=${shareToken}`;
+                await navigator.clipboard.writeText(shareUrl);
+                app.hideLoading();
+                app.notify('Ссылка скопирована в буфер обмена!', 'success');
+                modalOverlay.remove();
+            } catch (err) {
+                console.error(err);
+                app.hideLoading();
+                app.notify(err.message || 'Не удалось создать ссылку', 'error');
+            }
+        });
+        quizList.appendChild(item);
+    });
+
+    document.body.appendChild(modalOverlay);
+    setTimeout(() => modalOverlay.classList.add('visible'), 10);
+}
 
 function showNotification(message, type = 'info') {
     const containerClass = 'app-toast-container';

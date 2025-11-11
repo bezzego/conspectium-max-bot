@@ -32,6 +32,7 @@ class QuizSummaryRead(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     status: QuizStatus
+    is_public_tournament: bool = False
     created_at: datetime
     updated_at: datetime
     latest_result: Optional["QuizResultRead"] = None

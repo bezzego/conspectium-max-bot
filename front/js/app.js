@@ -398,6 +398,99 @@
         }, 4000);
     }
 
+    async function getShareToken(type, id) {
+        const endpoint = type === 'conspect' ? `/conspects/${id}/share-token` : `/quizzes/${id}/share-token`;
+        const response = await authFetch(endpoint, {
+            method: 'POST',
+        });
+        return response.share_token;
+    }
+
+    async function publishQuizToTournament(quizId) {
+        return authFetch(`/quizzes/${quizId}/publish-tournament`, {
+            method: 'POST',
+        });
+    }
+
+    async function getSharedConspect(shareToken) {
+        // Публичный endpoint, не требует авторизации
+        const response = await fetch(`${API_BASE}/conspects/share/${shareToken}`);
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || response.statusText);
+        }
+        return response.json();
+    }
+
+    async function getSharedQuiz(shareToken) {
+        // Публичный endpoint, не требует авторизации
+        const response = await fetch(`${API_BASE}/quizzes/share/${shareToken}`);
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || response.statusText);
+        }
+        return response.json();
+    }
+
+    async function createTournamentLobby(quizId, maxParticipants = 8) {
+        return authFetch('/tournament', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                quiz_id: quizId,
+                max_participants: maxParticipants,
+            }),
+        });
+    }
+
+    async function joinTournamentLobby(inviteCode) {
+        return authFetch('/tournament/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                invite_code: inviteCode,
+            }),
+        });
+    }
+
+    async function getTournamentLobby(lobbyId) {
+        return authFetch(`/tournament/${lobbyId}`);
+    }
+
+    async function getTournamentLobbyByInviteCode(inviteCode) {
+        // Публичный endpoint
+        const response = await fetch(`${API_BASE}/tournament/invite/${inviteCode}`);
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || response.statusText);
+        }
+        return response.json();
+    }
+
+    async function updateTournamentParticipantStatus(lobbyId, isReady) {
+        return authFetch(`/tournament/${lobbyId}/participants/me`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                is_ready: isReady,
+            }),
+        });
+    }
+
+    async function startTournamentLobby(lobbyId) {
+        return authFetch(`/tournament/${lobbyId}/start`, {
+            method: 'POST',
+        });
+    }
+
+    async function getMyMedals() {
+        return authFetch('/tournament/medals/me');
+    }
+
+    async function listMyMedals(limit = 50, offset = 0) {
+        return authFetch(`/tournament/medals/me/list?limit=${limit}&offset=${offset}`);
+    }
+
     const readyPromise = ensureAuth();
 
     window.ConspectiumApp = {
@@ -416,6 +509,18 @@
         deleteQuiz,
         generateConspectVariant,
         downloadAudioSource,
+        getShareToken,
+        publishQuizToTournament,
+        getSharedConspect,
+        getSharedQuiz,
+        createTournamentLobby,
+        joinTournamentLobby,
+        getTournamentLobby,
+        getTournamentLobbyByInviteCode,
+        updateTournamentParticipantStatus,
+        startTournamentLobby,
+        getMyMedals,
+        listMyMedals,
         notify,
         state,
     };

@@ -1,0 +1,61 @@
+.medals-display {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.medals-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.medal-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 60px;
+}
+
+.medal-icon {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.medal-count {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 480px) {
+    .medals-stats {
+        gap: 10px;
+    }
+    
+    .medal-stat {
+        min-width: 50px;
+    }
+    
+    .medal-icon {
+        font-size: 28px;
+    }
+    
+    .medal-count {
+        font-size: 16px;
+    }
+}
+

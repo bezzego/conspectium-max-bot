@@ -183,7 +183,23 @@
         deleteBtn.textContent = 'Удалить';
         deleteBtn.addEventListener('click', () => confirmDelete(quiz.id, quiz.title));
 
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'action-btn share';
+        shareBtn.type = 'button';
+        shareBtn.innerHTML = '<i class="fas fa-share"></i> Поделиться';
+        shareBtn.addEventListener('click', () => shareQuiz(quiz.id));
+
+        const tournamentBtn = document.createElement('button');
+        tournamentBtn.className = 'action-btn tournament';
+        tournamentBtn.type = 'button';
+        tournamentBtn.innerHTML = quiz.is_public_tournament 
+            ? '<i class="fas fa-check"></i> В турнире'
+            : '<i class="fas fa-trophy"></i> Опубликовать';
+        tournamentBtn.addEventListener('click', () => toggleTournamentPublish(quiz.id, quiz.is_public_tournament));
+
         actions.appendChild(launchBtn);
+        actions.appendChild(shareBtn);
+        actions.appendChild(tournamentBtn);
         actions.appendChild(renameBtn);
         actions.appendChild(deleteBtn);
         return actions;
@@ -343,5 +359,53 @@
             ? `${correct}/${total} правильных`
             : null;
         return { scoreText, breakdown };
+    }
+
+    async function shareQuiz(quizId) {
+        const app = window.ConspectiumApp;
+        if (!app) return;
+        try {
+            app.showLoading('Генерируем ссылку...');
+            const shareToken = await app.getShareToken('quiz', quizId);
+            const shareUrl = `${window.location.origin}/front/html/quiz_shared.html?token=${shareToken}`;
+            await navigator.clipboard.writeText(shareUrl);
+            app.hideLoading();
+            app.notify('Ссылка скопирована в буфер обмена!', 'success');
+        } catch (err) {
+            console.error(err);
+            app.hideLoading();
+            app.notify(err.message || 'Не удалось создать ссылку', 'error');
+        }
+    }
+
+    async function toggleTournamentPublish(quizId, isPublished) {
+        const app = window.ConspectiumApp;
+        if (!app) return;
+        
+        if (isPublished) {
+            app.notify('Тест уже опубликован в турнире', 'info');
+            return;
+        }
+
+        const confirmed = window.confirm('Опубликовать тест в турнире? Другие пользователи смогут его проходить.');
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            app.showLoading('Публикуем тест...');
+            const updated = await app.publishQuizToTournament(quizId);
+            const index = state.tests.findIndex((quiz) => quiz.id === quizId);
+            if (index !== -1) {
+                state.tests[index] = { ...state.tests[index], ...updated };
+            }
+            renderTests();
+            app.hideLoading();
+            app.notify('Тест опубликован в турнире!', 'success');
+        } catch (err) {
+            console.error(err);
+            app.hideLoading();
+            app.notify(err.message || 'Не удалось опубликовать тест', 'error');
+        }
     }
 })();

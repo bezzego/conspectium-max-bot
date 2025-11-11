@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Публичный тест — Конспектиум</title>
+    <link rel="icon" type="image/png" href="/img/short_icon_white.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/css/style.css">
+    <link rel="stylesheet" href="/front/css/test.css">
+    <link rel="stylesheet" href="/front/css/responsive.css">
+</head>
+<body class="page-quiz-shared">
+    <div class="container">
+        <header class="top-bar">
+            <div class="brand">
+                <a href="/front/html/main.html" class="logo-link">
+                    <img class="logo" src="/img/logo_black.png" alt="logo">
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <div id="loadingState" class="loading-state">
+                <div class="spinner"></div>
+                <p>Загружаем тест...</p>
+            </div>
+            <div id="errorState" class="error-state" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p id="errorMessage">Тест не найден</p>
+            </div>
+            <div id="quizContent" style="display: none;"></div>
+        </main>
+    </div>
+
+    <script src="/front/js/app.js" defer></script>
+    <script src="/front/js/test.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const app = window.ConspectiumApp;
+            if (!app) return;
+
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            
+            if (!token) {
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Не указан токен доступа';
+                return;
+            }
+
+            try {
+                const quiz = await app.getSharedQuiz(token);
+                document.getElementById('loadingState').style.display = 'none';
+                
+                // Перенаправляем на страницу теста с quizId из токена
+                // Или отображаем тест напрямую
+                if (quiz && quiz.id) {
+                    window.location.href = `test.html?quizId=${quiz.id}&shared=true`;
+                } else {
+                    throw new Error('Неверный формат данных теста');
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('errorMessage').textContent = err.message || 'Не удалось загрузить тест';
+            }
+        });
+    </script>
+</body>
+</html>
+

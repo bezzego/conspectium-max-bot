@@ -17,6 +17,8 @@ class Quiz(Base):
 
     title = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
+    share_token = Column(String(64), nullable=True, unique=True, index=True)
+    is_public_tournament = Column(Boolean, nullable=False, default=False)
     status = Column(
         SqlEnum(
             QuizStatus,

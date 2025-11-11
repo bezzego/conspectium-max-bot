@@ -57,10 +57,16 @@
                         <h2 class="card-title">Конспект из аудио</h2>
                         <p class="card-subtitle">Загрузи голосовое сообщение или лекцию — мы расшифруем и соберём ключевые идеи</p>
                     </div>
-                    <button class="accent-btn secondary" id="uploadAudioButton">
-                        <i class="fas fa-microphone"></i>
-                        <span>Загрузить аудио</span>
-                    </button>
+                    <div class="audio-actions">
+                        <button class="accent-btn secondary" id="uploadAudioButton">
+                            <i class="fas fa-upload"></i>
+                            <span>Загрузить аудио</span>
+                        </button>
+                        <button class="accent-btn secondary record-btn" id="recordAudioButton">
+                            <i class="fas fa-microphone"></i>
+                            <span>Записать аудио</span>
+                        </button>
+                    </div>
                     <p class="helper-text">Поддерживаются форматы MP3, M4A, WAV, OGG. <br> Максимум 50 МБ.</p>
                 </article>
             </section>
@@ -88,6 +94,7 @@
     <script src="/front/js/conspect_create.js" defer></script>
     <script src="/front/js/liquid_glass.js" defer></script>
     <script src="/front/js/slider.js" defer></script>
+    <script src="/front/js/audio_recorder.js" defer></script>
 
 </body>
 </html>

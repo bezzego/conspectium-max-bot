@@ -93,13 +93,48 @@
         let currentView = 'tournaments';
 
         // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             initNavigation();
+            await loadPublicTournamentQuizzes();
             renderTournaments();
             setupEventListeners();
             updateFilters();
             initCustomSelects();
         });
+
+        async function loadPublicTournamentQuizzes() {
+            try {
+                // Публичные тесты доступны без авторизации
+                const response = await fetch('/api/quizzes/tournament/public');
+                if (!response.ok) {
+                    return;
+                }
+                const data = await response.json();
+                
+                if (data && data.items && data.items.length > 0) {
+                    // Преобразуем публичные тесты в формат турниров
+                    const publicQuizzes = data.items.map(quiz => ({
+                        id: `quiz_${quiz.id}`,
+                        title: quiz.title || 'Без названия',
+                        subject: 'all', // Можно добавить определение предмета
+                        description: quiz.description || 'Публичный тест',
+                        questions: quiz.questions?.length || 5,
+                        time: Math.ceil((quiz.questions?.length || 5) * 1.5), // Примерное время
+                        participants: 0, // Можно добавить подсчет участников
+                        difficulty: 'medium',
+                        rating: 4.5,
+                        tags: [],
+                        quizId: quiz.id,
+                        isPublicQuiz: true,
+                    }));
+                    
+                    // Добавляем публичные тесты к существующим турнирам
+                    tournaments.push(...publicQuizzes);
+                }
+            } catch (err) {
+                console.error('Failed to load public tournament quizzes:', err);
+            }
+        }
 
         // Инициализация навигации
         function initNavigation() {
@@ -304,6 +339,12 @@
         }
 
         function joinTournament(tournament) {
+            // Если это публичный тест, открываем его напрямую
+            if (tournament.isPublicQuiz && tournament.quizId) {
+                window.location.href = `test.html?quizId=${tournament.quizId}&tournament=true`;
+                return;
+            }
+            
             currentTournament = tournament;
             document.getElementById('lobbyTitle').textContent = `Лобби: ${tournament.title}`;
             document.getElementById('lobbyCode').textContent = lobbyCode;

@@ -202,6 +202,38 @@
     background: rgba(0, 0, 0, 0.35);
 }
 
+.audio-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.audio-actions .accent-btn {
+    flex: 1;
+    min-width: 140px;
+}
+
+.record-btn.recording {
+    background: linear-gradient(
+        135deg,
+        rgba(220, 53, 69, 0.25) 0%,
+        rgba(200, 35, 51, 0.2) 50%,
+        rgba(220, 53, 69, 0.25) 100%
+    ) !important;
+    border-color: rgba(220, 53, 69, 0.4) !important;
+    color: #dc3545 !important;
+    animation: pulse-recording 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-recording {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+}
+
 .helper-text {
     font-size: 13px;
     line-height: 1.6;

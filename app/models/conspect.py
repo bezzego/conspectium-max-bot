@@ -21,6 +21,7 @@ class Conspect(Base):
     brief_markdown = Column(Text, nullable=True)
     full_markdown = Column(Text, nullable=True)
     keywords = Column(JSONB, nullable=True)
+    share_token = Column(String(64), nullable=True, unique=True, index=True)
     status = Column(
         SqlEnum(
             ConspectStatus,

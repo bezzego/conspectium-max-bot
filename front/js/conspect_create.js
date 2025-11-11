@@ -91,6 +91,95 @@
         latestConspectId = conspect.id;
     });
 
+    const shareBtn = document.getElementById('shareConspectBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            if (!latestConspectId) {
+                app.notify('Сначала создай конспект', 'info');
+                return;
+            }
+            try {
+                app.showLoading('Генерируем ссылку...');
+                const shareToken = await app.getShareToken('conspect', latestConspectId);
+                const shareUrl = `${window.location.origin}/front/html/conspect_shared.html?token=${shareToken}`;
+                await navigator.clipboard.writeText(shareUrl);
+                app.hideLoading();
+                app.notify('Ссылка скопирована в буфер обмена!', 'success');
+            } catch (err) {
+                console.error(err);
+                app.hideLoading();
+                app.notify(err.message || 'Не удалось создать ссылку', 'error');
+            }
+        });
+    }
+
+    const recordBtn = document.getElementById('recordAudioButton');
+    if (recordBtn && window.AudioRecorder) {
+        const recorder = new window.AudioRecorder();
+        let isRecording = false;
+
+        if (!recorder.isSupported()) {
+            recordBtn.style.display = 'none';
+        } else {
+            recordBtn.addEventListener('click', async () => {
+                if (!isRecording) {
+                    try {
+                        await recorder.startRecording();
+                        isRecording = true;
+                        recordBtn.innerHTML = '<i class="fas fa-stop"></i><span>Остановить запись</span>';
+                        recordBtn.classList.add('recording');
+                        app.notify('Запись начата', 'info');
+                    } catch (err) {
+                        console.error(err);
+                        app.notify(err.message || 'Не удалось начать запись', 'error');
+                    }
+                } else {
+                    try {
+                        app.showLoading('Останавливаем запись...');
+                        const audioBlob = await recorder.stopRecording();
+                        isRecording = false;
+                        recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Записать аудио</span>';
+                        recordBtn.classList.remove('recording');
+                        
+                        // Конвертируем blob в File
+                        const fileName = `recording_${Date.now()}.webm`;
+                        const audioFile = new File([audioBlob], fileName, { type: 'audio/webm' });
+                        
+                        // Используем существующую логику загрузки
+                        const variant = await showVariantChoiceModal({ title: 'Запись с микрофона' });
+                        if (!variant) {
+                            app.hideLoading();
+                            return;
+                        }
+                        
+                        app.hideLoading();
+                        showConspectLoadingAnimation('Загружаем аудио...');
+                        
+                        const audio = await app.uploadAudio(audioFile);
+                        hideAudioUploadLoader();
+                        showConspectLoadingAnimation('Создаём конспект...');
+                        
+                        const conspect = await app.createConspectFromAudio(audio.id, fileName, {
+                            variants: [variant],
+                        });
+                        
+                        hideAudioUploadLoader();
+                        app.notify('Конспект готов!', 'success');
+                        await loadLatestConspect(app);
+                        showConspectModal(conspect, { initialVariant: variant });
+                    } catch (err) {
+                        console.error(err);
+                        isRecording = false;
+                        recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Записать аудио</span>';
+                        recordBtn.classList.remove('recording');
+                        app.hideLoading();
+                        app.notify(err.message || 'Не удалось обработать запись', 'error');
+                    }
+                }
+            });
+        }
+    }
+
     async function loadLatestConspect(app) {
         try {
             const data = await app.authFetch('/conspects');

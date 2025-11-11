@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/main.css">
     <link rel="stylesheet" href="/front/css/liquid_glass.css">
+    <link rel="stylesheet" href="/front/css/medals.css">
     <!-- Иконка для вкладки -->
     <link rel="icon" type="image/png" href="/img/short_icon_white.png">
     <link rel="stylesheet" href="/front/css/responsive.css">
@@ -49,6 +50,28 @@
 
     <main>
         <h1 class="title">Создавай. Конспектируй. Изучай.</h1>
+
+        <!-- Отображение медалей -->
+        <div class="medals-display" id="medalsDisplay" style="display: none;">
+            <div class="medals-stats">
+                <div class="medal-stat">
+                    <span class="medal-icon gold">🥇</span>
+                    <span class="medal-count" id="goldCount">0</span>
+                </div>
+                <div class="medal-stat">
+                    <span class="medal-icon silver">🥈</span>
+                    <span class="medal-count" id="silverCount">0</span>
+                </div>
+                <div class="medal-stat">
+                    <span class="medal-icon bronze">🥉</span>
+                    <span class="medal-count" id="bronzeCount">0</span>
+                </div>
+                <div class="medal-stat">
+                    <span class="medal-icon total">🏆</span>
+                    <span class="medal-count" id="totalMedals">0</span>
+                </div>
+            </div>
+        </div>
 
         <section class="preview">
             <div class="conspect-list" id="mainConspects"></div>
