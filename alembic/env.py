@@ -1,8 +1,16 @@
 from __future__ import annotations
 
 import logging
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 from typing import Any, Dict
+
+# Добавляем путь к корню проекта в sys.path
+# Это позволяет запускать alembic без poetry run или PYTHONPATH
+project_root = Path(__file__).parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool

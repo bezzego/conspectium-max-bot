@@ -30,9 +30,27 @@
             <div class="avatar-dots" id="dots"></div>
         </div>
 
-        <div class="form">
+        <div class="form" id="registerForm">
             <div class="input-group">
-                <input id="username-input" type="text" placeholder="Введи своё имя" maxlength="20">
+                <input id="email-input" type="email" placeholder="Email" required>
+                <i class="fas fa-envelope input-icon"></i>
+                <span class="error-message" id="email-error"></span>
+            </div>
+
+            <div class="input-group">
+                <input id="nickname-input" type="text" placeholder="Никнейм" maxlength="50" required>
+                <i class="fas fa-at input-icon"></i>
+                <span class="error-message" id="nickname-error"></span>
+            </div>
+
+            <div class="input-group">
+                <input id="password-input" type="password" placeholder="Пароль (минимум 6 символов)" required>
+                <i class="fas fa-lock input-icon"></i>
+                <span class="error-message" id="password-error"></span>
+            </div>
+
+            <div class="input-group">
+                <input id="username-input" type="text" placeholder="Введи своё имя (необязательно)" maxlength="20">
                 <i class="fas fa-user input-icon"></i>
             </div>
 
@@ -55,8 +73,38 @@
 
             <button id="confirmBtn" class="confirm-btn" disabled>
                 <i class="fas fa-check"></i>
-                <span>Подтвердить</span>
+                <span>Зарегистрироваться</span>
             </button>
+
+            <div class="auth-switch">
+                <span>У меня уже есть аккаунт</span>
+                <button id="switchToLoginBtn" class="link-btn">Войти</button>
+            </div>
+        </div>
+
+        <!-- Форма входа -->
+        <div class="form" id="loginForm" style="display: none;">
+            <div class="input-group">
+                <input id="login-input" type="text" placeholder="Email или никнейм" required>
+                <i class="fas fa-user input-icon"></i>
+                <span class="error-message" id="login-error"></span>
+            </div>
+
+            <div class="input-group">
+                <input id="login-password-input" type="password" placeholder="Пароль" required>
+                <i class="fas fa-lock input-icon"></i>
+                <span class="error-message" id="login-password-error"></span>
+            </div>
+
+            <button id="loginBtn" class="confirm-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Войти</span>
+            </button>
+
+            <div class="auth-switch">
+                <span>Нет аккаунта?</span>
+                <button id="switchToRegisterBtn" class="link-btn">Зарегистрироваться</button>
+            </div>
         </div>
     </div>
 </div>

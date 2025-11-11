@@ -171,6 +171,104 @@ class SettingsManager {
 
         const avatarBlock = document.getElementById('currentAvatar');
         avatarBlock?.addEventListener('click', () => this.showAvatarModal());
+        
+        // Обработчик изменения пароля
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        if (changePasswordBtn) {
+            changePasswordBtn.addEventListener('click', async () => {
+                await this.handleChangePassword();
+            });
+        }
+    }
+    
+    async handleChangePassword() {
+        const oldPasswordInput = document.getElementById('oldPasswordInput');
+        const newPasswordInput = document.getElementById('newPasswordInput');
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        
+        if (!oldPasswordInput || !newPasswordInput || !confirmPasswordInput || !changePasswordBtn) return;
+        
+        const oldPassword = oldPasswordInput.value;
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        // Валидация на фронте
+        let hasErrors = false;
+        
+        // Очистка предыдущих ошибок
+        ['oldPasswordError', 'newPasswordError', 'confirmPasswordError'].forEach(id => {
+            const errorEl = document.getElementById(id);
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.style.display = 'none';
+            }
+        });
+        
+        if (!oldPassword) {
+            this.showPasswordError('oldPasswordError', 'Введите текущий пароль');
+            hasErrors = true;
+        }
+        
+        if (!newPassword) {
+            this.showPasswordError('newPasswordError', 'Введите новый пароль');
+            hasErrors = true;
+        } else if (newPassword.length < 6) {
+            this.showPasswordError('newPasswordError', 'Пароль должен содержать минимум 6 символов');
+            hasErrors = true;
+        }
+        
+        if (!confirmPassword) {
+            this.showPasswordError('confirmPasswordError', 'Подтвердите новый пароль');
+            hasErrors = true;
+        } else if (newPassword !== confirmPassword) {
+            this.showPasswordError('confirmPasswordError', 'Пароли не совпадают');
+            hasErrors = true;
+        }
+        
+        if (hasErrors) return;
+        
+        if (!this.app) {
+            alert('Приложение не загружено');
+            return;
+        }
+        
+        try {
+            changePasswordBtn.disabled = true;
+            this.app.showLoading('Изменяем пароль...');
+            
+            await this.app.changePassword(oldPassword, newPassword, confirmPassword);
+            
+            // Очистка полей
+            oldPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+            
+            this.app.hideLoading();
+            this.app.notify('Пароль успешно изменен', 'success');
+        } catch (error) {
+            console.error('Ошибка изменения пароля:', error);
+            this.app.hideLoading();
+            const errorMessage = error.message || 'Не удалось изменить пароль';
+            
+            if (errorMessage.includes('текущий пароль') || errorMessage.includes('Неверный')) {
+                this.showPasswordError('oldPasswordError', errorMessage);
+            } else if (errorMessage.includes('совпадают')) {
+                this.showPasswordError('confirmPasswordError', errorMessage);
+            } else {
+                this.app.notify(errorMessage, 'error');
+            }
+        } finally {
+            changePasswordBtn.disabled = false;
+        }
+    }
+    
+    showPasswordError(errorId, message) {
+        const errorEl = document.getElementById(errorId);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
     }
 
     showAvatarModal() {

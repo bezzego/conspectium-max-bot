@@ -300,7 +300,7 @@
     }
 
     async function registerUser(payload) {
-        // payload: { display_name, gender, avatar_id, avatar_url }
+        // payload: { email, nickname, password, display_name, gender, avatar_id, avatar_url }
         const response = await fetch(`${API_BASE}/auth/register`, {
             method: 'POST',
             headers: {
@@ -311,7 +311,14 @@
 
         if (!response.ok) {
             const text = await response.text();
-            throw new Error(text || 'Registration failed');
+            let errorMessage = 'Не удалось зарегистрироваться';
+            try {
+                const errorData = JSON.parse(text);
+                errorMessage = errorData.detail || errorMessage;
+            } catch {
+                errorMessage = text || errorMessage;
+            }
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();
@@ -320,6 +327,50 @@
         localStorage.setItem(TOKEN_KEY, state.token);
         setUser(state.user);
         return data.user;
+    }
+
+    async function loginUser(login, password) {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                login: login,
+                password: password,
+            }),
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            let errorMessage = 'Неверный email/никнейм или пароль';
+            try {
+                const errorData = JSON.parse(text);
+                errorMessage = errorData.detail || errorMessage;
+            } catch {
+                errorMessage = text || errorMessage;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        state.token = data.token.access_token;
+        state.user = data.user;
+        localStorage.setItem(TOKEN_KEY, state.token);
+        setUser(state.user);
+        return data.user;
+    }
+
+    async function changePassword(oldPassword, newPassword, confirmPassword) {
+        return authFetch('/auth/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                old_password: oldPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword,
+            }),
+        });
     }
 
     async function generateConspectVariant(conspectId, variant) {
@@ -506,6 +557,8 @@
         createManualQuiz,
         updateProfile,
         registerUser,
+        loginUser,
+        changePassword,
         deleteQuiz,
         generateConspectVariant,
         downloadAudioSource,

@@ -85,6 +85,31 @@
                 </div>
             </section>
 
+            <!-- Секция изменения пароля -->
+            <section class="settings-section">
+                <h2 class="settings-title">Изменение пароля</h2>
+                <div class="password-change-form">
+                    <div class="input-group-settings">
+                        <input type="password" id="oldPasswordInput" placeholder="Текущий пароль" class="settings-input">
+                        <i class="fas fa-lock input-icon-settings"></i>
+                        <span class="error-message" id="oldPasswordError"></span>
+                    </div>
+                    <div class="input-group-settings">
+                        <input type="password" id="newPasswordInput" placeholder="Новый пароль (минимум 6 символов)" class="settings-input">
+                        <i class="fas fa-lock input-icon-settings"></i>
+                        <span class="error-message" id="newPasswordError"></span>
+                    </div>
+                    <div class="input-group-settings">
+                        <input type="password" id="confirmPasswordInput" placeholder="Подтвердите новый пароль" class="settings-input">
+                        <i class="fas fa-lock input-icon-settings"></i>
+                        <span class="error-message" id="confirmPasswordError"></span>
+                    </div>
+                    <button class="accent-btn secondary full-width" id="changePasswordBtn">
+                        <span>Изменить пароль</span>
+                    </button>
+                </div>
+            </section>
+
             <section class="settings-section">
                 <h2 class="settings-title">Настройки приложения</h2>
                 

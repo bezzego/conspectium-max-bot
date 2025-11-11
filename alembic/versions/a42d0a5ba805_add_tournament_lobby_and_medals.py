@@ -29,7 +29,6 @@ def upgrade() -> None:
             WHEN duplicate_object THEN null;
         END $$;
     """))
-    conn.commit()
     
     # Создаем enum для типа медали (если не существует)
     conn.execute(sa.text("""
@@ -39,7 +38,6 @@ def upgrade() -> None:
             WHEN duplicate_object THEN null;
         END $$;
     """))
-    conn.commit()
     
     # Создаем таблицы через SQL напрямую, чтобы избежать проблем с enum
     conn.execute(sa.text("""
@@ -102,8 +100,6 @@ def upgrade() -> None:
         CREATE INDEX IF NOT EXISTS ix_medal_user_id ON medal(user_id);
         CREATE INDEX IF NOT EXISTS ix_medal_lobby_id ON medal(lobby_id);
     """))
-    
-    conn.commit()
 
 
 def downgrade() -> None:

@@ -13,8 +13,18 @@ const ALL_AVATARS = [
 const avatarTrack = document.getElementById('avatarTrack');
 const dotsWrap = document.getElementById('dots');
 const nameInput = document.getElementById('username-input');
+const emailInput = document.getElementById('email-input');
+const nicknameInput = document.getElementById('nickname-input');
+const passwordInput = document.getElementById('password-input');
 const confirmBtn = document.getElementById('confirmBtn');
+const loginBtn = document.getElementById('loginBtn');
+const loginInput = document.getElementById('login-input');
+const loginPasswordInput = document.getElementById('login-password-input');
 const genderInputs = document.querySelectorAll('input[name="gender"]');
+const registerForm = document.getElementById('registerForm');
+const loginForm = document.getElementById('loginForm');
+const switchToLoginBtn = document.getElementById('switchToLoginBtn');
+const switchToRegisterBtn = document.getElementById('switchToRegisterBtn');
 
 // Состояние
 let avatars = ALL_AVATARS.slice();
@@ -147,7 +157,9 @@ function snapToIndex(index) {
     });
     
     updatePositions();
-    validateForm();
+    if (registerForm && registerForm.style.display !== 'none') {
+        validateRegisterForm();
+    }
     
     setTimeout(() => {
         items.forEach(item => {
@@ -225,21 +237,134 @@ function applyFilter() {
     renderAvatars();
 }
 
-// Валидация имени
-function isNameValid(name) {
-    const trimmed = name.trim();
-    if (trimmed.length < 2 || trimmed.length > 20) return false;
-    const re = /^[A-Za-z\u0400-\u04FF\s\-]+$/u;
+// Валидация email
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email.trim());
+}
+
+// Валидация nickname
+function isValidNickname(nickname) {
+    const trimmed = nickname.trim();
+    if (trimmed.length < 3 || trimmed.length > 50) return false;
+    const re = /^[a-zA-Z0-9_]+$/;
     return re.test(trimmed);
 }
 
-// Валидация формы
-function validateForm() {
-    const name = nameInput.value || '';
-    const nameOK = isNameValid(name);
+// Валидация пароля
+function isValidPassword(password) {
+    return password.length >= 6;
+}
+
+// Показать ошибку
+function showError(inputId, errorId, message) {
+    const errorEl = document.getElementById(errorId);
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    }
+    const inputEl = document.getElementById(inputId);
+    if (inputEl) {
+        inputEl.style.borderColor = 'rgba(220, 53, 69, 0.5)';
+    }
+}
+
+// Скрыть ошибку
+function hideError(inputId, errorId) {
+    const errorEl = document.getElementById(errorId);
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
+    }
+    const inputEl = document.getElementById(inputId);
+    if (inputEl) {
+        inputEl.style.borderColor = '';
+    }
+}
+
+// Валидация формы регистрации
+function validateRegisterForm() {
+    const email = emailInput.value.trim();
+    const nickname = nicknameInput.value.trim();
+    const password = passwordInput.value;
     const genderOK = Boolean(selectedGender);
-    confirmBtn.disabled = !(nameOK && genderOK);
-    return !confirmBtn.disabled;
+    
+    let isValid = true;
+    
+    // Валидация email
+    if (!email) {
+        showError('email-input', 'email-error', 'Email обязателен');
+        isValid = false;
+    } else if (!isValidEmail(email)) {
+        showError('email-input', 'email-error', 'Неверный формат email');
+        isValid = false;
+    } else {
+        hideError('email-input', 'email-error');
+    }
+    
+    // Валидация nickname
+    if (!nickname) {
+        showError('nickname-input', 'nickname-error', 'Никнейм обязателен');
+        isValid = false;
+    } else if (!isValidNickname(nickname)) {
+        showError('nickname-input', 'nickname-error', 'Никнейм может содержать только буквы, цифры и подчеркивание (3-50 символов)');
+        isValid = false;
+    } else {
+        hideError('nickname-input', 'nickname-error');
+    }
+    
+    // Валидация пароля
+    if (!password) {
+        showError('password-input', 'password-error', 'Пароль обязателен');
+        isValid = false;
+    } else if (!isValidPassword(password)) {
+        showError('password-input', 'password-error', 'Пароль должен содержать минимум 6 символов');
+        isValid = false;
+    } else {
+        hideError('password-input', 'password-error');
+    }
+    
+    confirmBtn.disabled = !(isValid && genderOK);
+    return isValid && genderOK;
+}
+
+// Валидация формы входа
+function validateLoginForm() {
+    const login = loginInput.value.trim();
+    const password = loginPasswordInput.value;
+    
+    let isValid = true;
+    
+    if (!login) {
+        showError('login-input', 'login-error', 'Введите email или никнейм');
+        isValid = false;
+    } else {
+        hideError('login-input', 'login-error');
+    }
+    
+    if (!password) {
+        showError('login-password-input', 'login-password-error', 'Введите пароль');
+        isValid = false;
+    } else {
+        hideError('login-password-input', 'login-password-error');
+    }
+    
+    return isValid;
+}
+
+// Переключение между формами
+function switchToLogin() {
+    registerForm.style.display = 'none';
+    loginForm.style.display = 'block';
+    document.querySelector('.welcome-header h2').textContent = 'Вход в аккаунт';
+    document.querySelector('.welcome-header p').textContent = 'Введи свои данные для входа';
+}
+
+function switchToRegister() {
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'block';
+    document.querySelector('.welcome-header h2').textContent = 'Привет! Введи свои данные';
+    document.querySelector('.welcome-header p').textContent = 'Они нужны для дальнейшего использования';
 }
 
 // События
@@ -271,104 +396,157 @@ function setupEventListeners() {
         onDragEnd();
     });
     
-    // Ввод имени
-    nameInput.addEventListener('input', validateForm);
+    // Валидация полей регистрации
+    emailInput.addEventListener('input', validateRegisterForm);
+    nicknameInput.addEventListener('input', validateRegisterForm);
+    passwordInput.addEventListener('input', validateRegisterForm);
+    nameInput.addEventListener('input', validateRegisterForm);
+    
+    // Валидация полей входа
+    loginInput.addEventListener('input', validateLoginForm);
+    loginPasswordInput.addEventListener('input', validateLoginForm);
     
     // Выбор пола
     genderInputs.forEach(input => {
         input.addEventListener('change', (e) => {
             selectedGender = e.target.value;
             applyFilter();
-            validateForm();
+            validateRegisterForm();
         });
     });
     
-    // Кнопка подтверждения
+    // Переключение между формами
+    switchToLoginBtn.addEventListener('click', switchToLogin);
+    switchToRegisterBtn.addEventListener('click', switchToRegister);
+    
+    // Кнопка регистрации
     confirmBtn.addEventListener('click', async () => {
-        console.debug('[welcome_modal] confirm click - validating form');
-        const valid = validateForm();
-        console.debug('[welcome_modal] form valid:', valid, 'name:', nameInput.value, 'gender:', selectedGender);
-        if (!valid) return;
+        if (!validateRegisterForm()) return;
 
-        const userData = {
-            name: nameInput.value.trim(),
-            gender: selectedGender,
-            avatar: avatars[currentIndex],
-            timestamp: new Date().toISOString()
-        };
+        const email = emailInput.value.trim();
+        const nickname = nicknameInput.value.trim();
+        const password = passwordInput.value;
+        const displayName = nameInput.value.trim() || null;
+        const avatar = avatars[currentIndex];
 
         const app = window.ConspectiumApp;
-        console.debug('[welcome_modal] ConspectiumApp present:', !!app);
         if (app) {
             try {
-                console.debug('[welcome_modal] using app.registerUser');
-                app.showLoading('Сохраняем профиль...');
-                await persistProfile(app, {
-                    display_name: userData.name,
-                    gender: userData.gender,
-                    avatar_id: userData.avatar?.id,
-                    avatar_url: userData.avatar?.url,
+                app.showLoading('Регистрируем...');
+                await app.registerUser({
+                    email: email,
+                    nickname: nickname,
+                    password: password,
+                    display_name: displayName,
+                    gender: selectedGender,
+                    avatar_id: avatar?.id,
+                    avatar_url: avatar?.url,
                 });
                 app.hideLoading();
-                console.debug('[welcome_modal] persistProfile (via app) completed');
+                redirectToMain();
             } catch (error) {
-                console.error('[welcome_modal] persistProfile via app failed', error);
-                try { app.hideLoading(); } catch (e) {}
-                try { app.notify(error.message || 'Не удалось сохранить профиль', 'error'); } catch (e) {}
-                // proceed to fallback below to attempt direct registration
-            }
-        }
-
-        // If app-based registration didn't produce a token, attempt direct
-        // registration fallback to ensure we have a session token stored.
-        if (!localStorage.getItem('conspectium_token')) {
-            console.debug('[welcome_modal] no token found after app.registerUser; trying direct fallback');
-            try {
-                await persistProfile(null, {
-                    display_name: userData.name,
-                    gender: userData.gender,
-                    avatar_id: userData.avatar?.id,
-                    avatar_url: userData.avatar?.url,
-                });
-                console.debug('[welcome_modal] fallback direct registration succeeded');
-            } catch (err) {
-                console.error('[welcome_modal] fallback direct registration failed', err);
-                // Show an error to the user and stop
-                const appNotify = window.ConspectiumApp?.notify;
-                if (typeof appNotify === 'function') {
-                    try { appNotify('Не удалось зарегистрировать пользователя', 'error'); } catch (e) {}
+                console.error('[welcome_modal] Registration failed', error);
+                app.hideLoading();
+                const errorMessage = error.message || 'Не удалось зарегистрироваться';
+                if (errorMessage.includes('email')) {
+                    showError('email-input', 'email-error', errorMessage);
+                } else if (errorMessage.includes('никнейм')) {
+                    showError('nickname-input', 'nickname-error', errorMessage);
                 } else {
-                    alert('Не удалось зарегистрировать пользователя: ' + (err?.message || err));
+                    app.notify(errorMessage, 'error');
                 }
-                return;
+            }
+        } else {
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        nickname: nickname,
+                        password: password,
+                        display_name: displayName,
+                        gender: selectedGender,
+                        avatar_id: avatar?.id,
+                        avatar_url: avatar?.url,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || 'Не удалось зарегистрироваться');
+                }
+
+                const data = await response.json();
+                localStorage.setItem('conspectium_token', data.token.access_token);
+                localStorage.setItem('conspectium_user', JSON.stringify(data.user));
+                redirectToMain();
+            } catch (err) {
+                console.error('[welcome_modal] Registration failed', err);
+                alert('Не удалось зарегистрироваться: ' + (err?.message || err));
             }
         }
+    });
+    
+    // Кнопка входа
+    loginBtn.addEventListener('click', async () => {
+        if (!validateLoginForm()) return;
 
-        try {
-            localStorage.setItem('userData', JSON.stringify(userData));
-        } catch (error) {
-            console.error('Ошибка сохранения:', error);
+        const login = loginInput.value.trim();
+        const password = loginPasswordInput.value;
+
+        const app = window.ConspectiumApp;
+        if (app) {
+            try {
+                app.showLoading('Входим...');
+                await app.loginUser(login, password);
+                app.hideLoading();
+                redirectToMain();
+            } catch (error) {
+                console.error('[welcome_modal] Login failed', error);
+                app.hideLoading();
+                const errorMessage = error.message || 'Неверный email/никнейм или пароль';
+                showError('login-input', 'login-error', errorMessage);
+                showError('login-password-input', 'login-password-error', '');
+            }
+        } else {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        login: login,
+                        password: password,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || 'Неверный email/никнейм или пароль');
+                }
+
+                const data = await response.json();
+                localStorage.setItem('conspectium_token', data.token.access_token);
+                localStorage.setItem('conspectium_user', JSON.stringify(data.user));
+                redirectToMain();
+            } catch (err) {
+                console.error('[welcome_modal] Login failed', err);
+                showError('login-input', 'login-error', 'Неверный email/никнейм или пароль');
+            }
         }
-
-        console.debug('[welcome_modal] finished persistProfile; localStorage token:', localStorage.getItem('conspectium_token'));
-
+    });
+    
+    // Функция перенаправления
+    function redirectToMain() {
         const modal = document.querySelector('.welcome-modal-overlay');
         if (modal) {
             modal.style.opacity = '0';
             modal.style.transition = 'opacity 0.35s ease';
         }
-
         setTimeout(() => {
-            try {
-                if (modal && modal.parentNode) modal.remove();
-            } catch (e) {
-                // ignore
-            }
-            console.log('Данные сохранены:', userData);
-
             window.location.href = '/front/html/main.html';
         }, 350);
-    });
+    }
     
     // Клавиши для навигации
     document.addEventListener('keydown', (e) => {
@@ -384,10 +562,21 @@ function setupEventListeners() {
 
 // Инициализация
 function init() {
+    // Проверяем наличие всех необходимых элементов
+    if (!avatarTrack || !nameInput || !confirmBtn) {
+        console.error('Не найдены необходимые элементы DOM');
+        return;
+    }
+    
     renderAvatars();
     setupEventListeners();
     currentTranslate = 0;
     prevTranslate = 0;
+    
+    // Инициализируем валидацию формы регистрации
+    if (registerForm && emailInput && nicknameInput && passwordInput) {
+        validateRegisterForm();
+    }
 }
 
 // Запуск
