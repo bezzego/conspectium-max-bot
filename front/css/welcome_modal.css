@@ -1,434 +1,512 @@
-    @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");    
-    :root {
-    --yellow: #f5d86e;
-    --bg-dark: #1f1f1f;
-    --light-gray: #dddcdc;
-    }
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");    
+:root {
+--yellow: #f5d86e;
+--bg-dark: #1f1f1f;
+--light-gray: #dddcdc;
+}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Manrope", "Open Sans", sans-serif;
-    }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Manrope", "Open Sans", sans-serif;
+}
 
-    body {
-      background: var(--bg-dark);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      width: 100%;
-      padding: 0 10px;
-    }
+body {
+  background: var(--bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 0 10px;
+}
 
-    .wrapper {
-      width: 400px;
-      min-height: 610px;
-      border-radius: 20px;
-      padding: 35px;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(9px);
-      -webkit-backdrop-filter: blur(9px);
-      position: relative;
-      overflow: hidden;
-    }
+.wrapper {
+  width: 400px;
+  min-height: 610px;
+  border-radius: 20px;
+  padding: 35px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  position: relative;
+  overflow: hidden;
+}
 
-    .form-container {
-      position: relative;
-      width: 100%;
-      min-height: 350px;
-    }
+.form-container {
+  position: relative;
+  width: 100%;
+  min-height: 350px;
+}
 
-    .form-page {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      transition: all 0.4s ease;
-      opacity: 1;
-      transform: translateX(0);
-    }
+.form-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s ease;
+  opacity: 1;
+  transform: translateX(0);
+}
 
-    .form-page.hidden {
-      opacity: 0;
-      transform: translateX(20px);
-      pointer-events: none;
-    }
+.form-page.hidden {
+  opacity: 0;
+  transform: translateX(20px);
+  pointer-events: none;
+}
 
-    h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      color: #fff;
-    }
+h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #fff;
+}
 
-    .progress-bar {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 25px;
-    }
+.progress-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
 
-    .progress-step {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      margin: 0 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: bold;
-      position: relative;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      z-index: 2;
-    }
+.progress-step {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  z-index: 2;
+}
 
-    .progress-step.active {
-      background: rgba(255, 255, 255, 0.8);
-      color: #000;
-    }
+.progress-step.active {
+  background: rgba(255, 255, 255, 0.8);
+  color: #000;
+}
 
-    .progress-step.completed {
-      background: rgba(255, 255, 255, 0.5);
-    }
+.progress-step.completed {
+  background: rgba(255, 255, 255, 0.5);
+}
 
-    .progress-step:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      width: 20px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.3);
-      right: -20px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 1;
-    }
+.progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
 
-    .input-field {
-      position: relative;
-      border-bottom: 2px solid #ccc;
-      margin: 15px 0;
-    }
+            .input-field {
+              position: relative;
+              border-bottom: 2px solid #ccc;
+              margin: 20px 0;
+            }
 
-    .input-field label {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      color: #fff;
-      font-size: 16px;
-      pointer-events: none;
-      transition: 0.15s ease;
-    }
+          .input-field label {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+          }
 
-    .input-field input, .input-field select {
-      width: 100%;
-      height: 40px;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-size: 16px;
-      color: #fff;
-    }
+        .input-field input, .input-field select {
+          width: 100%;
+          height: 40px;
+          background: transparent;
+          border: none;
+          outline: none;
+          font-size: 16px;
+          color: #fff;
+        }
 
-    .input-field input:focus~label,
-    .input-field input:valid~label,
-    .input-field select:focus~label,
-    .input-field select:valid~label {
-      font-size: 0.8rem;
-      top: 10px;
-      transform: translateY(-120%);
-    }
+        .input-field input:focus ~ label,
+        .input-field input:not(:placeholder-shown) ~ label,
+        .input-field input:valid ~ label {
+          font-size: 0.8rem;
+          top: -5px;
+          transform: translateY(0);
+          color: #fff;
+        }
 
-    .error-message {
-      color: #ff6b6b;
-      font-size: 12px;
-      text-align: left;
-      margin-top: 5px;
-      display: none;
-    }
 
-    .avatar-section {
-      margin: 20px 0;
-    }
+        /* Добавляем placeholder для полей, которые должны оставаться наверху */
+.input-field input:not(:placeholder-shown) {
+  background: transparent;
+}
 
-    .avatar-carousel-container {
-      position: relative;
-      height: 120px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
+/* Специально для поля Email - добавляем required атрибут в HTML */
+.input-field input:required:valid ~ label {
+  font-size: 0.8rem;
+  top: -5px;
+  transform: translateY(0);
+  color: #fff;
+}
 
-    .avatar-track {
-      position: relative;
-      height: 100%;
-      width: 100%;
-    }
+/* Для необязательных полей (как имя) */
+.input-field input:optional:not(:placeholder-shown) ~ label {
+  font-size: 0.8rem;
+  top: -5px;
+  transform: translateY(0);
+  color: #fff;
+}
 
-    .avatar-item {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
+.error-message {
+  color: #ff6b6b;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 8px;
+  display: none;
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  width: 100%;
+}
 
-    .avatar-item img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid transparent;
-      transition: all 0.3s ease;
-    }
+/* Стили для ошибок */
+.input-field.error {
+  border-bottom-color: #ff6b6b;
+}
 
-    .avatar-item.active img {
-      border-color: var(--yellow);
-      transform: scale(1.1);
-    }
+.input-field.error label {
+  color: #ff6b6b;
+}
 
-    .avatar-item.adjacent img {
-      opacity: 0.7;
-      transform: scale(0.9);
-    }
+.input-field.success {
+  border-bottom-color: #4CAF50;
+}
 
-    .avatar-item.far img {
-      opacity: 0.4;
-      transform: scale(0.8);
-    }
+.input-field.success label {
+  color: #4CAF50;
+}
 
-    .avatar-item.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
 
-    .avatar-center-indicator {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 85px;
-      height: 85px;
-      border: 2px dashed var(--yellow);
-      border-radius: 50%;
-      pointer-events: none;
-    }
+.avatar-section {
+  margin: 20px 0;
+}
 
-    .avatar-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-    }
+.avatar-carousel-container {
+  position: relative;
+  height: 120px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
 
-    .avatar-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+.avatar-track {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
 
-    .avatar-dot.active {
-      background: var(--yellow);
-      transform: scale(1.2);
-    }
+.avatar-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
 
-    .gender-buttons {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      margin: 20px 0;
-    }
+.avatar-item img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
 
-    .gender-btn {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      padding: 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+.avatar-item.active img {
+  border-color: var(--yellow);
+  transform: scale(1.1);
+}
 
-    .gender-btn.active {
-      background: rgba(255, 255, 255, 0.8);
-      color: #000;
-      border-color: var(--yellow);
-    }
+.avatar-item.adjacent img {
+  opacity: 0.7;
+  transform: scale(0.9);
+}
 
-    .gender-btn:hover {
-      border-color: rgba(255, 255, 255, 0.6);
-    }
+.avatar-item.far img {
+  opacity: 0.4;
+  transform: scale(0.8);
+}
 
-    /* Стили для кнопок в стиле liquid-glass */
-    button.liquid-glass {
-      background: linear-gradient(
-          135deg,
-          rgba(243, 194, 17, 0.377) 0%,
-          rgba(240, 193, 25, 0.295) 50%,
-          rgba(243, 196, 24, 0.377) 100%
-      );
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border-radius: 15px;
-      border: 1px solid rgba(245, 216, 110, 0.3);
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      overflow: hidden;
-      width: 100%;
-      padding: 16px 20px;
-      box-sizing: border-box;
-      font-size: 16px;
-      margin-top: 40px;
-      position: relative;
-    }
+.avatar-item.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
-    button.liquid-glass:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
+.avatar-center-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 115px;
+  height: 115px;
+  border: 2px dashed var(--yellow);
+  border-radius: 50%;
+  pointer-events: none;
+}
 
-    button.liquid-glass:disabled:hover {
-      background: linear-gradient(
-          135deg,
-          rgba(243, 194, 17, 0.377) 0%,
-          rgba(240, 193, 25, 0.295) 50%,
-          rgba(243, 196, 24, 0.377) 100%
-      );
-      border: 1px solid rgba(245, 216, 110, 0.3);
-      box-shadow: none;
-    }
+.avatar-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
 
-    /* Контейнер для бликов в кнопке */
-    button.liquid-glass::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-          135deg,
-          transparent 0%,
-          rgba(255, 255, 255, 0.3) 30%,
-          transparent 70%
-      );
-      border-radius: 15px;
-      opacity: 0.6;
-      pointer-events: none;
-    }
+.avatar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-    /* Эффект градиентной рамки для кнопки */
-    button.liquid-glass::after {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        background: linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.3),
-            rgba(245, 216, 110, 0.2),
-            rgba(255, 255, 255, 0.3),
-            rgba(245, 216, 110, 0.2)
-        );
-        border-radius: 15px;
-        z-index: -1;
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        pointer-events: none;
-    }
+.avatar-dot.active {
+  background: var(--yellow);
+  transform: scale(1.2);
+}
 
-    button.liquid-glass:hover::after {
-        opacity: 1;
-    }
+.gender-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 20px 0;
+}
 
-    /* Эффекты при наведении на кнопку */
-    button.liquid-glass:hover:not(:disabled) {
-        transform: scale(1.02);
-        background: linear-gradient(
-            135deg,
-            rgba(245, 213, 99, 0.35) 0%,
-            rgba(248, 213, 87, 0.22) 50%,
-            rgba(245, 212, 92, 0.35) 100%
-        );
-        border: 1px solid rgba(245, 216, 110, 0.4);
-        box-shadow: 
-            0 12px 40px rgba(245, 216, 110, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5),
-            inset 0 -1px 0 rgba(179, 152, 46, 0.25);
-        color: #fff;
-    }
+.gender-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 55px;
+}
 
-    .auth-switch {
-      margin-top: 20px;
-      color: #fff;
-      font-size: 14px;
-    }
+.gender-btn.active {
+  background: rgba(255, 255, 255, 0.8);
+  color: #000;
+  border-color: var(--yellow);
+}
 
-    .link-btn {
-      background: none;
-      border: none;
-      color: var(--yellow);
-      cursor: pointer;
-      text-decoration: underline;
-      margin-left: 5px;
-    }
+.gender-btn:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+}
 
-    .link-btn:hover {
-      color: #ffd700;
-    }
+/* Стили для кнопок в стиле liquid-glass */
+button.liquid-glass {
+  background: linear-gradient(
+      135deg,
+      rgba(243, 194, 17, 0.377) 0%,
+      rgba(240, 193, 25, 0.295) 50%,
+      rgba(243, 196, 24, 0.377) 100%
+  );
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 15px;
+  border: 1px solid rgba(245, 216, 110, 0.3);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  width: 100%;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  font-size: 16px;
+  margin-top: 20px;
+  position: relative;
+}
 
-    /* Анимации для плавных переходов */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateX(20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
+button.liquid-glass:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
 
-    .form-page:not(.hidden) {
-      animation: fadeIn 0.4s ease;
-    }
+button.liquid-glass:disabled:hover {
+  background: linear-gradient(
+      135deg,
+      rgba(243, 194, 17, 0.377) 0%,
+      rgba(240, 193, 25, 0.295) 50%,
+      rgba(243, 196, 24, 0.377) 100%
+  );
+  border: 1px solid rgba(245, 216, 110, 0.3);
+  box-shadow: none;
+}
 
-    /* Исправление цвета автозаполнения */
-    .input-field input:-webkit-autofill,
-    .input-field input:-webkit-autofill:hover,
-    .input-field input:-webkit-autofill:focus,
-    .input-field input:-webkit-autofill:active {
+/* Контейнер для бликов в кнопке */
+button.liquid-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+      135deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 30%,
+      transparent 70%
+  );
+  border-radius: 15px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Эффект градиентной рамки для кнопки */
+button.liquid-glass::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2),
+        rgba(255, 255, 255, 0.3),
+        rgba(245, 216, 110, 0.2)
+    );
+    border-radius: 15px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+button.liquid-glass:hover::after {
+    opacity: 1;
+}
+
+/* Эффекты при наведении на кнопку */
+button.liquid-glass:hover:not(:disabled) {
+    transform: scale(1.02);
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    border: 1px solid rgba(245, 216, 110, 0.4);
+    box-shadow: 
+        0 12px 40px rgba(245, 216, 110, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(179, 152, 46, 0.25);
+    color: #fff;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--yellow);
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 5px;
+}
+
+.link-btn:hover {
+  color: #ffd700;
+}
+
+/* Анимации для плавных переходов */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.form-page:not(.hidden) {
+  animation: fadeIn 0.4s ease;
+}
+
+/* Более агрессивное решение для автозаполнения */
+.input-field input:-webkit-autofill,
+.input-field input:-webkit-autofill:hover,
+.input-field input:-webkit-autofill:focus,
+.input-field input:-webkit-autofill:active {
+    -webkit-text-fill-color: #fff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important; /* Используем цвет фона */
+    transition: background-color 5000s ease-in-out 0s;
+    background: transparent !important;
+    border: none !important;
+    caret-color: #fff !important;
+}
+
+.input-field input:autofill,
+.input-field input:autofill:hover,
+.input-field input:autofill:focus,
+.input-field input:autofill:active {
+    -webkit-text-fill-color: #fff !important;
+    box-shadow: 0 0 0 1000px #1f1f1f inset !important;
+    -webkit-box-shadow: 0 0 0 1000px #1f1f1f inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    background: transparent !important;
+    border: none !important;
+    caret-color: #fff !important;
+}
+
+/* Для современных браузеров */
+.input-field input:where(:-webkit-autofill, :autofill) {
+    -webkit-text-fill-color: #fff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important;
+    box-shadow: 0 0 0 1000px #1f1f1f inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Альтернативное решение через фильтр */
+@supports (-webkit-touch-callout: none) {
+    .input-field input:-webkit-autofill {
         -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
-        transition: background-color 5000s ease-in-out 0s;
-        background: transparent !important;
+        -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important;
     }
+}
 
-    .footer-text {
-      position: absolute;
-      bottom: 15px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.253);
-      font-size: 14px;
-      font-weight: 300;
-    }
+
+
+.footer-text {
+  position: absolute;
+  bottom: 15px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.253);
+  font-size: 14px;
+  font-weight: 300;
+}

@@ -32,20 +32,21 @@
         <h2>Регистрация</h2>
         
         <div class="input-field">
-          <input type="email" id="email-input" required autocomplete="email">
-          <label for="email-input">Email</label>
-          <span class="error-message" id="email-error"></span>
+            <input type="email" id="email-input" autocomplete="off" required autocomplete="email" placeholder=" ">
+            <label for="email-input">Email</label>
+            <span class="error-message" id="email-error"></span>
         </div>
         
         <div class="input-field">
-          <input type="text" id="nickname-input" required autocomplete="username" maxlength="50">
-          <label for="nickname-input">Никнейм</label>
-          <span class="error-message" id="nickname-error"></span>
+            <input type="text" id="nickname-input" autocomplete="off" required autocomplete="username" maxlength="50" placeholder=" ">
+            <label for="nickname-input">Никнейм</label>
+            <span class="error-message" id="nickname-error"></span>
         </div>
 
         <div class="input-field">
-          <input type="text" id="username-input" autocomplete="name" maxlength="20">
-          <label for="username-input">Имя (необязательно)</label>
+            <input type="text" id="username-input" autocomplete="off" required autocomplete="name" maxlength="20" placeholder=" ">
+            <label for="username-input">Имя</label>
+            <span class="error-message" id="name-error"></span>
         </div>
 
         <button type="button" id="next1" class="liquid-glass">Дальше</button>
@@ -57,23 +58,23 @@
       </div>
 
       <!-- Страница 2: Пароль -->
-      <div class="form-page hidden" id="page2">
+        <div class="form-page hidden" id="page2">
         <h2>Создайте пароль</h2>
         
-        <div class="input-field">
-          <input type="password" id="password-input" required autocomplete="new-password">
-          <label for="password-input">Пароль</label>
-          <span class="error-message" id="password-error"></span>
-        </div>
+            <div class="input-field">
+                <input type="password" id="password-input" required autocomplete="new-password" placeholder=" ">
+                <label for="password-input">Пароль</label>
+                <span class="error-message" id="password-error"></span>
+            </div>
 
-        <div class="input-field">
-          <input type="password" id="password-input" required autocomplete="new-password">
-          <label for="password-input">Пароль</label>
-          <span class="error-message" id="password-error"></span>
-        </div>
+            <div class="input-field">
+                <input type="password" id="password-confirm-input" required autocomplete="new-password" placeholder=" ">
+                <label for="password-confirm-input">Повторите пароль</label>
+                <span class="error-message" id="password-confirm-error"></span>
+            </div>
 
         <button type="button" id="next2" class="liquid-glass">Дальше</button>
-      </div>
+        </div>
 
       <!-- Страница 3: Аватар и пол -->
       <div class="form-page hidden" id="page3">
@@ -104,19 +105,19 @@
       </div>
 
       <!-- Форма входа -->
-      <div class="form-page hidden" id="loginPage">
-        <h2>Вход в аккаунт</h2>
+        <div class="form-page hidden" id="loginPage">
+            <h2>Вход в аккаунт</h2>
         
         <div class="input-field">
-          <input type="text" id="login-input" required autocomplete="username">
-          <label for="login-input">Email или никнейм</label>
-          <span class="error-message" id="login-error"></span>
+            <input type="text" id="login-input" required autocomplete="username" placeholder=" ">
+            <label for="login-input">Email или никнейм</label>
+            <span class="error-message" id="login-error"></span>
         </div>
         
         <div class="input-field">
-          <input type="password" id="login-password-input" required autocomplete="current-password">
-          <label for="login-password-input">Пароль</label>
-          <span class="error-message" id="login-password-error"></span>
+            <input type="password" id="login-password-input" required autocomplete="current-password" placeholder=" ">
+            <label for="login-password-input">Пароль</label>
+            <span class="error-message" id="login-password-error"></span>
         </div>
 
         <button type="button" id="loginBtn" class="liquid-glass">
@@ -135,6 +136,29 @@
       by HackFlow
     </div>
   </div>
+
+<script>
+/* Добавь этот скрипт если CSS не помогает */
+document.addEventListener('DOMContentLoaded', function() {
+    // Принудительно сбрасываем стили автозаполнения
+    const inputs = document.querySelectorAll('.input-field input');
+    inputs.forEach(input => {
+        // Обработчик для уже заполненных полей
+        if (input.matches(':-webkit-autofill') || input.matches(':autofill')) {
+            input.style.backgroundColor = 'transparent';
+            input.style.backgroundImage = 'none';
+        }
+        
+        // Обработчик для будущего автозаполнения
+        input.addEventListener('animationstart', function(e) {
+            if (e.animationName === 'onAutoFillStart') {
+                this.style.backgroundColor = 'transparent';
+                this.style.backgroundImage = 'none';
+            }
+        });
+    });
+});
+</script>
 
 <script src="/front/js/script.js"></script>
 <script src="/front/js/welcome_modal.js"></script>
