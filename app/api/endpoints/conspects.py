@@ -139,3 +139,59 @@ def create_conspect_variant(
 
     background_tasks.add_task(generation_service.process_conspect_job, job.id)
     return JobRead.model_validate(job)
+
+
+@router.post(
+    "/share/{share_token}/save",
+    response_model=ConspectRead,
+    summary="Сохранить публичный конспект в свой список",
+)
+def save_shared_conspect(
+    share_token: str,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> ConspectRead:
+    """Копирует публичный конспект в список конспектов пользователя"""
+    # Получаем исходный конспект по токену
+    source_conspect = get_conspect_by_share_token(db, share_token)
+    if not source_conspect:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Конспект не найден"
+        )
+    if source_conspect.status != ConspectStatus.READY:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Конспект еще не готов"
+        )
+    
+    # Проверяем, не сохранил ли уже пользователь этот конспект
+    existing = (
+        db.query(Conspect)
+        .filter(
+            Conspect.user_id == user.id,
+            Conspect.title == source_conspect.title,
+            Conspect.summary == source_conspect.summary,
+        )
+        .first()
+    )
+    if existing:
+        return _serialize_conspect(existing)
+    
+    # Создаем копию конспекта для пользователя
+    new_conspect = Conspect(
+        user_id=user.id,
+        title=source_conspect.title,
+        summary=source_conspect.summary,
+        compressed_markdown=source_conspect.compressed_markdown,
+        brief_markdown=source_conspect.brief_markdown,
+        full_markdown=source_conspect.full_markdown,
+        keywords=source_conspect.keywords,
+        status=ConspectStatus.READY,
+        model_used=source_conspect.model_used,
+        generated_at=source_conspect.generated_at,
+    )
+    db.add(new_conspect)
+    db.commit()
+    db.refresh(new_conspect)
+    return _serialize_conspect(new_conspect)

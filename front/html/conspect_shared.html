@@ -57,9 +57,12 @@
                 const contentDiv = document.getElementById('conspectContent');
                 contentDiv.style.display = 'block';
                 
+                // Сохраняем токен в конспекте для использования при сохранении
+                conspect.share_token = token;
+                
                 // Используем существующую функцию для отображения конспекта
                 if (window.showConspectModal) {
-                    showConspectModal(conspect, { isPublic: true });
+                    showConspectModal(conspect, { isPublic: true, shareToken: token });
                 } else {
                     // Простое отображение, если функция недоступна
                     contentDiv.innerHTML = `

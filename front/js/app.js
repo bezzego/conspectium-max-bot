@@ -483,6 +483,13 @@
         return response.json();
     }
 
+    async function saveSharedConspect(shareToken) {
+        await ensureAuth();
+        return authFetch(`/conspects/share/${shareToken}/save`, {
+            method: 'POST',
+        });
+    }
+
     async function createTournamentLobby(quizId, maxParticipants = 8) {
         return authFetch('/tournament', {
             method: 'POST',
@@ -566,6 +573,7 @@
         publishQuizToTournament,
         getSharedConspect,
         getSharedQuiz,
+        saveSharedConspect,
         createTournamentLobby,
         joinTournamentLobby,
         getTournamentLobby,

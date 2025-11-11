@@ -2138,6 +2138,46 @@ function showConspectModal(conspect, options = {}) {
         font-size: 13px;
     }
 }
+
+.public-conspect-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.public-conspect-actions .accent-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.public-conspect-actions .accent-btn.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.public-conspect-actions .accent-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 480px) {
+    .public-conspect-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
     `;
 
     const existingStyles = document.getElementById('modal-styles');
@@ -2214,6 +2254,18 @@ function showConspectModal(conspect, options = {}) {
                     <h3>Ключевые идеи</h3>
                     <ul class="modal-keypoints">${keyPoints}</ul>
                 ` : ''}
+                ${options.isPublic ? `
+                    <div class="public-conspect-actions">
+                        <button class="accent-btn save-conspect-btn" id="saveConspectBtn">
+                            <i class="fas fa-save"></i>
+                            <span>Сохранить</span>
+                        </button>
+                        <button class="accent-btn secondary exit-conspect-btn" id="exitConspectBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Выйти</span>
+                        </button>
+                    </div>
+                ` : ''}
             </div>
         </div>
     `;
@@ -2231,8 +2283,13 @@ function showConspectModal(conspect, options = {}) {
     const originalCopyHtml = copyButton ? copyButton.innerHTML : '';
     const originalShareHtml = shareButton ? shareButton.innerHTML : '';
     let currentVariantKey = determineDefaultVariant(options.initialVariant);
-    let currentVariantMarkdown =
-        variantState[currentVariantKey] || (currentVariantKey === 'summary' ? activeConspect.summary : '');
+    // Убеждаемся, что markdown правильно извлекается
+    let currentVariantMarkdown = '';
+    if (currentVariantKey === 'summary') {
+        currentVariantMarkdown = activeConspect.summary || '';
+    } else {
+        currentVariantMarkdown = variantState[currentVariantKey] || '';
+    }
     let variantButtons = [];
 
     const updateVariantButtonsState = () => {
@@ -2371,6 +2428,49 @@ function showConspectModal(conspect, options = {}) {
                 appInstance.notify(err.message || 'Не удалось создать ссылку', 'error');
             }
         });
+    }
+
+    // Обработчики для публичных конспектов
+    if (options.isPublic && options.shareToken) {
+        const saveBtn = conspectModalOverlay.querySelector('#saveConspectBtn');
+        const exitBtn = conspectModalOverlay.querySelector('#exitConspectBtn');
+        const shareToken = options.shareToken;
+
+        if (saveBtn && appInstance) {
+            saveBtn.addEventListener('click', async () => {
+                try {
+                    saveBtn.disabled = true;
+                    appInstance.showLoading('Сохраняем конспект...');
+                    const savedConspect = await appInstance.saveSharedConspect(shareToken);
+                    appInstance.hideLoading();
+                    appInstance.notify('Конспект успешно сохранен!', 'success');
+                    // Обновляем конспект, чтобы он стал "своим"
+                    activeConspect = savedConspect;
+                    // Можно закрыть модальное окно или обновить его
+                    setTimeout(() => {
+                        closeConspectModal();
+                        window.location.href = '/front/html/main.html';
+                    }, 1500);
+                } catch (err) {
+                    console.error(err);
+                    appInstance.hideLoading();
+                    saveBtn.disabled = false;
+                    const errorMessage = err.message || 'Не удалось сохранить конспект';
+                    if (errorMessage.includes('уже') || errorMessage.includes('существует')) {
+                        appInstance.notify('Конспект уже сохранен в вашем списке', 'info');
+                    } else {
+                        appInstance.notify(errorMessage, 'error');
+                    }
+                }
+            });
+        }
+
+        if (exitBtn) {
+            exitBtn.addEventListener('click', () => {
+                closeConspectModal();
+                window.location.href = '/front/html/main.html';
+            });
+        }
     }
 
     conspectModalOverlay.addEventListener('click', (event) => {
