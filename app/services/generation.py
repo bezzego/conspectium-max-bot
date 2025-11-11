@@ -285,12 +285,14 @@ class GenerationService:
         db.add(quiz)
         db.flush()
 
+        questions_count = payload.questions_count if hasattr(payload, 'questions_count') and payload.questions_count else 5
         job = GenerationJob(
             user_id=user.id,
             job_type=GenerationJobType.QUIZ,
             status=GenerationJobStatus.PENDING,
             conspect_id=conspect.id,
             quiz_id=quiz.id,
+            prompt=json.dumps({"questions_count": questions_count}),
         )
         db.add(job)
         db.commit()
@@ -316,12 +318,21 @@ class GenerationService:
             if conspect.status != ConspectStatus.READY:
                 raise RuntimeError("Конспект еще в обработке")
 
+            # Извлекаем количество вопросов из job.prompt
+            questions_count = 5  # значение по умолчанию
+            if job.prompt:
+                try:
+                    prompt_data = json.loads(job.prompt)
+                    questions_count = int(prompt_data.get("questions_count", 5))
+                except (json.JSONDecodeError, ValueError, TypeError):
+                    pass
+
             try:
-                ai_response = self.ai_client.generate_quiz(conspect.summary or "")
+                ai_response = self.ai_client.generate_quiz(conspect.summary or "", questions_count=questions_count)
             except Exception as exc:  # noqa: BLE001
                 logging.exception("Quiz generation via AI failed: %s", exc)
                 if settings.environment != "production":
-                    ai_response = self._build_local_quiz(conspect, exc)
+                    ai_response = self._build_local_quiz(conspect, exc, questions_count=questions_count)
                 elif self._is_transient_ai_failure(exc):
                     raise RuntimeError(
                         "Сервис генерации тестов перегружен. Попробуй снова через минуту."
@@ -635,7 +646,7 @@ class GenerationService:
             "error": str(error),
         }
 
-    def _build_local_quiz(self, conspect: Conspect, error: Exception) -> dict:
+    def _build_local_quiz(self, conspect: Conspect, error: Exception, questions_count: int = 5) -> dict:
         points = conspect.keywords or []
         if not points and conspect.summary:
             points = [
@@ -651,7 +662,7 @@ class GenerationService:
             ]
 
         questions = []
-        for idx, point in enumerate(points[:5], start=1):
+        for idx, point in enumerate(points[:questions_count], start=1):
             questions.append(
                 {
                     "question": f"Верно ли утверждение: {point}",

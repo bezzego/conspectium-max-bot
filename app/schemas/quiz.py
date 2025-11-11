@@ -47,6 +47,7 @@ class QuizRead(QuizSummaryRead):
 
 class QuizCreateFromConspectRequest(BaseModel):
     conspect_id: int
+    questions_count: Optional[int] = Field(default=5, ge=1, le=20, description="Количество вопросов в тесте")
 
 
 class QuizUpdateRequest(BaseModel):

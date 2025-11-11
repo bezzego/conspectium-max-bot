@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     max_api_base_url: str = "https://platform-api.max.ru"
     max_bot_token: Optional[str] = None
-    max_mini_app_url: Optional[str] = None
+    max_mini_app_url: str = "https://conspectium-hackflow.ru/"
     max_welcome_message: str = "Привет! Я бот Конспектиума. Нажми кнопку ниже, чтобы открыть мини-приложение."
     max_welcome_button_text: str = "Открыть Конспектиум"
 

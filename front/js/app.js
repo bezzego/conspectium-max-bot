@@ -250,11 +250,14 @@
         return authFetch(`/conspects/${finishedJob.conspect_id}`);
     }
 
-    async function createQuizFromConspect(conspectId) {
+    async function createQuizFromConspect(conspectId, questionsCount = 5) {
         const job = await authFetch('/quizzes/from-conspect', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ conspect_id: conspectId }),
+            body: JSON.stringify({ 
+                conspect_id: conspectId,
+                questions_count: questionsCount
+            }),
         });
         const finishedJob = await pollJob(job.id, { timeoutMs: 120000 });
         return finishedJob.quiz_id;

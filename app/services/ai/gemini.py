@@ -112,9 +112,9 @@ class GeminiClient:
             ),
         }
 
-    def generate_quiz(self, conspect_summary: str) -> Dict[str, Any]:
+    def generate_quiz(self, conspect_summary: str, questions_count: int = 5) -> Dict[str, Any]:
         prompt = (
-            "Сформируй тест из 5 вопросов по следующему конспекту. "
+            f"Сформируй тест из {questions_count} вопросов по следующему конспекту. "
             "Каждый вопрос должен иметь 4 варианта ответа, один из которых верный. "
             "Дополнительно добавь краткое объяснение для верного ответа. "
             "Верни JSON: {"

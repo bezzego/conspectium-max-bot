@@ -278,7 +278,42 @@ function showButtons(item) {
             createBtn.addEventListener('click', async (event) => {
                 event.stopPropagation();
                 if (!selectedConspectId) return;
-                await createQuiz(selectedConspectId);
+                
+                // Ждем инициализации слайдера, если он еще не готов
+                const waitForSlider = () => {
+                    return new Promise((resolve) => {
+                        if (window.testSettingsModal) {
+                            resolve(window.testSettingsModal);
+                        } else {
+                            // Ждем до 2 секунд
+                            let attempts = 0;
+                            const checkInterval = setInterval(() => {
+                                attempts++;
+                                if (window.testSettingsModal) {
+                                    clearInterval(checkInterval);
+                                    resolve(window.testSettingsModal);
+                                } else if (attempts > 40) { // 2 секунды (40 * 50ms)
+                                    clearInterval(checkInterval);
+                                    resolve(null);
+                                }
+                            }, 50);
+                        }
+                    });
+                };
+                
+                const modal = await waitForSlider();
+                
+                if (modal) {
+                    // Показываем слайдер для выбора количества вопросов
+                    modal.setOnCreateCallback((testData) => {
+                        const questionsCount = testData.questionsCount || 5;
+                        createQuiz(selectedConspectId, questionsCount);
+                    });
+                    modal.show();
+                } else {
+                    // Если слайдер не загружен, используем значение по умолчанию
+                    await createQuiz(selectedConspectId, 5);
+                }
             });
         }
 
@@ -298,7 +333,7 @@ function showButtons(item) {
         activeItem = null;
     }
 
-async function createQuiz(conspectId) {
+async function createQuiz(conspectId, questionsCount = 5) {
     const appInstance = app();
     
     showWizardAnimation();
@@ -307,7 +342,7 @@ async function createQuiz(conspectId) {
     const totalAnimationTime = 6000; 
     
     try {
-        const quizId = await appInstance.createQuizFromConspect(conspectId);
+        const quizId = await appInstance.createQuizFromConspect(conspectId, questionsCount);
         
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(totalAnimationTime - elapsedTime, 0);
