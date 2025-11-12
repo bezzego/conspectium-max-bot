@@ -1,6 +1,8 @@
 from datetime import datetime
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -17,6 +19,7 @@ from app.schemas.user import (
 )
 from app.services.security import token_service
 from app.services.auth import hash_password, verify_password
+from app.services.storage import avatar_storage
 
 router = APIRouter()
 
@@ -148,12 +151,25 @@ def update_me(
         user.gender = gender if gender in {"male", "female", "robot"} else None
         changed = True
 
-    if payload.avatar_id is not None:
+    # Обрабатываем avatar_url и avatar_id вместе
+    if payload.avatar_url is not None:
+        new_avatar_url = payload.avatar_url.strip() or None
+        user.avatar_url = new_avatar_url
+        
+        # Если устанавливаем загруженный аватар с устройства, всегда очищаем avatar_id
+        if new_avatar_url and new_avatar_url.startswith('/api/auth/avatar/'):
+            user.avatar_id = None
+        # Если avatar_url установлен (но не загруженный) и avatar_id тоже передан, используем avatar_id
+        elif payload.avatar_id is not None:
+            user.avatar_id = payload.avatar_id.strip() or None
+        changed = True
+    elif payload.avatar_id is not None:
+        # Если avatar_url не передан, но avatar_id передан, обновляем только avatar_id
         user.avatar_id = payload.avatar_id.strip() or None
         changed = True
 
-    if payload.avatar_url is not None:
-        user.avatar_url = payload.avatar_url.strip() or None
+    if payload.description is not None:
+        user.description = payload.description.strip() or None
         changed = True
 
     if changed:
@@ -190,3 +206,78 @@ def change_password(
     db.commit()
     
     return {"message": "Пароль успешно изменен"}
+
+
+@router.post("/upload-avatar", response_model=UserRead, summary="Загрузка аватара пользователя")
+async def upload_avatar(
+    file: UploadFile = File(...),
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> UserRead:
+    """Загружает аватар пользователя"""
+    if not file.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Файл не найден")
+
+    # Проверяем тип файла (разрешаем изображения)
+    allowed_types = ("image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif")
+    if file.content_type and file.content_type not in allowed_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Неподдерживаемый тип файла: {file.content_type}. Разрешенные типы: {', '.join(allowed_types)}",
+        )
+
+    # Сохраняем файл
+    path, size = avatar_storage.save_upload(user.id, file)
+    size_mb = size / (1024 * 1024)
+    if size_mb > settings.max_avatar_size_mb:
+        path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Файл слишком большой. Максимальный размер: {settings.max_avatar_size_mb} МБ",
+        )
+
+    # Получаем относительный путь для сохранения в БД
+    relative_path = path.relative_to(avatar_storage.base_dir)
+    
+    # Формируем URL для доступа к файлу (используем статический путь)
+    avatar_url = f"/api/auth/avatar/{user.id}/{relative_path.name}"
+    
+    # Обновляем пользователя
+    user.avatar_url = avatar_url
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return UserRead.model_validate(user)
+
+
+@router.get("/avatar/{user_id}/{filename}", response_class=FileResponse, summary="Получить аватар пользователя")
+def get_avatar(
+    user_id: int,
+    filename: str,
+    db: Session = Depends(deps.get_db_session),
+) -> FileResponse:
+    """Получает аватар пользователя"""
+    try:
+        file_path = avatar_storage.resolve_path(f"{user_id}/{filename}")
+        if not file_path.exists():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Аватар не найден")
+        
+        # Определяем MIME тип по расширению
+        ext = file_path.suffix.lower()
+        mime_types = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif',
+        }
+        media_type = mime_types.get(ext, 'image/jpeg')
+        
+        return FileResponse(
+            path=file_path,
+            media_type=media_type,
+            filename=filename,
+        )
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Аватар не найден")

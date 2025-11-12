@@ -46,62 +46,36 @@
                     <ul>
                         <li><a href="#">Редактировать</a></li>
                         <li><a href="#">Поделиться</a></li>
-                        <li><a href="#">Добавить пост</a></li>
                     </ul>
                 </div>
             </div>
-            <h2 class="name">Olkhovskiy</h2>
-            <div class="title">Ольховский Александр</div>
+            <h2 class="name">Загрузка...</h2>
+            <div class="title">@loading</div>
 
             <div class="actions">
                 <div class="follow-info">
                     <h2>
                         <a href="#">
-                            <span>12</span>
+                            <span>0</span>
                             <small>Подписчики</small>
                         </a>
                     </h2>
                     <h2>
                         <a href="#">
-                            <span>1000</span>
+                            <span>0</span>
                             <small>Подписки</small>
                         </a>
                     </h2>
                 </div>
                 <div class="follow-btn">
-                    <button>Подписаться</button>
+                    <button style="display: none;">Подписаться</button>
                 </div>
             </div>
-            <div class="desc">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Architecto commodi non vel repellendus harum facilis aut odio eaque, dolorem voluptas quaerat rem tempore porro magni!</div>
+            <div class="desc">Загрузка профиля...</div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuOpener = document.getElementById('menuOpener');
-            const dropdownMenu = document.getElementById('dropdownMenu');
-            
-            menuOpener.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdownMenu.classList.toggle('active');
-            });
-            
-            // Закрытие меню при клике вне его
-            document.addEventListener('click', function() {
-                dropdownMenu.classList.remove('active');
-            });
-            
-            // Предотвращение закрытия меню при клике на него
-            dropdownMenu.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            // Функция для кнопки назад
-            function goBack() {
-                window.history.back();
-            }
-            window.goBack = goBack;
-        });
-    </script>
+    <script src="/front/js/app.js"></script>
+    <script src="/front/js/profile.js"></script>
 </body>
 </html>

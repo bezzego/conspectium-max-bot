@@ -17,6 +17,7 @@ class UserBase(BaseModel):
     gender: Optional[str] = None
     avatar_id: Optional[str] = None
     avatar_url: Optional[str] = None
+    description: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -92,3 +93,4 @@ class UserUpdateRequest(BaseModel):
     gender: Optional[str] = Field(None, description="Пол пользователя")
     avatar_id: Optional[str] = Field(None, description="ID аватара")
     avatar_url: Optional[str] = Field(None, description="URL аватара")
+    description: Optional[str] = Field(None, max_length=500, description="Описание профиля")

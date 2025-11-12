@@ -1,19 +1,20 @@
 (() => {
-    const app = window.ConspectiumApp;
-    if (!app) {
-        console.error('ConspectiumApp not found');
-        return;
-    }
-
     let currentLobby = null;
     let currentView = 'tournaments';
     let refreshInterval = null;
+    let app = null;
 
     // Инициализация
     document.addEventListener('DOMContentLoaded', async function() {
-        await app.ready();
-        initNavigation();
+        // Получаем app сразу (он должен быть доступен, так как app.js загружается первым)
+        app = window.ConspectiumApp;
+        
+        // Загружаем турниры сразу (не требует авторизации)
+        // Это не блокируется ожиданием app.js
         await loadTournaments();
+        
+        // Инициализируем навигацию и другие элементы
+        initNavigation();
         setupEventListeners();
         updateFilters();
         initCustomSelects();
@@ -21,53 +22,126 @@
         // Проверяем, есть ли код приглашения в URL
         const params = new URLSearchParams(window.location.search);
         const inviteCode = params.get('join');
-        if (inviteCode) {
-            await joinLobbyByInviteCode(inviteCode);
+        if (inviteCode && app) {
+            // Для присоединения к лобби нужна авторизация
+            try {
+                await app.ready();
+                await joinLobbyByInviteCode(inviteCode);
+            } catch (err) {
+                console.error('Ошибка при присоединении к лобби:', err);
+                if (app && app.notify) {
+                    app.notify('Для присоединения к лобби необходимо войти в аккаунт', 'error');
+                }
+            }
         }
     });
 
     async function loadTournaments() {
         try {
-            // Загружаем только публичные тесты
-            const response = await fetch('/api/quizzes/tournament/public');
-            if (!response.ok) {
-                console.error('Failed to load tournaments');
+            const grid = document.getElementById('tournamentsGrid');
+            if (!grid) {
+                console.error('Tournaments grid not found');
                 return;
             }
+            
+            // Показываем состояние загрузки
+            grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Загружаем турниры...</p>';
+            
+            // Загружаем только публичные тесты (этот endpoint не требует авторизации)
+            const response = await fetch('/api/quizzes/tournament/public');
+            if (!response.ok) {
+                console.error('Failed to load tournaments:', response.status, response.statusText);
+                grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Не удалось загрузить турниры</p>';
+                return;
+            }
+            
             const data = await response.json();
+            console.log('Loaded tournaments:', data);
             
             if (data && data.items && data.items.length > 0) {
+                console.log('Rendering', data.items.length, 'tournaments');
                 renderTournaments(data.items);
             } else {
-                document.getElementById('tournamentsGrid').innerHTML = 
+                grid.innerHTML = 
                     '<p style="color: white; text-align: center; padding: 40px;">Пока нет доступных турниров</p>';
             }
         } catch (err) {
             console.error('Failed to load tournaments:', err);
+            const grid = document.getElementById('tournamentsGrid');
+            if (grid) {
+                grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Ошибка при загрузке турниров</p>';
+            }
         }
     }
 
     function renderTournaments(quizzes) {
+        console.log('renderTournaments called with', quizzes.length, 'quizzes');
         const grid = document.getElementById('tournamentsGrid');
-        if (!grid) return;
+        if (!grid) {
+            console.error('tournamentsGrid element not found!');
+            return;
+        }
         
+        console.log('Clearing grid and rendering', quizzes.length, 'tournaments');
         grid.innerHTML = '';
         
-        quizzes.forEach(quiz => {
+        if (quizzes.length === 0) {
+            console.log('No quizzes to render');
+            grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Пока нет доступных турниров</p>';
+            return;
+        }
+        
+        quizzes.forEach((quiz, index) => {
+            console.log(`Rendering quiz ${index + 1}:`, quiz.title, 'by', quiz.user_nickname);
             const card = document.createElement('div');
             card.className = 'tournament-card fade-in';
             card.onclick = () => createLobbyFromQuiz(quiz);
             
-            const questionsCount = quiz.questions?.length || 0;
+            const questionsCount = quiz.questions_count || quiz.questions?.length || 0;
             const estimatedTime = Math.ceil(questionsCount * 1.5);
+            
+            // Форматируем дату публикации
+            const publishDate = new Date(quiz.created_at);
+            const formattedDate = publishDate.toLocaleDateString('ru-RU', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Получаем никнейм пользователя
+            const userNickname = quiz.user_nickname || 'Неизвестный пользователь';
+            const userAvatarUrl = quiz.user_avatar_url || '';
+            
+            // Формируем HTML для аватара
+            let avatarHtml = '';
+            if (userAvatarUrl) {
+                // Если аватар загружен с устройства, используем его URL
+                if (userAvatarUrl.startsWith('/api/auth/avatar/')) {
+                    avatarHtml = `<img src="${userAvatarUrl}" alt="${userNickname}" class="tournament-author-avatar" onerror="this.style.display='none'">`;
+                } else {
+                    // Если это URL из коллекции, используем его
+                    avatarHtml = `<img src="${userAvatarUrl}" alt="${userNickname}" class="tournament-author-avatar" onerror="this.style.display='none'">`;
+                }
+            }
+            
+            // Создаем иконку пользователя для перехода на профиль
+            const userId = quiz.user_id || quiz.userId;
             
             card.innerHTML = `
                 <div class="tournament-badge">
                     <i class="fas fa-graduation-cap"></i>
                     Публичный тест
                 </div>
+                ${userId ? `<div class="tournament-user-icon"><i class="fas fa-user"></i></div>` : ''}
                 <div class="tournament-title">${quiz.title || 'Без названия'}</div>
                 <div class="tournament-description">${quiz.description || 'Пройди тест и соревнуйся с другими!'}</div>
+                <div class="tournament-author">
+                    ${avatarHtml}
+                    <div class="tournament-author-info">
+                        <span class="tournament-author-name">${userNickname}</span>
+                        <span class="tournament-publish-date">${formattedDate}</span>
+                    </div>
+                </div>
                 <div class="tournament-meta">
                     <span class="tournament-difficulty difficulty-medium">Средний</span>
                 </div>
@@ -83,30 +157,81 @@
                 </div>
             `;
             
+            // Добавляем обработчики событий для перехода на профиль
+            if (userId) {
+                const userIcon = card.querySelector('.tournament-user-icon');
+                if (userIcon) {
+                    userIcon.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        window.location.href = `/front/html/profile.html?user=${encodeURIComponent(userId)}`;
+                    });
+                    userIcon.style.cursor = 'pointer';
+                }
+            }
+            
+            const authorElement = card.querySelector('.tournament-author');
+            if (authorElement && userId) {
+                authorElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.location.href = `/front/html/profile.html?user=${encodeURIComponent(userId)}`;
+                });
+                authorElement.style.cursor = 'pointer';
+            }
+            
             grid.appendChild(card);
         });
+        
+        console.log('Successfully rendered', quizzes.length, 'tournaments in the grid');
     }
 
     async function createLobbyFromQuiz(quiz) {
+        if (!app) {
+            alert('Для создания лобби необходимо войти в аккаунт');
+            window.location.href = '/front/html/welcome_modal.html';
+            return;
+        }
+        
+        // Проверяем авторизацию перед созданием лобби
         try {
-            app.showLoading('Создаём лобби...');
+            await app.ready();
+        } catch (err) {
+            if (app.notify) {
+                app.notify('Для создания лобби необходимо войти в аккаунт', 'error');
+            } else {
+                alert('Для создания лобби необходимо войти в аккаунт');
+            }
+            return;
+        }
+        
+        try {
+            if (app.showLoading) app.showLoading('Создаём лобби...');
             const lobby = await app.createTournamentLobby(quiz.id, 8);
-            app.hideLoading();
+            if (app.hideLoading) app.hideLoading();
             
             currentLobby = lobby;
             await showLobbyView(lobby);
         } catch (err) {
             console.error(err);
-            app.hideLoading();
-            app.notify(err.message || 'Не удалось создать лобби', 'error');
+            if (app.hideLoading) app.hideLoading();
+            if (app.notify) {
+                app.notify(err.message || 'Не удалось создать лобби', 'error');
+            } else {
+                alert(err.message || 'Не удалось создать лобби');
+            }
         }
     }
 
     async function joinLobbyByInviteCode(inviteCode) {
+        if (!app) {
+            alert('Для присоединения к лобби необходимо войти в аккаунт');
+            window.location.href = '/front/html/welcome_modal.html';
+            return;
+        }
+        
         try {
-            app.showLoading('Присоединяемся к лобби...');
+            if (app.showLoading) app.showLoading('Присоединяемся к лобби...');
             const lobby = await app.joinTournamentLobby(inviteCode);
-            app.hideLoading();
+            if (app.hideLoading) app.hideLoading();
             
             currentLobby = lobby;
             await showLobbyView(lobby);
@@ -115,18 +240,30 @@
             window.history.replaceState({}, '', window.location.pathname);
         } catch (err) {
             console.error(err);
-            app.hideLoading();
-            app.notify(err.message || 'Не удалось присоединиться к лобби', 'error');
+            if (app.hideLoading) app.hideLoading();
+            if (app.notify) {
+                app.notify(err.message || 'Не удалось присоединиться к лобби', 'error');
+            } else {
+                alert(err.message || 'Не удалось присоединиться к лобби');
+            }
         }
     }
 
     async function showLobbyView(lobby) {
-        document.getElementById('resultsContainer').style.display = 'none';
-        document.querySelector('.tournaments-grid').style.display = 'none';
-        document.querySelector('.tournament-filters').style.display = 'none';
-        document.querySelector('.title').style.display = 'none';
-        document.querySelector('.subtitle').style.display = 'none';
-        document.getElementById('lobbyContainer').style.display = 'block';
+        const resultsContainer = document.getElementById('resultsContainer');
+        const tournamentsGrid = document.getElementById('tournamentsGrid');
+        const filters = document.querySelector('.tournament-filters');
+        const title = document.querySelector('.title');
+        const subtitle = document.querySelector('.subtitle');
+        const lobbyContainer = document.getElementById('lobbyContainer');
+        
+        if (resultsContainer) resultsContainer.style.display = 'none';
+        if (tournamentsGrid) tournamentsGrid.style.display = 'none';
+        if (filters) filters.style.display = 'none';
+        if (title) title.style.display = 'none';
+        if (subtitle) subtitle.style.display = 'none';
+        if (lobbyContainer) lobbyContainer.style.display = 'block';
+        
         currentView = 'lobby';
         
         updateLobbyInfo(lobby);
@@ -163,7 +300,7 @@
         
         grid.innerHTML = '';
         
-        const currentUserId = app.state?.user?.id;
+        const currentUserId = app?.state?.user?.id;
         const isHost = lobby.host_id === currentUserId;
         
         lobby.participants.forEach(participant => {
@@ -235,7 +372,7 @@
     }
 
     async function toggleReady() {
-        if (!currentLobby) return;
+        if (!currentLobby || !app) return;
         
         try {
             const currentUser = currentLobby.participants.find(p => p.user_id === app.state?.user?.id);
@@ -250,23 +387,31 @@
             await updateParticipants(currentLobby);
         } catch (err) {
             console.error(err);
-            app.notify(err.message || 'Не удалось обновить статус', 'error');
+            if (app.notify) {
+                app.notify(err.message || 'Не удалось обновить статус', 'error');
+            } else {
+                alert(err.message || 'Не удалось обновить статус');
+            }
         }
     }
 
     async function startTournament() {
-        if (!currentLobby) return;
+        if (!currentLobby || !app) return;
         
         const isHost = currentLobby.host_id === app.state?.user?.id;
         if (!isHost) {
-            app.notify('Только хост может запустить турнир', 'error');
+            if (app.notify) {
+                app.notify('Только хост может запустить турнир', 'error');
+            } else {
+                alert('Только хост может запустить турнир');
+            }
             return;
         }
         
         try {
-            app.showLoading('Запускаем турнир...');
+            if (app.showLoading) app.showLoading('Запускаем турнир...');
             const updatedLobby = await app.startTournamentLobby(currentLobby.id);
-            app.hideLoading();
+            if (app.hideLoading) app.hideLoading();
             
             currentLobby = updatedLobby;
             
@@ -274,8 +419,12 @@
             window.location.href = `test.html?quizId=${updatedLobby.quiz_id}&lobbyId=${updatedLobby.id}`;
         } catch (err) {
             console.error(err);
-            app.hideLoading();
-            app.notify(err.message || 'Не удалось запустить турнир', 'error');
+            if (app.hideLoading) app.hideLoading();
+            if (app.notify) {
+                app.notify(err.message || 'Не удалось запустить турнир', 'error');
+            } else {
+                alert(err.message || 'Не удалось запустить турнир');
+            }
         }
     }
 
@@ -285,14 +434,25 @@
             refreshInterval = null;
         }
         
-        document.getElementById('lobbyContainer').style.display = 'none';
-        document.getElementById('resultsContainer').style.display = 'none';
-        document.querySelector('.tournaments-grid').style.display = 'grid';
-        document.querySelector('.tournament-filters').style.display = 'block';
-        document.querySelector('.title').style.display = 'block';
-        document.querySelector('.subtitle').style.display = 'block';
+        const lobbyContainer = document.getElementById('lobbyContainer');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const tournamentsGrid = document.getElementById('tournamentsGrid');
+        const filters = document.querySelector('.tournament-filters');
+        const title = document.querySelector('.title');
+        const subtitle = document.querySelector('.subtitle');
+        
+        if (lobbyContainer) lobbyContainer.style.display = 'none';
+        if (resultsContainer) resultsContainer.style.display = 'none';
+        if (tournamentsGrid) tournamentsGrid.style.display = 'grid';
+        if (filters) filters.style.display = 'block';
+        if (title) title.style.display = 'block';
+        if (subtitle) subtitle.style.display = 'block';
+        
         currentView = 'tournaments';
         currentLobby = null;
+        
+        // Перезагружаем список турниров при возврате к виду турниров
+        loadTournaments();
     }
 
     function showNotification(message) {

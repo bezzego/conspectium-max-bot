@@ -665,36 +665,57 @@ const styleSheet = document.createElement('style');
 styleSheet.textContent = popupStyles;
 document.head.appendChild(styleSheet);
 
-// Флаг для предотвращения множественных обработчиков
-let popupHandlersAttached = false;
+// Функция для обработки клика на кнопку "Скинули ссылку?"
+function handleShareLinkClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    // Проверяем, не открыт ли уже popup
+    const existingPopup = document.querySelector('.popup-overlay');
+    if (existingPopup) {
+        return; // Popup уже открыт
+    }
+    createTestPopup();
+}
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Предотвращаем добавление множественных обработчиков
-    if (popupHandlersAttached) {
-        return;
+// Функция для инициализации обработчиков кнопки "Скинули ссылку?"
+function initShareLinkButton() {
+    // Обработчик для кнопки по ID
+    const shareLinkBtn = document.getElementById('shareLinkBtn');
+    if (shareLinkBtn && !shareLinkBtn.dataset.handlerAttached) {
+        // Убираем href="#" чтобы предотвратить переход по ссылке
+        shareLinkBtn.href = 'javascript:void(0);';
+        
+        // Добавляем обработчик
+        shareLinkBtn.addEventListener('click', handleShareLinkClick);
+        
+        // Помечаем, что обработчик добавлен
+        shareLinkBtn.dataset.handlerAttached = 'true';
     }
     
+    // Обработчик для карточек по тексту (для обратной совместимости)
     const linkCards = document.querySelectorAll('.action-card');
-    
     linkCards.forEach(card => {
         const span = card.querySelector('span');
-        if (span && span.textContent.includes('Скинули ссылку?')) {
-            // Удаляем старые обработчики, если они есть
-            const newCard = card.cloneNode(true);
-            card.parentNode.replaceChild(newCard, card);
-            
-            newCard.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                // Проверяем, не открыт ли уже popup
-                const existingPopup = document.querySelector('.popup-overlay');
-                if (existingPopup) {
-                    return; // Popup уже открыт
-                }
-                createTestPopup();
-            });
+        if (span && span.textContent.includes('Скинули ссылку?') && !card.id && !card.dataset.handlerAttached) {
+            card.href = 'javascript:void(0);';
+            card.addEventListener('click', handleShareLinkClick);
+            card.dataset.handlerAttached = 'true';
         }
     });
+}
+
+// Инициализируем обработчик после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    initShareLinkButton();
     
-    popupHandlersAttached = true;
+    // Также пытаемся инициализировать после небольшой задержки на случай, если элементы добавляются динамически
+    setTimeout(initShareLinkButton, 100);
+    setTimeout(initShareLinkButton, 500);
 });
+
+// Если DOM уже загружен, инициализируем сразу
+if (document.readyState !== 'loading') {
+    initShareLinkButton();
+    setTimeout(initShareLinkButton, 100);
+    setTimeout(initShareLinkButton, 500);
+}

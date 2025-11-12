@@ -56,6 +56,42 @@ def get_current_user(
     return user
 
 
+def get_optional_user(
+    db: Session = Depends(get_db_session),
+    credentials: HTTPAuthorizationCredentials | None = Depends(auth_scheme),
+) -> User | None:
+    """Получает текущего пользователя, если он авторизован, иначе возвращает None"""
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        return None
+
+    try:
+        payload = token_service.decode_token(credentials.credentials)
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+
+        jti = payload.get("jti")
+        if not jti:
+            return None
+
+        session = (
+            db.query(UserSession)
+            .filter(UserSession.token_jti == jti, UserSession.expires_at > datetime.utcnow())
+            .one_or_none()
+        )
+        if session is None:
+            return None
+
+        session.last_used_at = datetime.utcnow()
+        db.add(session)
+        db.commit()
+
+        user = db.get(User, int(user_id))
+        return user
+    except Exception:
+        return None
+
+
 def create_session(db: Session, user: User, expire_minutes: int) -> UserSession:
     token_jti = secrets.token_hex(16)
     session = UserSession(

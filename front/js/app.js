@@ -20,8 +20,22 @@
 
     function clearAuthState() {
         state.token = null;
-        setUser(null);
+        state.user = null;
         localStorage.removeItem(TOKEN_KEY);
+        try {
+            const cachedUser = localStorage.getItem(USER_KEY);
+            if (cachedUser) {
+                localStorage.removeItem(USER_KEY);
+            }
+        } catch (e) {
+            console.error('Failed to clear user from localStorage', e);
+        }
+    }
+    
+    function logout() {
+        clearAuthState();
+        // Перенаправляем на страницу регистрации
+        window.location.href = '/front/html/welcome_modal.html';
     }
 
     if (localStorage.getItem(USER_KEY)) {
@@ -324,7 +338,7 @@
 
     async function updateProfile(payload) {
         const sanitized = {};
-        ['display_name', 'gender', 'avatar_id', 'avatar_url'].forEach((key) => {
+        ['display_name', 'gender', 'avatar_id', 'avatar_url', 'description'].forEach((key) => {
             if (payload[key] !== undefined) {
                 sanitized[key] = payload[key];
             }
@@ -502,6 +516,38 @@
         });
     }
 
+    async function uploadAvatar(file) {
+        await ensureAuth();
+        const formData = new FormData();
+        formData.append('file', file);
+        const attempt = async (retry = false) => {
+            const response = await fetch(`${API_BASE}/auth/upload-avatar`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${state.token}`,
+                },
+                body: formData,
+            });
+            if (response.status === 401 || response.status === 403) {
+                if (retry) {
+                    const text = await response.text();
+                    throw new Error(text || 'Не удалось загрузить аватар');
+                }
+                clearAuthState();
+                await ensureAuth();
+                return attempt(true);
+            }
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Не удалось загрузить аватар');
+            }
+            const user = await response.json();
+            setUser(user);
+            return user;
+        };
+        return attempt();
+    }
+
     async function getSharedConspect(shareToken) {
         // Публичный endpoint, не требует авторизации
         const response = await fetch(`${API_BASE}/conspects/share/${shareToken}`);
@@ -588,10 +634,76 @@
         return authFetch(`/tournament/medals/me/list?limit=${limit}&offset=${offset}`);
     }
 
-    const readyPromise = ensureAuth();
+    // Не вызываем ensureAuth сразу, чтобы не блокировать загрузку страницы
+    // ensureAuth будет вызван только при вызове app.ready()
+    let readyPromise = null;
+    function getReadyPromise() {
+        if (!readyPromise) {
+            readyPromise = ensureAuth();
+        }
+        return readyPromise;
+    }
+
+    async function getProfile(userIdentifier) {
+        // Публичный endpoint, не требует авторизации
+        const response = await fetch(`${API_BASE}/profile/${encodeURIComponent(userIdentifier)}`);
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || response.statusText);
+        }
+        return response.json();
+    }
+
+    async function followUser(userId) {
+        await ensureAuth();
+        return authFetch(`/profile/${userId}/follow`, {
+            method: 'POST',
+        });
+    }
+
+    async function unfollowUser(userId) {
+        await ensureAuth();
+        return authFetch(`/profile/${userId}/follow`, {
+            method: 'DELETE',
+        });
+    }
+
+    async function updateUserProfile(userId, payload) {
+        await ensureAuth();
+        return authFetch(`/profile/${userId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+    }
+
+    function shareProfile(userIdentifier) {
+        // Формируем ссылку на профиль
+        const profileUrl = `${window.location.origin}/front/html/profile.html?user=${encodeURIComponent(userIdentifier)}`;
+        
+        // Копируем в буфер обмена
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(profileUrl).then(() => {
+                if (window.ConspectiumApp && window.ConspectiumApp.notify) {
+                    window.ConspectiumApp.notify('Ссылка на профиль скопирована в буфер обмена', 'success');
+                } else {
+                    alert('Ссылка на профиль скопирована в буфер обмена');
+                }
+            }).catch(err => {
+                console.error('Failed to copy to clipboard:', err);
+                // Fallback: показываем ссылку в alert
+                prompt('Скопируйте ссылку на профиль:', profileUrl);
+            });
+        } else {
+            // Fallback для старых браузеров
+            prompt('Скопируйте ссылку на профиль:', profileUrl);
+        }
+        
+        return profileUrl;
+    }
 
     window.ConspectiumApp = {
-        ready: () => readyPromise,
+        ready: () => getReadyPromise(),
         authFetch,
         createElement,
         showLoading,
@@ -602,6 +714,7 @@
         createQuizFromConspect,
         createManualQuiz,
         updateProfile,
+        uploadAvatar,
         registerUser,
         loginUser,
         changePassword,
@@ -621,7 +734,14 @@
         startTournamentLobby,
         getMyMedals,
         listMyMedals,
+        logout,
         notify,
         state,
+        // Profile functions
+        getProfile,
+        followUser,
+        unfollowUser,
+        updateUserProfile,
+        shareProfile,
     };
 })();

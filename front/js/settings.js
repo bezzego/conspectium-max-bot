@@ -64,9 +64,16 @@ class SettingsManager {
     applyUser(user) {
         this.userName = user.display_name || user.first_name || '';
         this.userGender = user.gender || null;
-        this.currentAvatar = user.avatar_id || 'robot';
         this.customAvatarUrl = user.avatar_url || null;
         this.userDescription = user.description || '';
+        
+        // Если есть загруженный аватар с устройства, устанавливаем currentAvatar в 'custom'
+        // Иначе используем avatar_id из пользователя
+        if (this.customAvatarUrl && this.customAvatarUrl.startsWith('/api/auth/avatar/')) {
+            this.currentAvatar = 'custom';
+        } else {
+            this.currentAvatar = user.avatar_id || 'robot';
+        }
     }
 
     loadFromStorageFallback() {
@@ -85,12 +92,18 @@ class SettingsManager {
     }
 
     resolveAvatar() {
+        // Если есть загруженный аватар с устройства, приоритет у него
+        if (this.customAvatarUrl && this.customAvatarUrl.startsWith('/api/auth/avatar/')) {
+            return { id: 'custom', type: 'custom', url: this.customAvatarUrl };
+        }
+        // Иначе проверяем, есть ли аватар в списке
         const fromList = ALL_AVATARS.find((avatar) => avatar.id === this.currentAvatar);
         if (fromList) {
             return fromList;
         }
-        if (this.currentAvatar && this.customAvatarUrl) {
-            return { id: this.currentAvatar, type: 'custom', url: this.customAvatarUrl };
+        // Если есть customAvatarUrl (но не загруженный), используем его
+        if (this.customAvatarUrl) {
+            return { id: this.currentAvatar || 'custom', type: 'custom', url: this.customAvatarUrl };
         }
         return ALL_AVATARS.find((avatar) => avatar.id === 'robot') || ALL_AVATARS[0];
     }
@@ -188,8 +201,18 @@ class SettingsManager {
                 try {
                     this.app?.showLoading('Загружаем аватар...');
                     const user = await this.app.uploadAvatar(file);
+                    // Обновляем состояние из ответа сервера
                     this.applyUser(user);
+                    // Убеждаемся, что customAvatarUrl правильно установлен
+                    if (user.avatar_url) {
+                        this.customAvatarUrl = user.avatar_url;
+                        // Если аватар загружен с устройства, не устанавливаем avatar_id из списка
+                        if (user.avatar_url.startsWith('/api/auth/avatar/')) {
+                            this.currentAvatar = 'custom';
+                        }
+                    }
                     this.renderCurrentAvatar();
+                    this.persistToLocalStorage();
                     this.app?.hideLoading();
                     this.app?.notify('Аватар успешно загружен', 'success');
                 } catch (error) {
@@ -214,6 +237,24 @@ class SettingsManager {
             });
         }
 
+        // Обработчик кнопки выхода
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                const confirmed = window.confirm('Вы уверены, что хотите выйти из аккаунта?');
+                if (confirmed) {
+                    if (this.app && this.app.logout) {
+                        this.app.logout();
+                    } else {
+                        // Если app недоступен, очищаем вручную
+                        localStorage.removeItem('conspectium_token');
+                        localStorage.removeItem('conspectium_user');
+                        window.location.href = '/front/html/welcome_modal.html';
+                    }
+                }
+            });
+        }
+        
         const nameInput = document.getElementById('userNameInput');
         if (nameInput) {
             nameInput.addEventListener('input', (e) => {
@@ -449,12 +490,29 @@ class SettingsManager {
     async saveUserData(options = {}) {
         if (!this.app) return;
         const { notify = false, showLoading = false } = options;
-        const avatar = this.resolveAvatar();
+        
+        // Определяем, есть ли загруженный аватар с устройства
+        const hasUploadedAvatar = this.customAvatarUrl && this.customAvatarUrl.startsWith('/api/auth/avatar/');
+        
+        let avatarUrl = null;
+        let avatarId = null;
+        
+        if (hasUploadedAvatar) {
+            // Если есть загруженный аватар с устройства, используем его
+            avatarUrl = this.customAvatarUrl;
+            avatarId = null; // Очищаем avatar_id, так как используется загруженный аватар
+        } else {
+            // Иначе используем аватар из коллекции
+            const avatar = this.resolveAvatar();
+            avatarUrl = avatar?.url || null;
+            avatarId = avatar?.id || null;
+        }
+        
         const payload = {
             display_name: this.userName.trim() || null,
             gender: this.userGender,
-            avatar_id: avatar?.id || null,
-            avatar_url: avatar?.url || null,
+            avatar_id: avatarId,
+            avatar_url: avatarUrl,
             description: this.userDescription?.trim() || null,
         };
 
@@ -462,9 +520,25 @@ class SettingsManager {
             if (showLoading) {
                 this.app.showLoading('Сохраняем профиль...');
             }
-            await this.persistProfile(payload);
-            this.customAvatarUrl = payload.avatar_url;
+            const updatedUser = await this.persistProfile(payload);
+            
+            // Обновляем состояние из ответа сервера
+            if (updatedUser) {
+                this.applyUser(updatedUser);
+                // Убеждаемся, что customAvatarUrl сохранен правильно
+                if (updatedUser.avatar_url && updatedUser.avatar_url.startsWith('/api/auth/avatar/')) {
+                    this.customAvatarUrl = updatedUser.avatar_url;
+                    this.currentAvatar = 'custom';
+                }
+            } else {
+                // Если сервер не вернул обновленного пользователя, обновляем локально
+                if (hasUploadedAvatar) {
+                    this.customAvatarUrl = avatarUrl;
+                    this.currentAvatar = 'custom';
+                }
+            }
             this.persistToLocalStorage();
+            this.renderCurrentAvatar(); // Обновляем отображение аватара
             if (notify) {
                 this.app.notify('Профиль сохранён', 'success');
             }

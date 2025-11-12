@@ -51,9 +51,15 @@
                     <div class="current-avatar" id="currentAvatar">
                         <img src="" alt="Текущий аватар" id="currentAvatarImg">
                     </div>
-                    <button class="change-avatar-btn" id="changeAvatarBtn">
-                        Сменить аватар
-                    </button>
+                    <div class="avatar-buttons">
+                        <button class="change-avatar-btn" id="changeAvatarBtn">
+                            Выбрать из коллекции
+                        </button>
+                        <input type="file" id="avatarUploadInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style="display: none;">
+                        <button class="upload-avatar-btn" id="uploadAvatarBtn">
+                            Загрузить с устройства
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -62,6 +68,13 @@
                 <h2 class="settings-title">Имя пользователя</h2>
                 <input type="text" class="name-input-settings" id="userNameInput" 
                        placeholder="Введите ваше имя" maxlength="20">
+            </section>
+
+            <!-- Секция описания -->
+            <section class="settings-section">
+                <h2 class="settings-title">Описание профиля</h2>
+                <textarea class="description-input-settings" id="userDescriptionInput" 
+                          placeholder="Расскажите о себе..." maxlength="500" rows="3"></textarea>
             </section>
 
             <!-- Секция пола -->
@@ -108,6 +121,14 @@
                         <span>Изменить пароль</span>
                     </button>
                 </div>
+            </section>
+
+            <section class="settings-section">
+                <h2 class="settings-title">Выход из аккаунта</h2>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Выйти из аккаунта
+                </button>
             </section>
 
             <section class="settings-section">

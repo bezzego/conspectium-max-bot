@@ -1,4 +1,4 @@
-from app.models import audio, conspect, generation, quiz, session, tournament, user  # noqa: F401
+from app.models import audio, conspect, generation, quiz, session, tournament, user, user_follow  # noqa: F401
 from app.models.base import Base
 
 __all__ = [
@@ -10,4 +10,5 @@ __all__ = [
     "generation",
     "session",
     "tournament",
+    "user_follow",
 ]

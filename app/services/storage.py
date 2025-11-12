@@ -64,3 +64,52 @@ class AudioStorageService:
 
 
 audio_storage = AudioStorageService(settings.audio_storage_dir)
+
+
+class AvatarStorageService:
+    """Сервис для хранения аватаров пользователей"""
+    def __init__(self, base_dir: str) -> None:
+        self.base_dir = Path(base_dir)
+        self.base_dir.mkdir(parents=True, exist_ok=True)
+
+    def _user_dir(self, user_id: int) -> Path:
+        path = self.base_dir / str(user_id)
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def save_upload(self, user_id: int, upload: UploadFile) -> tuple[Path, int]:
+        user_dir = self._user_dir(user_id)
+        path = user_dir / self._safe_filename(upload.filename or "avatar")
+        total_size = 0
+
+        with path.open("wb") as out_file:
+            while chunk := upload.file.read(1024 * 1024):
+                total_size += len(chunk)
+                out_file.write(chunk)
+
+        upload.file.seek(0)
+
+        return path, total_size
+
+    def resolve_path(self, file_path: str | os.PathLike[str]) -> Path:
+        candidate = Path(file_path)
+        if not candidate.is_absolute():
+            candidate = self.base_dir / candidate
+        candidate = candidate.resolve()
+        base = self.base_dir.resolve()
+        if not str(candidate).startswith(str(base)):
+            raise ValueError("Invalid avatar storage path")
+        return candidate
+
+    def _safe_filename(self, original: str) -> str:
+        filename = Path(original).name
+        stem, ext = os.path.splitext(filename)
+        safe_stem = re.sub(r"[^A-Za-z0-9._-]", "_", stem or "avatar")
+        safe_ext = re.sub(r"[^A-Za-z0-9.]", "", ext) or ".jpg"
+        unique_suffix = uuid4().hex
+        truncated_stem = safe_stem[:40]
+        truncated_ext = safe_ext[:10]
+        return f"{truncated_stem}_{unique_suffix}{truncated_ext}"
+
+
+avatar_storage = AvatarStorageService(settings.avatar_storage_dir)

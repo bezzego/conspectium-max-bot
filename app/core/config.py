@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     max_welcome_button_text: str = "Открыть Конспектиум"
 
     audio_storage_dir: str = "var/audio"
+    avatar_storage_dir: str = "var/avatars"
     max_upload_size_mb: int = 50
+    max_avatar_size_mb: int = 5
 
     backend_cors_origins: List[str] = Field(default_factory=list)
 

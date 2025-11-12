@@ -59,14 +59,10 @@
                 
                 document.getElementById('loadingState').style.display = 'none';
                 
-                // Перенаправляем на страницу теста с quizId из токена
-                if (quiz && quiz.id) {
-                    // Используем абсолютный путь для надежности
-                    const testUrl = `/front/html/test.html?quizId=${encodeURIComponent(quiz.id)}&shared=true`;
-                    window.location.href = testUrl;
-                } else {
-                    throw new Error('Неверный формат данных теста: отсутствует ID');
-                }
+                // Перенаправляем на страницу теста с share_token вместо quizId
+                // Это позволяет загружать тест без авторизации
+                const testUrl = `/front/html/test.html?shareToken=${encodeURIComponent(token)}`;
+                window.location.href = testUrl;
             } catch (err) {
                 console.error('Ошибка при загрузке теста:', err);
                 document.getElementById('loadingState').style.display = 'none';

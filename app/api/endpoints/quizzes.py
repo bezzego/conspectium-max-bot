@@ -255,7 +255,13 @@ def get_shared_quiz(
     db: Session = Depends(deps.get_db_session),
 ) -> QuizRead:
     """Получает тест по публичному токену (без авторизации)"""
-    quiz = get_quiz_by_share_token(db, share_token)
+    # Загружаем тест с вопросами и ответами
+    quiz = (
+        db.query(Quiz)
+        .filter(Quiz.share_token == share_token)
+        .options(selectinload(Quiz.questions).selectinload(QuizQuestion.answers))
+        .one_or_none()
+    )
     if not quiz:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -279,18 +285,47 @@ def list_public_tournament_quizzes(
     offset: int = 0,
 ) -> QuizListResponse:
     """Получает список публичных тестов для турнира"""
-    quizzes = (
-        db.query(Quiz)
+    from app.models.user import User
+    
+    # Загружаем тесты с пользователями и подсчитываем вопросы одним запросом
+    quizzes_query = (
+        db.query(
+            Quiz,
+            User.nickname.label('user_nickname'),
+            User.avatar_url.label('user_avatar_url'),
+            func.count(QuizQuestion.id).label('questions_count')
+        )
+        .join(User, Quiz.user_id == User.id)
+        .outerjoin(QuizQuestion, QuizQuestion.quiz_id == Quiz.id)
         .filter(
             Quiz.is_public_tournament == True,  # noqa: E712
             Quiz.status == QuizStatus.READY,
         )
+        .group_by(Quiz.id, User.nickname, User.avatar_url)
         .order_by(Quiz.created_at.desc())
         .limit(limit)
         .offset(offset)
-        .all()
     )
-    items = [QuizSummaryRead.model_validate(quiz) for quiz in quizzes]
+    
+    items = []
+    for quiz, user_nickname, user_avatar_url, questions_count in quizzes_query.all():
+        quiz_dict = {
+            "id": quiz.id,
+            "user_id": quiz.user_id,
+            "conspect_id": quiz.conspect_id,
+            "title": quiz.title,
+            "description": quiz.description,
+            "status": quiz.status,
+            "is_public_tournament": quiz.is_public_tournament,
+            "created_at": quiz.created_at,
+            "updated_at": quiz.updated_at,
+            "latest_result": None,
+            "user_nickname": user_nickname,
+            "user_avatar_url": user_avatar_url,
+            "questions_count": questions_count or 0,
+        }
+        items.append(QuizSummaryRead.model_validate(quiz_dict))
+    
     return QuizListResponse(items=items)
 
 

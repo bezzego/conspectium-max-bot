@@ -18,6 +18,23 @@
         const app = window.ConspectiumApp;
         if (!app) return;
 
+        const params = new URLSearchParams(window.location.search);
+        const shareToken = params.get('shareToken');
+        
+        // Если это общий тест (через share_token), загружаем его без авторизации
+        if (shareToken) {
+            try {
+                await loadSharedQuiz(app, shareToken);
+                // Создаем элементы навигации после загрузки DOM
+                createNavigationElements();
+            } catch (err) {
+                console.error('Ошибка загрузки общего теста:', err);
+                showEmptyState('Не удалось загрузить тест. Попробуй создать новый.');
+            }
+            return;
+        }
+
+        // Для обычных тестов требуется авторизация
         try {
             await app.ready();
         } catch (err) {
@@ -26,7 +43,6 @@
             return;
         }
 
-        const params = new URLSearchParams(window.location.search);
         let quizId = params.get('quizId');
 
         if (!quizId) {
@@ -56,6 +72,58 @@
             console.error(err);
         }
         return null;
+    }
+
+    async function loadSharedQuiz(app, shareToken) {
+        const questionsContainer = document.getElementById('quizQuestions');
+        const titleEl = document.getElementById('quizTitle');
+        const descriptionEl = document.getElementById('quizDescription');
+        const submitBtn = document.getElementById('submitQuizBtn');
+
+        if (!questionsContainer || !titleEl || !submitBtn) {
+            return;
+        }
+
+        questionsContainer.innerHTML = '<p class="loading-state">Загружаем тест…</p>';
+
+        try {
+            // Используем публичный endpoint для общего теста (не требует авторизации)
+            const quiz = await app.getSharedQuiz(shareToken);
+            quizState.id = quiz.id;
+            quizState.questions = Array.isArray(quiz.questions) ? quiz.questions : [];
+            quizState.results = Array.isArray(quiz.results) ? quiz.results : [];
+
+            titleEl.textContent = quiz.title || 'Без названия';
+            if (descriptionEl) {
+                descriptionEl.textContent = quiz.description || '';
+            }
+
+            renderQuestions(quizState.questions);
+            renderHistory(quizState.results);
+            renderLatestResultPanel();
+
+            // Для общего теста кнопка отправки требует авторизации
+            if (submitBtn) {
+                submitBtn.style.display = '';
+                submitBtn.onclick = async () => {
+                    // Проверяем авторизацию перед отправкой
+                    try {
+                        await app.ready();
+                        await submitQuiz(app, quiz.id);
+                    } catch (err) {
+                        console.error('Ошибка авторизации:', err);
+                        if (app.notify) {
+                            app.notify('Для отправки результатов необходимо войти в аккаунт', 'error');
+                        } else {
+                            alert('Для отправки результатов необходимо войти в аккаунт');
+                        }
+                    }
+                };
+            }
+        } catch (err) {
+            console.error(err);
+            showEmptyState('Не удалось загрузить тест. Попробуй создать новый.');
+        }
     }
 
     async function loadQuiz(app, quizId) {

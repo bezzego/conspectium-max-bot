@@ -392,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Валидация пароля
+    const passwordConfirm = document.getElementById('password-confirm-input').value;
     if (!password) {
       showError('password-input', 'password-error', 'Пароль обязателен');
       isValid = false;
@@ -400,6 +401,17 @@ document.addEventListener('DOMContentLoaded', function() {
       isValid = false;
     } else {
       hideError('password-input', 'password-error');
+    }
+    
+    // Валидация подтверждения пароля
+    if (!passwordConfirm) {
+      showError('password-confirm-input', 'password-confirm-error', 'Подтверждение пароля обязательно');
+      isValid = false;
+    } else if (password !== passwordConfirm) {
+      showError('password-confirm-input', 'password-confirm-error', 'Пароли не совпадают');
+      isValid = false;
+    } else {
+      hideError('password-confirm-input', 'password-confirm-error');
     }
     
     registerBtn.disabled = !(isValid && genderOK);
