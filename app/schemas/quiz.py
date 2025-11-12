@@ -36,6 +36,11 @@ class QuizSummaryRead(BaseModel):
     created_at: datetime
     updated_at: datetime
     latest_result: Optional["QuizResultRead"] = None
+    # Информация о пользователе (для публичных тестов)
+    user_nickname: Optional[str] = None
+    user_avatar_url: Optional[str] = None
+    # Количество вопросов (для публичных тестов)
+    questions_count: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 

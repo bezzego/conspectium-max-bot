@@ -19,6 +19,7 @@ class SettingsManager {
         this.userName = '';
         this.userGender = null;
         this.customAvatarUrl = null;
+        this.userDescription = '';
         this.app = window.ConspectiumApp || null;
         this.saveTimer = null;
         this.saveButton = null;
@@ -65,6 +66,7 @@ class SettingsManager {
         this.userGender = user.gender || null;
         this.currentAvatar = user.avatar_id || 'robot';
         this.customAvatarUrl = user.avatar_url || null;
+        this.userDescription = user.description || '';
     }
 
     loadFromStorageFallback() {
@@ -116,6 +118,11 @@ class SettingsManager {
             nameInput.value = this.userName;
         }
 
+        const descriptionInput = document.getElementById('userDescriptionInput');
+        if (descriptionInput) {
+            descriptionInput.value = this.userDescription || '';
+        }
+
         document.querySelectorAll('.gender-btn-settings').forEach((btn) => btn.classList.remove('selected'));
         if (this.userGender) {
             const radioId = `gender${this.userGender.charAt(0).toUpperCase() + this.userGender.slice(1)}Settings`;
@@ -129,16 +136,71 @@ class SettingsManager {
     }
 
     renderCurrentAvatar() {
-        const currentAvatar = this.resolveAvatar();
         const img = document.getElementById('currentAvatarImg');
-        if (img && currentAvatar) {
+        if (!img) return;
+        
+        // Если аватар загружен с устройства (customAvatarUrl начинается с /api/auth/avatar/)
+        if (this.customAvatarUrl && this.customAvatarUrl.startsWith('/api/auth/avatar/')) {
+            img.src = this.customAvatarUrl;
+            return;
+        }
+        
+        // Иначе используем аватар из коллекции
+        const currentAvatar = this.resolveAvatar();
+        if (currentAvatar) {
             img.src = currentAvatar.url;
+        } else {
+            // Fallback на дефолтный аватар
+            const defaultAvatar = ALL_AVATARS.find(a => a.id === 'robot');
+            if (defaultAvatar) {
+                img.src = defaultAvatar.url;
+            }
         }
     }
 
     setupEventListeners() {
         const changeAvatarBtn = document.getElementById('changeAvatarBtn');
         changeAvatarBtn?.addEventListener('click', () => this.showAvatarModal());
+
+        const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+        const avatarUploadInput = document.getElementById('avatarUploadInput');
+        if (uploadAvatarBtn && avatarUploadInput) {
+            uploadAvatarBtn.addEventListener('click', () => {
+                avatarUploadInput.click();
+            });
+            avatarUploadInput.addEventListener('change', async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                // Проверяем тип файла
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    this.app?.notify('Неподдерживаемый тип файла. Разрешенные форматы: JPEG, PNG, WebP, GIF', 'error');
+                    return;
+                }
+                
+                // Проверяем размер файла (5 МБ)
+                if (file.size > 5 * 1024 * 1024) {
+                    this.app?.notify('Файл слишком большой. Максимальный размер: 5 МБ', 'error');
+                    return;
+                }
+                
+                try {
+                    this.app?.showLoading('Загружаем аватар...');
+                    const user = await this.app.uploadAvatar(file);
+                    this.applyUser(user);
+                    this.renderCurrentAvatar();
+                    this.app?.hideLoading();
+                    this.app?.notify('Аватар успешно загружен', 'success');
+                } catch (error) {
+                    console.error('Ошибка загрузки аватара:', error);
+                    this.app?.hideLoading();
+                    this.app?.notify(error.message || 'Не удалось загрузить аватар', 'error');
+                } finally {
+                    e.target.value = ''; // Сбрасываем значение input
+                }
+            });
+        }
 
         this.saveButton = document.getElementById('saveProfileBtn');
         if (this.saveButton) {
@@ -156,6 +218,14 @@ class SettingsManager {
         if (nameInput) {
             nameInput.addEventListener('input', (e) => {
                 this.userName = e.target.value;
+                this.scheduleSave();
+            });
+        }
+
+        const descriptionInput = document.getElementById('userDescriptionInput');
+        if (descriptionInput) {
+            descriptionInput.addEventListener('input', (e) => {
+                this.userDescription = e.target.value;
                 this.scheduleSave();
             });
         }
@@ -385,6 +455,7 @@ class SettingsManager {
             gender: this.userGender,
             avatar_id: avatar?.id || null,
             avatar_url: avatar?.url || null,
+            description: this.userDescription?.trim() || null,
         };
 
         try {

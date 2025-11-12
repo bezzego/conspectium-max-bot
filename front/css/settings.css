@@ -442,7 +442,15 @@
     object-fit: cover;
 }
 
-.change-avatar-btn {
+.avatar-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.change-avatar-btn,
+.upload-avatar-btn {
     text-align: center;
     background: linear-gradient(135deg, rgba(245, 216, 110, 0.3) 0%, rgba(240, 213, 124, 0.4) 100%);
     border: 1px solid rgba(245, 216, 110, 0.5);
@@ -460,9 +468,12 @@
     min-width: 160px;
 }
 
-.change-avatar-btn:hover {
+.change-avatar-btn:hover,
+.upload-avatar-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(245, 216, 110, 0.3);
+    background: linear-gradient(135deg, rgba(245, 216, 110, 0.4) 0%, rgba(240, 213, 124, 0.5) 100%);
+    border-color: rgba(245, 216, 110, 0.7);
 }
 
 .avatar-carousel-modal {
@@ -767,6 +778,31 @@
     margin-left: 4px;
     font-weight: 500;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.description-input-settings {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    resize: vertical;
+    min-height: 80px;
+    box-sizing: border-box;
+}
+
+.description-input-settings::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.description-input-settings:focus {
+    outline: none;
+    border-color: rgba(245, 216, 110, 0.5);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .name-input-settings {
