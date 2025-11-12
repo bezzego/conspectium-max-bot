@@ -538,8 +538,42 @@
                 return attempt(true);
             }
             if (!response.ok) {
+                // Обработка ошибки 413 (Request Entity Too Large) от nginx
+                if (response.status === 413) {
+                    const text = await response.text();
+                    // Проверяем, является ли ответ HTML (от nginx) или JSON (от FastAPI)
+                    if (text.includes('<html>') || text.includes('Request Entity Too Large')) {
+                        throw new Error('Файл слишком большой для загрузки. Максимальный размер: 5 МБ. Если файл меньше 5 МБ, обратитесь к администратору - требуется увеличить client_max_body_size в конфигурации nginx.');
+                    }
+                    // Если это JSON ответ от FastAPI
+                    try {
+                        const errorData = JSON.parse(text);
+                        throw new Error(errorData.detail || errorData.message || 'Файл слишком большой для загрузки. Максимальный размер: 5 МБ.');
+                    } catch (e) {
+                        throw new Error('Файл слишком большой для загрузки. Максимальный размер: 5 МБ.');
+                    }
+                }
+                
                 const text = await response.text();
-                throw new Error(text || 'Не удалось загрузить аватар');
+                // Пытаемся распарсить JSON с описанием ошибки
+                let errorMessage = 'Не удалось загрузить аватар';
+                try {
+                    const errorData = JSON.parse(text);
+                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                } catch (e) {
+                    // Если не удалось распарсить JSON (например, HTML от nginx)
+                    // Проверяем, есть ли в тексте информация об ошибке
+                    if (text.includes('413') || text.includes('Request Entity Too Large') || text.includes('too large')) {
+                        errorMessage = 'Файл слишком большой для загрузки. Максимальный размер: 5 МБ. Если файл меньше 5 МБ, обратитесь к администратору - требуется настройка сервера.';
+                    } else if (text && text.length < 500 && !text.includes('<html>')) {
+                        // Если текст короткий и не HTML, возможно это просто сообщение об ошибке
+                        errorMessage = text;
+                    } else {
+                        // Если текст длинный (например, HTML страница), используем стандартное сообщение
+                        errorMessage = `Ошибка ${response.status}: Не удалось загрузить аватар`;
+                    }
+                }
+                throw new Error(errorMessage);
             }
             const user = await response.json();
             setUser(user);

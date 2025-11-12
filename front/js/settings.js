@@ -218,7 +218,18 @@ class SettingsManager {
                 } catch (error) {
                     console.error('Ошибка загрузки аватара:', error);
                     this.app?.hideLoading();
-                    this.app?.notify(error.message || 'Не удалось загрузить аватар', 'error');
+                    
+                    // Обработка ошибки 413 (Request Entity Too Large)
+                    let errorMessage = error.message || 'Не удалось загрузить аватар';
+                    
+                    // Проверяем, не является ли это ошибкой 413 от nginx
+                    if (errorMessage.includes('413') || errorMessage.includes('Request Entity Too Large') || errorMessage.includes('too large')) {
+                        errorMessage = 'Файл слишком большой. Максимальный размер: 5 МБ. Если файл меньше 5 МБ, обратитесь к администратору - возможно, требуется настройка сервера.';
+                    } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                        errorMessage = 'Ошибка сети при загрузке аватара. Проверьте подключение к интернету.';
+                    }
+                    
+                    this.app?.notify(errorMessage, 'error');
                 } finally {
                     e.target.value = ''; // Сбрасываем значение input
                 }
