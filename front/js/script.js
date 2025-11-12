@@ -336,7 +336,6 @@ window.goBack = goBack;
     border-radius: 16px;
     padding: 16px 20px;
     font-size: 16px;
-    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;

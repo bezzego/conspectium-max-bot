@@ -163,6 +163,10 @@
         const actions = document.createElement('div');
         actions.className = 'test-actions';
 
+        // Первая строка: основная кнопка и маленькие кнопки
+        const firstRow = document.createElement('div');
+        firstRow.className = 'test-actions__row test-actions__row--main';
+
         const launchBtn = document.createElement('button');
         launchBtn.className = 'action-btn launch';
         launchBtn.type = 'button';
@@ -171,37 +175,52 @@
             window.location.href = `test.html?quizId=${quiz.id}`;
         });
 
+        const smallButtons = document.createElement('div');
+        smallButtons.className = 'test-actions__square-buttons';
+
         const renameBtn = document.createElement('button');
-        renameBtn.className = 'action-btn rename';
+        renameBtn.className = 'action-btn small rename';
         renameBtn.type = 'button';
-        renameBtn.textContent = 'Переименовать';
+        renameBtn.innerHTML = '<i class="fas fa-edit"></i>';
+        renameBtn.title = 'Переименовать';
         renameBtn.addEventListener('click', () => toggleRenameForm(quiz.id));
 
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'action-btn delete';
+        deleteBtn.className = 'action-btn small delete';
         deleteBtn.type = 'button';
-        deleteBtn.textContent = 'Удалить';
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        deleteBtn.title = 'Удалить';
         deleteBtn.addEventListener('click', () => confirmDelete(quiz.id, quiz.title));
+
+        smallButtons.appendChild(renameBtn);
+        smallButtons.appendChild(deleteBtn);
+
+        firstRow.appendChild(launchBtn);
+        firstRow.appendChild(smallButtons);
+
+        // Вторая строка
+        const secondRow = document.createElement('div');
+        secondRow.className = 'test-actions__row test-actions__row--secondary';
 
         const shareBtn = document.createElement('button');
         shareBtn.className = 'action-btn share';
         shareBtn.type = 'button';
-        shareBtn.innerHTML = '<i class="fas fa-share"></i> Поделиться';
+        shareBtn.innerHTML = 'Поделиться';
         shareBtn.addEventListener('click', () => shareQuiz(quiz.id));
 
         const tournamentBtn = document.createElement('button');
         tournamentBtn.className = 'action-btn tournament';
         tournamentBtn.type = 'button';
         tournamentBtn.innerHTML = quiz.is_public_tournament 
-            ? '<i class="fas fa-check"></i> В турнире'
-            : '<i class="fas fa-trophy"></i> Опубликовать';
+            ? 'В турнире'
+            : 'Опубликовать';
         tournamentBtn.addEventListener('click', () => toggleTournamentPublish(quiz.id, quiz.is_public_tournament));
 
-        actions.appendChild(launchBtn);
-        actions.appendChild(shareBtn);
-        actions.appendChild(tournamentBtn);
-        actions.appendChild(renameBtn);
-        actions.appendChild(deleteBtn);
+        secondRow.appendChild(shareBtn);
+        secondRow.appendChild(tournamentBtn);
+
+        actions.appendChild(firstRow);
+        actions.appendChild(secondRow);
         return actions;
     }
 

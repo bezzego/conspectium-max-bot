@@ -154,27 +154,332 @@
         return el;
     }
 
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     function showLoading(message = 'Загрузка...') {
-        let overlay = document.querySelector('.app-loading-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'app-loading-overlay';
-            overlay.innerHTML = `
-                <div class="loader-content">
-                    <div class="spinner"></div>
-                    <div class="loader-text"></div>
+        if (window.conspectLoadingAnimation) return;
+
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(70, 70, 70, 0.85);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            overflow: hidden !important;
+        `;
+        
+        loadingOverlay.innerHTML = `
+            <div class="loading-content">
+                <div class="loader">
+                    <div style="--i: 1"></div>
+                    <div style="--i: 2"></div>
+                    <div style="--i: 3"></div>
+                    <div style="--i: 4"></div>
                 </div>
-            `;
-            document.body.appendChild(overlay);
-        }
-        overlay.querySelector('.loader-text').textContent = message;
-        overlay.classList.add('visible');
+                
+                <div class="loading-text">${escapeHtml(message)}</div>
+                
+                <div class="noise"></div>
+            </div>
+            <div class="hackflow-signature" style="opacity: 0;">by HackFlow</div>
+            
+            <style>
+                .loading-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                    background: linear-gradient(135deg, 
+                        rgba(100, 100, 100, 0.9) 0%, 
+                        rgba(80, 80, 80, 0.95) 50%, 
+                        rgba(100, 100, 100, 0.9) 100%);
+                    backdrop-filter: blur(15px);
+                    border: 1px solid rgba(255, 255, 255, 0.25);
+                    border-radius: 25px;
+                    padding: 50px 30px;
+                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3),
+                                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+                    width: 320px;
+                    height: 320px;
+                    margin-bottom: 60px;
+                    overflow: hidden;
+                }
+
+                .loading-content::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, 
+                        transparent 0%, 
+                        rgba(255, 255, 255, 0.12) 50%,
+                        transparent 100%);
+                    opacity: 0.5;
+                    pointer-events: none;
+                    border-radius: 25px;
+                }
+
+                .loader {
+                  position: relative;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  margin-bottom: 20px;
+                  margin-top: 10px;
+                }
+
+                .loader::before {
+                  content: "";
+                  backdrop-filter: blur(8px);
+                  position: absolute;
+                  width: 140px;
+                  height: 55px;
+                  z-index: 20;
+                  border-radius: 0 0 10px 10px;
+                  border: 1px solid rgba(255, 255, 255, 0.3);
+                  border-top: none;
+                  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
+                  animation: anim2 2s infinite;
+                }
+
+                .loader div {
+                  background: rgb(240, 240, 240);
+                  border-radius: 50%;
+                  width: 25px;
+                  height: 25px;
+                  z-index: -1;
+                  animation: anim 2s infinite linear;
+                  animation-delay: calc(-0.3s * var(--i));
+                  transform: translateY(5px);
+                  margin: 0.2em;
+                  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+                }
+
+                .loading-text {
+                    margin-top: 15px;
+                    color: white;
+                    font-size: 16px;
+                    font-family: 'Manrope', sans-serif;
+                    text-align: center;
+                    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+                    font-weight: 600;
+                    position: relative;
+                    z-index: 2;
+                }
+
+                .hackflow-signature {
+                    position: fixed;
+                    bottom: 15px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: rgba(255, 255, 255, 0.9);
+                    font-family: 'Manrope', Arial, sans-serif;
+                    font-size: 14px;
+                    text-align: center;
+                    user-select: none;
+                    z-index: 10001;
+                    opacity: 0;
+                    transition: opacity 0.5s ease;
+                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+                }
+
+                @keyframes anim {
+                  0%,
+                  100% {
+                    transform: translateY(5px);
+                  }
+                  50% {
+                    transform: translateY(-65px);
+                  }
+                }
+
+                @keyframes anim2 {
+                  0%,
+                  100% {
+                    transform: rotate(-10deg);
+                  }
+                  50% {
+                    transform: rotate(10deg);
+                  }
+                }
+
+                .noise {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-image: url(data:image/png;base64,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);
+                    opacity: 0.02;
+                    pointer-events: none;
+                    border-radius: 25px;
+                }
+
+                /* Адаптивность */
+                @media (max-width: 768px) {
+                    .loading-content {
+                        width: 280px;
+                        height: 280px;
+                        padding: 30px 25px;
+                        margin-bottom: 50px;
+                    }
+                    
+                    .loader {
+                        margin-top: 8px;
+                    }
+                    
+                    .loader::before {
+                        width: 120px;
+                        height: 45px;
+                    }
+                    
+                    .loader div {
+                        width: 20px;
+                        height: 20px;
+                    }
+                    
+                    .loading-text {
+                        font-size: 15px;
+                        margin-top: 12px;
+                    }
+                    
+                    .hackflow-signature {
+                        font-size: 13px;
+                    }
+                    
+                    @keyframes anim {
+                        0%,
+                        100% {
+                            transform: translateY(5px);
+                        }
+                        50% {
+                            transform: translateY(-55px);
+                        }
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .loading-content {
+                        width: 250px;
+                        height: 250px;
+                        padding: 45px 20px;
+                        margin-bottom: 45px;
+                    }
+                    
+                    .loader {
+                        margin-top: 5px;
+                    }
+                    
+                    .loader::before {
+                        width: 100px;
+                        height: 40px;
+                    }
+                    
+                    .loader div {
+                        width: 18px;
+                        height: 18px;
+                        margin: 0.15em;
+                    }
+                    
+                    .loading-text {
+                        font-size: 14px;
+                        margin-top: 10px;
+                    }
+                    
+                    .hackflow-signature {
+                        font-size: 12px;
+                    }
+                    
+                    @keyframes anim {
+                        0%,
+                        100% {
+                            transform: translateY(5px);
+                        }
+                        50% {
+                            transform: translateY(-45px);
+                        }
+                    }
+                }
+            </style>
+        `;
+
+        // Блокируем скролл
+        const scrollY = window.scrollY;
+        document.body.style.cssText = `
+            overflow: hidden !important;
+            position: fixed;
+            top: -${scrollY}px;
+            left: 0;
+            right: 0;
+            height: 100vh;
+        `;
+        document.documentElement.style.overflow = 'hidden !important';
+        
+        document.body.appendChild(loadingOverlay);
+
+        // Сохраняем позицию скролла
+        window._scrollY = scrollY;
+
+        requestAnimationFrame(() => {
+            loadingOverlay.style.opacity = '1';
+        });
+
+        // Появление подписи через 0.5 секунды
+        setTimeout(() => {
+            const signature = loadingOverlay.querySelector('.hackflow-signature');
+            if (signature) {
+                signature.style.opacity = '1';
+                signature.style.transition = 'opacity 0.5s ease';
+            }
+        }, 500);
+
+        // Исчезновение подписи за 1 секунду до конца (через 5 секунд от начала)
+        setTimeout(() => {
+            const signature = loadingOverlay.querySelector('.hackflow-signature');
+            if (signature) {
+                signature.style.opacity = '0';
+                signature.style.transition = 'opacity 0.5s ease';
+            }
+        }, 5000);
+        
+        window.conspectLoadingAnimation = {
+            overlay: loadingOverlay
+        };
     }
 
     function hideLoading() {
-        const overlay = document.querySelector('.app-loading-overlay');
-        if (overlay) {
-            overlay.classList.remove('visible');
+        // Восстанавливаем скролл
+        if (window._scrollY !== undefined) {
+            document.body.style.cssText = '';
+            document.documentElement.style.overflow = '';
+            window.scrollTo(0, window._scrollY);
+            delete window._scrollY;
+        }
+
+        // Удаляем оверлей
+        if (window.conspectLoadingAnimation) {
+            const { overlay } = window.conspectLoadingAnimation;
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+            delete window.conspectLoadingAnimation;
         }
     }
 
