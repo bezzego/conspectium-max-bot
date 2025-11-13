@@ -984,8 +984,15 @@
     }
 
     async function getProfile(userIdentifier) {
-        // Публичный endpoint, не требует авторизации
-        const response = await fetch(`${API_BASE}/profile/${encodeURIComponent(userIdentifier)}`);
+        // Публичный endpoint, но передаем токен если есть, чтобы сервер мог определить is_own_profile
+        const headers = {};
+        if (state.token) {
+            headers['Authorization'] = `Bearer ${state.token}`;
+        }
+        
+        const response = await fetch(`${API_BASE}/profile/${encodeURIComponent(userIdentifier)}`, {
+            headers: headers
+        });
         if (!response.ok) {
             const text = await response.text();
             throw new Error(text || response.statusText);
