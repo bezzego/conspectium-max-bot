@@ -1075,9 +1075,9 @@ if (typeof window.copyToClipboard === 'undefined') {
         
         if (success) {
             if (window.ConspectiumApp && window.ConspectiumApp.notify) {
-                window.ConspectiumApp.notify('Ссылка на профиль скопирована в буфер обмена', 'success');
+                window.ConspectiumApp.notify('Ссылка на профиль скопирована', 'success');
             } else {
-                alert('Ссылка на профиль скопирована в буфер обмена');
+                alert('Ссылка на профиль скопирована');
             }
         } else {
             // Если все методы не сработали, показываем ссылку для ручного копирования

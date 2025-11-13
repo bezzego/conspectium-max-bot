@@ -71,10 +71,199 @@
             titleEl.textContent = `@${profile.nickname}`;
         }
 
-        // Обновляем описание
         const descEl = document.querySelector('.desc');
         if (descEl) {
-            descEl.textContent = profile.description || 'Нет описания';
+            if (profile.description) {
+                // Форматируем текст с поддержкой Markdown-подобного синтаксиса
+                descEl.innerHTML = formatProfileDescription(profile.description);
+                descEl.classList.add('desc-formatted');
+                
+                // Добавляем обработчики для копирования кода
+                setTimeout(() => {
+                    setupCodeCopyHandlers();
+                }, 100);
+            } else {
+                descEl.textContent = 'Нет описания';
+                descEl.classList.remove('desc-formatted');
+            }
+        }
+
+        function formatProfileDescription(text) {
+            if (!text) return '';
+            
+            const escapeHtml = (str) => {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            };
+            
+            let formattedText = escapeHtml(text);
+            
+            // Сохраняем оригинальные переносы строк
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            
+            // Обработка маркдаун-подобного синтаксиса
+            
+            // Жирный текст: **текст** или __текст__
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/__(.*?)__/g, '<strong>$1</strong>');
+            
+            // Курсив: *текст* или _текст_
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formattedText = formattedText.replace(/_(.*?)_/g, '<em>$1</em>');
+            
+            // Подчеркнутый: ++текст++
+            formattedText = formattedText.replace(/\+\+(.*?)\+\+/g, '<u>$1</u>');
+            
+            // Зачеркнутый: ~~текст~~
+            formattedText = formattedText.replace(/~~(.*?)~~/g, '<del>$1</del>');
+            
+            // Ссылки: [текст](URL)
+            formattedText = formattedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+            
+            // Списки (простая поддержка)
+            // Нумерованные списки
+            formattedText = formattedText.replace(/^(\d+\.\s+.+)$/gm, '<li>$1</li>');
+            // Маркированные списки
+            formattedText = formattedText.replace(/^([-*]\s+.+)$/gm, '<li>$1</li>');
+            
+            // Оборачиваем списки в ul/ol
+            formattedText = formattedText.replace(/(<li>.*<\/li>)/s, function(match) {
+                // Проверяем, есть ли цифры в начале (нумерованный список)
+                if (match.match(/<li>\d+\./)) {
+                    return '<ol>' + match + '</ol>';
+                } else {
+                    return '<ul>' + match + '</ul>';
+                }
+            });
+            
+            // Убираем маркеры из пунктов списка
+            formattedText = formattedText.replace(/<li>(\d+\.\s*)(.+?)<\/li>/g, '<li>$2</li>');
+            formattedText = formattedText.replace(/<li>([-*]\s*)(.+?)<\/li>/g, '<li>$2</li>');
+            
+            // Цитаты: > текст (исправленная версия)
+            formattedText = formattedText.replace(/^(&gt;|>)\s*(.+?)(?=<br>|$)/gm, '<blockquote>$2</blockquote>');
+            
+            // Многострочные цитаты
+            formattedText = formattedText.replace(/(<blockquote>.*?)(?=<blockquote>|$)/gs, function(match) {
+                return match.replace(/<br>\s*<blockquote>/g, '<br>');
+            });
+            
+            // Код: используем %% вместо обратных апострофов
+            formattedText = formattedText.replace(/%%([^%]+)%%/g, function(match, codeContent) {
+                const cleanCode = codeContent.replace(/&amp;/g, '&')
+                                        .replace(/&lt;/g, '<')
+                                        .replace(/&gt;/g, '>')
+                                        .replace(/&quot;/g, '"')
+                                        .replace(/&#39;/g, "'");
+                return '<code class="copyable-code" data-code="' + escapeHtml(cleanCode) + '">' + codeContent + '<span class="copy-tooltip">Нажми чтобы скопировать</span></code>';
+            });
+            
+            // Разделители: --- или ***
+            formattedText = formattedText.replace(/^---$/gm, '<hr>');
+            formattedText = formattedText.replace(/^\*\*\*$/gm, '<hr>');
+            
+            // Обработка нескольких переносов подряд (создание абзацев)
+            formattedText = formattedText.replace(/(<br>\s*){2,}/g, '</p><p>');
+            
+            // Оборачиваем в параграфы если есть контент
+            if (!formattedText.startsWith('<') || !formattedText.match(/^<(ul|ol|blockquote|hr)/)) {
+                formattedText = '<p>' + formattedText + '</p>';
+            }
+            
+            // Убираем лишние теги <p> вокруг списков и других блочных элементов
+            formattedText = formattedText.replace(/<p>\s*<(ul|ol|blockquote|hr)/g, '<$1');
+            formattedText = formattedText.replace(/<\/(ul|ol|blockquote|hr)>\s*<\/p>/g, '</$1>');
+            formattedText = formattedText.replace(/([а-яa-z]{15,})/gi, '<span class="word-break">$1</span>');
+            
+                // Списки (простая поддержка)
+            // Нумерованные списки
+            formattedText = formattedText.replace(/^(\d+\.\s+.+)$/gm, '<li>$1</li>');
+            // Маркированные списки
+            formattedText = formattedText.replace(/^([-*]\s+.+)$/gm, '<li>$1</li>');
+            
+            // Оборачиваем списки в ul/ol
+            formattedText = formattedText.replace(/(<li>.*<\/li>)/s, function(match) {
+                // Проверяем, есть ли цифры в начале (нумерованный список)
+                if (match.match(/<li>\d+\./)) {
+                    return '<ol>' + match + '</ol>';
+                } else {
+                    return '<ul>' + match + '</ul>';
+                }
+            });
+            
+            // Убираем маркеры из пунктов списка
+            formattedText = formattedText.replace(/<li>(\d+\.\s*)(.+?)<\/li>/g, '<li>$2</li>');
+            formattedText = formattedText.replace(/<li>([-*]\s*)(.+?)<\/li>/g, '<li>$2</li>');
+            
+            // Разделители: --- или ***
+            formattedText = formattedText.replace(/^---$/gm, '<hr>');
+            formattedText = formattedText.replace(/^\*\*\*$/gm, '<hr>');
+            
+            // Обработка нескольких переносов подряд (создание абзацев)
+            formattedText = formattedText.replace(/(<br>\s*){2,}/g, '</p><p>');
+            
+            // Оборачиваем в параграфы если есть контент
+            if (!formattedText.startsWith('<') || !formattedText.match(/^<(ul|ol|blockquote|hr)/)) {
+                formattedText = '<p>' + formattedText + '</p>';
+            }
+            
+            // Убираем лишние теги <p> вокруг списков и других блочных элементов
+            formattedText = formattedText.replace(/<p>\s*<(ul|ol|blockquote|hr)/g, '<$1');
+            formattedText = formattedText.replace(/<\/(ul|ol|blockquote|hr)>\s*<\/p>/g, '</$1>');
+            
+            return formattedText;
+        }
+
+        // Функция для настройки обработчиков копирования кода
+        function setupCodeCopyHandlers() {
+            const codeElements = document.querySelectorAll('.copyable-code');
+            
+            codeElements.forEach(codeElement => {
+                codeElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const codeToCopy = this.getAttribute('data-code');
+                    
+                    // Копируем в буфер обмена
+                    navigator.clipboard.writeText(codeToCopy).then(() => {
+                        // Показываем подтверждение
+                        const originalTooltip = this.querySelector('.copy-tooltip').textContent;
+                        this.querySelector('.copy-tooltip').textContent = 'Скопировано!';
+                        this.classList.add('copied');
+                        
+                        // Возвращаем исходный текст через 2 секунды
+                        setTimeout(() => {
+                            this.querySelector('.copy-tooltip').textContent = originalTooltip;
+                            this.classList.remove('copied');
+                        }, 2000);
+                        
+                    }).catch(err => {
+                        console.error('Ошибка копирования:', err);
+                        // Fallback для старых браузеров
+                        const textArea = document.createElement('textarea');
+                        textArea.value = codeToCopy;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        
+                        this.querySelector('.copy-tooltip').textContent = 'Скопировано!';
+                        this.classList.add('copied');
+                        
+                        setTimeout(() => {
+                            this.querySelector('.copy-tooltip').textContent = 'Нажми чтобы скопировать';
+                            this.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
+                
+                // Добавляем курсор pointer при наведении
+                codeElement.style.cursor = 'pointer';
+            });
         }
 
         // Обновляем количество подписчиков и подписок
@@ -358,7 +547,13 @@
                     </label>
                     <label>
                         <span>Описание</span>
-                        <textarea id="editDescription" rows="3" placeholder="Расскажите о себе..." maxlength="500">${description}</textarea>
+                        <textarea id="editDescription" rows="4" placeholder="Расскажите о себе..." maxlength="500">${description}</textarea>
+                        <!-- ОБНОВЛЕННАЯ ПОДСКАЗКА -->
+                            // В функции showEditModal обновите подсказку:
+                        <div class="description-hint">
+                            Поддерживается: **жирный**, *курсив*, ++подчеркнутый++, ~~зачеркнутый~~<br>
+                            %%код%%, списки, ссылки [текст](URL)
+                        </div>
                     </label>
                     <div class="profile-edit-buttons">
                         <button class="btn-cancel" id="cancelEditBtn">Отмена</button>

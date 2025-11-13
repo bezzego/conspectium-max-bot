@@ -33,7 +33,139 @@ body {
     align-items: center;
     padding: 10px;
     box-sizing: border-box;
-    margin: 0 auto; 
+    margin: 0 auto;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Для мобильных устройств - более агрессивные переносы */
+@media (max-width: 768px) {
+    .card .desc,
+    .card .desc-formatted {
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        word-break: break-word; /* Более агрессивные переносы на мобильных */
+        overflow-wrap: break-word;
+    }
+    
+    .card .desc-formatted a {
+        word-break: break-word; /* Для ссылок на мобильных */
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .card .desc,
+    .card .desc-formatted {
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        word-break: break-word;
+        overflow-wrap: anywhere; /* Самый агрессивный перенос */
+    }
+}
+
+/* Стили для копируемого кода */
+.copyable-code {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.copyable-code:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.copyable-code.copied {
+    background: rgba(56, 142, 60, 0.3) !important;
+    border-color: rgba(56, 142, 60, 0.6) !important;
+}
+
+.copy-tooltip {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.copyable-code:hover .copy-tooltip {
+    opacity: 1;
+}
+
+/* Стили для цитат */
+.card .desc-formatted blockquote {
+    border-left: 3px solid rgba(245, 216, 110, 0.5);
+    margin: 0.8rem 0;
+    padding: 0.8rem 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0 8px 8px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.card .desc-formatted blockquote::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 5px;
+    font-size: 60px;
+    color: rgba(245, 216, 110, 0.3);
+    font-family: serif;
+    line-height: 1;
+}
+
+.card .desc-formatted blockquote::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.03) 50%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+/* Многострочные цитаты */
+.card .desc-formatted blockquote br {
+    display: block;
+    margin: 0.3rem 0;
+    content: "";
+}
+
+/* Улучшенные стили для кода */
+.card .desc-formatted code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.4rem;
+    font-family: 'Courier New', Monaco, monospace;
+    font-size: 0.85em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    word-break: break-all;
+    hyphens: none;
+    position: relative;
 }
 
 .top-bar {
@@ -440,10 +572,153 @@ body {
 }
 
 .card .desc {
-    text-align: justify;
+    text-align: left;
     padding: 0 var(--padding-size) 1.2rem;
     color: rgba(255, 255, 255, 0.9);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    white-space: pre-wrap; /* Сохраняем переносы строк */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    hyphens: auto; /* Автоматические переносы слов */
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+.card .desc-formatted {
+    text-align: left;
+    padding: 0 var(--padding-size) 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.5;
+    hyphens: auto; /* Автоматические переносы слов */
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.card .desc-formatted .word-break {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Списки в описании */
+.card .desc-formatted ul,
+.card .desc-formatted ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    hyphens: none; /* В списках отключаем переносы */
+}
+
+.card .desc-formatted li {
+    margin: 0.3rem 0;
+    hyphens: auto; /* Но в элементах списка включаем */
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Абзацы */
+.card .desc-formatted p {
+    margin: 0.5rem 0;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+.card .desc-formatted p:first-child {
+    margin-top: 0;
+}
+
+.card .desc-formatted p:last-child {
+    margin-bottom: 0;
+}
+
+/* Жирный текст */
+.card .desc-formatted strong {
+    font-weight: 700;
+    color: #fff;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Курсив */
+.card .desc-formatted em {
+    font-style: italic;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Подчеркнутый текст */
+.card .desc-formatted u {
+    text-decoration: underline;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Зачеркнутый текст */
+.card .desc-formatted del {
+    text-decoration: line-through;
+    opacity: 0.7;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Ссылки */
+.card .desc-formatted a {
+    color: #f5d86e;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    word-break: break-all; /* Особенно для длинных URL */
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+.card .desc-formatted a:hover {
+    color: #e6c95a;
+    text-decoration: underline;
+}
+
+/* Цитаты */
+.card .desc-formatted blockquote {
+    border-left: 3px solid rgba(245, 216, 110, 0.5);
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Код */
+.card .desc-formatted code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.3rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    word-break: break-all; /* Для длинных строк кода */
+    hyphens: none; /* В коде отключаем переносы */
+}
+
+/* Разделители */
+.card .desc-formatted hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+    margin: 1rem 0;
 }
 
 .card .actions {
@@ -688,15 +963,47 @@ body {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.profile-edit-form textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
 .profile-edit-buttons {
     display: flex;
     gap: 10px;
     margin-top: 10px;
+}
+
+/* Подсказка под полем описания */
+.description-hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 5px;
+    text-align: right;
+}
+
+/* Подсветка синтаксиса в текстовом поле (опционально) */
+.profile-edit-form textarea:focus {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Стили для подсказки форматирования */
+.description-hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 5px;
+    text-align: left;
+    line-height: 1.4;
+    padding: 5px 0;
+}
+
+/* Стили для текстового поля описания в модальном окне */
+.profile-edit-form textarea {
+    resize: vertical;
+    min-height: 140px;
+    font-family: inherit;
+    line-height: 1.4;
+    white-space: pre-wrap; /* Сохраняем переносы при редактировании */
+}
+
+/* Подсветка синтаксиса в текстовом поле (опционально) */
+.profile-edit-form textarea:focus {
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .profile-edit-buttons button {
