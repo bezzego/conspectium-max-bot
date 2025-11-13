@@ -1419,8 +1419,12 @@ function initConspectCreatePage(app) {
                 return;
             }
             const shareUrl = `${window.location.origin}/front/html/conspect_list.html#conspect-${latestId}`;
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                app.notify('Ссылка скопирована в буфер обмена', 'success');
+            copyToClipboard(shareUrl).then((success) => {
+                if (success) {
+                    app.notify('Ссылка скопирована в буфер обмена', 'success');
+                } else {
+                    prompt('Скопируйте ссылку:', shareUrl);
+                }
             });
         });
     }
@@ -2411,9 +2415,13 @@ function showConspectModal(conspect, options = {}) {
                 appInstance.showLoading('Генерируем ссылку...');
                 const shareToken = await appInstance.getShareToken('conspect', conspectId);
                 const shareUrl = `${window.location.origin}/front/html/conspect_shared.html?token=${shareToken}`;
-                await navigator.clipboard.writeText(shareUrl);
+                const success = await copyToClipboard(shareUrl);
                 appInstance.hideLoading();
-                appInstance.notify('Ссылка скопирована в буфер обмена!', 'success');
+                if (success) {
+                    appInstance.notify('Ссылка скопирована в буфер обмена!', 'success');
+                } else {
+                    prompt('Скопируйте ссылку:', shareUrl);
+                }
                 
                 shareButton.innerHTML = '<i class="fas fa-check"></i>';
                 shareButton.classList.add('copied');
@@ -2486,7 +2494,7 @@ function showConspectModal(conspect, options = {}) {
     document.addEventListener('keydown', modalEscHandler);
 }
 
-function copyConspectToClipboard(conspect, variantKey, markdown) {
+async function copyConspectToClipboard(conspect, variantKey, markdown) {
     const lines = [];
     lines.push(conspect.title || 'Без названия');
     const content = markdown || conspect.summary || '';
@@ -2499,7 +2507,7 @@ function copyConspectToClipboard(conspect, variantKey, markdown) {
             lines.push(`• ${point}`);
         });
     }
-    return navigator.clipboard.writeText(lines.join('\n').trim());
+    return copyToClipboard(lines.join('\n').trim());
 }
 
 
@@ -2563,9 +2571,13 @@ function showQuizShareModal(app, quizzes) {
                 app.showLoading('Генерируем ссылку...');
                 const shareToken = await app.getShareToken('quiz', quiz.id);
                 const shareUrl = `${window.location.origin}/front/html/quiz_shared.html?token=${shareToken}`;
-                await navigator.clipboard.writeText(shareUrl);
+                const success = await copyToClipboard(shareUrl);
                 app.hideLoading();
-                app.notify('Ссылка скопирована в буфер обмена!', 'success');
+                if (success) {
+                    app.notify('Ссылка скопирована в буфер обмена!', 'success');
+                } else {
+                    prompt('Скопируйте ссылку:', shareUrl);
+                }
                 modalOverlay.remove();
             } catch (err) {
                 console.error(err);

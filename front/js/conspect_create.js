@@ -108,9 +108,13 @@
                 app.showLoading('Генерируем ссылку...');
                 const shareToken = await app.getShareToken('conspect', latestConspectId);
                 const shareUrl = `${window.location.origin}/front/html/conspect_shared.html?token=${shareToken}`;
-                await navigator.clipboard.writeText(shareUrl);
+                const success = await copyToClipboard(shareUrl);
                 app.hideLoading();
-                app.notify('Ссылка скопирована в буфер обмена!', 'success');
+                if (success) {
+                    app.notify('Ссылка скопирована в буфер обмена!', 'success');
+                } else {
+                    prompt('Скопируйте ссылку:', shareUrl);
+                }
             } catch (err) {
                 console.error(err);
                 app.hideLoading();

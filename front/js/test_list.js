@@ -387,9 +387,18 @@
             app.showLoading('Генерируем ссылку...');
             const shareToken = await app.getShareToken('quiz', quizId);
             const shareUrl = `${window.location.origin}/front/html/quiz_shared.html?token=${shareToken}`;
-            await navigator.clipboard.writeText(shareUrl);
+            let success = false;
+            if (app.copyToClipboard) {
+                success = await app.copyToClipboard(shareUrl);
+            } else {
+                success = await copyToClipboardFallback(shareUrl);
+            }
             app.hideLoading();
-            app.notify('Ссылка скопирована в буфер обмена!', 'success');
+            if (success) {
+                app.notify('Ссылка скопирована в буфер обмена!', 'success');
+            } else {
+                prompt('Скопируйте ссылку:', shareUrl);
+            }
         } catch (err) {
             console.error(err);
             app.hideLoading();

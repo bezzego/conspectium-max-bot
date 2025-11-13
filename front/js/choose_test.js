@@ -743,22 +743,71 @@ ${conspect.summary || 'Описание отсутствует.'}
 ${keyPointsText ? 'Ключевые идеи:\n' + keyPointsText : ''}
         `.trim();
 
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            if (window.ConspectiumApp) {
-                window.ConspectiumApp.notify('Конспект скопирован в буфер обмена', 'success');
+        // Используем универсальную функцию копирования
+        const copyToClipboard = async (text) => {
+            // Пробуем современный Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    console.warn('Clipboard API failed, trying fallback:', err);
+                }
             }
             
-            copyButton.innerHTML = '<i class="fas fa-check"></i>';
-            copyButton.style.color = '#b9b9b5ff;';
-            
-            setTimeout(() => {
-                copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-                copyButton.style.color = '';
-            }, 2000);
-        }).catch(err => {
-            console.error('Ошибка копирования:', err);
-            if (window.ConspectiumApp) {
-                window.ConspectiumApp.notify('Не удалось скопировать конспект', 'error');
+            // Fallback метод для Safari и старых браузеров
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.top = '-9999px';
+                textArea.style.left = '-9999px';
+                textArea.style.opacity = '0';
+                textArea.style.pointerEvents = 'none';
+                textArea.setAttribute('readonly', '');
+                textArea.setAttribute('aria-hidden', 'true');
+                document.body.appendChild(textArea);
+                
+                textArea.select();
+                textArea.setSelectionRange(0, text.length);
+                
+                if (navigator.userAgent.match(/ipad|iphone/i)) {
+                    const range = document.createRange();
+                    range.selectNodeContents(textArea);
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    textArea.setSelectionRange(0, 999999);
+                }
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                return successful;
+            } catch (err) {
+                console.error('All copy methods failed:', err);
+                return false;
+            }
+        };
+        
+        copyToClipboard(textToCopy).then((success) => {
+            if (success) {
+                if (window.ConspectiumApp) {
+                    window.ConspectiumApp.notify('Конспект скопирован в буфер обмена', 'success');
+                }
+                
+                copyButton.innerHTML = '<i class="fas fa-check"></i>';
+                copyButton.style.color = '#b9b9b5ff;';
+                
+                setTimeout(() => {
+                    copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+                    copyButton.style.color = '';
+                }, 2000);
+            } else {
+                console.error('Ошибка копирования: все методы не сработали');
+                if (window.ConspectiumApp) {
+                    window.ConspectiumApp.notify('Не удалось скопировать конспект', 'error');
+                }
             }
         });
     });
