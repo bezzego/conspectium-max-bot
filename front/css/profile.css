@@ -1498,9 +1498,6 @@ body.modal-open {
         margin-bottom: 20px;
     }
     
-    .profile-edit-form textarea {
-        min-height: 100px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1509,9 +1506,6 @@ body.modal-open {
         width: 95%;
     }
     
-    .profile-edit-form textarea {
-        min-height: 80px;
-    }
 }
 
 .profile-edit-buttons button {
