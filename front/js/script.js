@@ -1419,7 +1419,7 @@ function initConspectCreatePage(app) {
                 return;
             }
             const shareUrl = `${window.location.origin}/front/html/conspect_list.html#conspect-${latestId}`;
-            copyToClipboard(shareUrl).then((success) => {
+            window.copyToClipboard(shareUrl).then((success) => {
                 if (success) {
                     app.notify('Ссылка скопирована в буфер обмена', 'success');
                 } else {
@@ -2415,7 +2415,7 @@ function showConspectModal(conspect, options = {}) {
                 appInstance.showLoading('Генерируем ссылку...');
                 const shareToken = await appInstance.getShareToken('conspect', conspectId);
                 const shareUrl = `${window.location.origin}/front/html/conspect_shared.html?token=${shareToken}`;
-                const success = await copyToClipboard(shareUrl);
+                const success = await window.copyToClipboard(shareUrl);
                 appInstance.hideLoading();
                 if (success) {
                     appInstance.notify('Ссылка скопирована в буфер обмена!', 'success');
@@ -2507,7 +2507,7 @@ async function copyConspectToClipboard(conspect, variantKey, markdown) {
             lines.push(`• ${point}`);
         });
     }
-    return copyToClipboard(lines.join('\n').trim());
+    return window.copyToClipboard(lines.join('\n').trim());
 }
 
 
@@ -2571,7 +2571,7 @@ function showQuizShareModal(app, quizzes) {
                 app.showLoading('Генерируем ссылку...');
                 const shareToken = await app.getShareToken('quiz', quiz.id);
                 const shareUrl = `${window.location.origin}/front/html/quiz_shared.html?token=${shareToken}`;
-                const success = await copyToClipboard(shareUrl);
+                const success = await window.copyToClipboard(shareUrl);
                 app.hideLoading();
                 if (success) {
                     app.notify('Ссылка скопирована в буфер обмена!', 'success');

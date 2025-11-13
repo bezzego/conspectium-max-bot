@@ -1,109 +1,4 @@
 (() => {
-    /**
-     * Универсальная функция копирования в буфер обмена с fallback для Safari
-     * Важно: для Safari нужно, чтобы вызов происходил в контексте пользовательского действия
-     */
-    async function copyToClipboard(text) {
-        // Проверяем, доступен ли Clipboard API
-        const hasClipboardAPI = navigator.clipboard && navigator.clipboard.writeText;
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || /iPad|iPhone|iPod/.test(navigator.userAgent);
-        
-        // Для Safari лучше сразу использовать fallback метод
-        if (isSafari) {
-            try {
-                // Создаем временный textarea для копирования
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.top = '0';
-                textArea.style.left = '0';
-                textArea.style.width = '2em';
-                textArea.style.height = '2em';
-                textArea.style.padding = '0';
-                textArea.style.border = 'none';
-                textArea.style.outline = 'none';
-                textArea.style.boxShadow = 'none';
-                textArea.style.background = 'transparent';
-                textArea.style.opacity = '0';
-                textArea.style.pointerEvents = 'none';
-                textArea.setAttribute('readonly', '');
-                textArea.setAttribute('aria-hidden', 'true');
-                
-                document.body.appendChild(textArea);
-                
-                // Для iOS Safari нужен специальный подход
-                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                    textArea.contentEditable = 'true';
-                    textArea.readOnly = false;
-                    const range = document.createRange();
-                    range.selectNodeContents(textArea);
-                    const selection = window.getSelection();
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                    textArea.setSelectionRange(0, 999999);
-                } else {
-                    // Для обычного Safari
-                    textArea.focus();
-                    textArea.select();
-                    textArea.setSelectionRange(0, text.length);
-                }
-                
-                const successful = document.execCommand('copy');
-                document.body.removeChild(textArea);
-                
-                if (!successful) {
-                    throw new Error('execCommand copy failed');
-                }
-                
-                return true;
-            } catch (err) {
-                console.warn('Safari fallback failed, trying Clipboard API:', err);
-                // Если fallback не сработал, пробуем Clipboard API
-            }
-        }
-        
-        // Пробуем современный Clipboard API (для Chrome, Firefox, и если Safari fallback не сработал)
-        if (hasClipboardAPI) {
-            try {
-                await navigator.clipboard.writeText(text);
-                return true;
-            } catch (err) {
-                console.warn('Clipboard API failed, trying fallback:', err);
-                // Если не получилось, пробуем fallback
-            }
-        }
-        
-        // Fallback метод для других браузеров
-        try {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.top = '-9999px';
-            textArea.style.left = '-9999px';
-            textArea.style.opacity = '0';
-            textArea.style.pointerEvents = 'none';
-            textArea.setAttribute('readonly', '');
-            textArea.setAttribute('aria-hidden', 'true');
-            document.body.appendChild(textArea);
-            
-            textArea.focus();
-            textArea.select();
-            textArea.setSelectionRange(0, text.length);
-            
-            const successful = document.execCommand('copy');
-            document.body.removeChild(textArea);
-            
-            if (!successful) {
-                throw new Error('execCommand copy failed');
-            }
-            
-            return true;
-        } catch (err) {
-            console.error('All copy methods failed:', err);
-            return false;
-        }
-    }
-    
     let currentLobby = null;
     let currentView = 'tournaments';
     let refreshInterval = null;
@@ -738,7 +633,7 @@
             event.stopPropagation();
         }
         
-        const success = await copyToClipboard(code);
+        const success = await window.copyToClipboard(code);
         if (success) {
             showNotification('Код скопирован!');
             const btn = event.target.closest('.invite-copy-btn');
@@ -763,7 +658,7 @@
             event.stopPropagation();
         }
         
-        const success = await copyToClipboard(link);
+        const success = await window.copyToClipboard(link);
         if (success) {
             showNotification('Ссылка скопирована!');
             const btn = event.target.closest('.invite-copy-btn');
@@ -802,7 +697,7 @@
 
     async function copyLobbyCode() {
         if (currentLobby && currentLobby.invite_code) {
-            const success = await copyToClipboard(currentLobby.invite_code);
+            const success = await window.copyToClipboard(currentLobby.invite_code);
             if (success) {
                 showNotification('Код лобби скопирован!');
             } else {

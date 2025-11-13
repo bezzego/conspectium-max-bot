@@ -356,64 +356,8 @@
             return 'TOUR#' + Math.random().toString(36).substr(2, 6).toUpperCase();
         }
 
-        /**
-         * Универсальная функция копирования в буфер обмена с fallback для Safari
-         */
-        async function copyToClipboard(text) {
-            // Пробуем современный Clipboard API
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    return true;
-                } catch (err) {
-                    console.warn('Clipboard API failed, trying fallback:', err);
-                    // Если не получилось, пробуем fallback
-                }
-            }
-            
-            // Fallback метод для Safari и старых браузеров
-            try {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.top = '-9999px';
-                textArea.style.left = '-9999px';
-                textArea.style.opacity = '0';
-                textArea.style.pointerEvents = 'none';
-                textArea.setAttribute('readonly', '');
-                textArea.setAttribute('aria-hidden', 'true');
-                document.body.appendChild(textArea);
-                
-                // Выбираем текст и копируем
-                textArea.select();
-                textArea.setSelectionRange(0, text.length);
-                
-                // Для iOS Safari
-                if (navigator.userAgent.match(/ipad|iphone/i)) {
-                    const range = document.createRange();
-                    range.selectNodeContents(textArea);
-                    const selection = window.getSelection();
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                    textArea.setSelectionRange(0, 999999);
-                }
-                
-                const successful = document.execCommand('copy');
-                document.body.removeChild(textArea);
-                
-                if (!successful) {
-                    throw new Error('execCommand copy failed');
-                }
-                
-                return true;
-            } catch (err) {
-                console.error('All copy methods failed:', err);
-                return false;
-            }
-        }
-
         async function copyLobbyCode() {
-            const success = await copyToClipboard(lobbyCode);
+            const success = await window.copyToClipboard(lobbyCode);
             if (success) {
                 showNotification('Код лобби скопирован!');
             } else {
@@ -423,7 +367,7 @@
 
         async function generateInviteLink() {
             const link = `${window.location.origin}${window.location.pathname}?join=${lobbyCode}`;
-            const success = await copyToClipboard(link);
+            const success = await window.copyToClipboard(link);
             if (success) {
                 showNotification('Ссылка-приглашение скопирована!');
             } else {
@@ -718,7 +662,7 @@
                     return `${medal} ${r.place}. ${r.name} - ${r.score} - ${r.time}`;
                 }).join('\n');
             
-            const success = await copyToClipboard(text);
+            const success = await window.copyToClipboard(text);
             if (success) {
                 showNotification('Результаты скопированы!');
             } else {
