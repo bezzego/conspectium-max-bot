@@ -9,6 +9,53 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Скрытие скроллбара для всего body */
+body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE и Edge */
+}
+
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Скрытие скроллбара для контейнера профиля */
+.container {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE и Edge */
+}
+
+.container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Скрытие скроллбара для карточки профиля */
+.card {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE и Edge */
+}
+
+.card::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Обеспечиваем плавный скролл */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Дополнительные стили для модальных окон */
+.profile-edit-modal-content,
+.banner-edit-modal-content {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE и Edge */
+}
+
+.profile-edit-modal-content::-webkit-scrollbar,
+.banner-edit-modal-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
 body {
     font-family: 'Manrope', sans-serif;
     background: var(--bg-dark);
@@ -418,4 +465,81 @@ button:focus, .back-btn:focus {
     text-align: center;
     color: #ffffff;
     padding: 20px;
+}
+
+
+/* Полное скрытие скроллбара на всех устройствах */
+body,
+.container,
+.card,
+.profile-edit-modal-content,
+.banner-edit-modal-content {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar,
+.container::-webkit-scrollbar,
+.card::-webkit-scrollbar,
+.profile-edit-modal-content::-webkit-scrollbar,
+.banner-edit-modal-content::-webkit-scrollbar {
+    display: none;
+}
+
+/* Обеспечиваем плавный скролл */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Сохраняем функциональность скролла */
+body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Скрытие скроллбара для всего body */
+body {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+body::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Скрытие скроллбара для контейнера профиля */
+.container {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.container::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Скрытие скроллбара для карточки профиля */
+.card {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.card::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Обеспечиваем плавный скролл */
+html {
+    scroll-behavior: smooth !important;
+}
+
+/* Дополнительные стили для модальных окон */
+.profile-edit-modal-content,
+.banner-edit-modal-content {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.profile-edit-modal-content::-webkit-scrollbar,
+.banner-edit-modal-content::-webkit-scrollbar {
+    display: none !important;
 }

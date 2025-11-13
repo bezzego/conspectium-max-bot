@@ -373,7 +373,6 @@ body {
 }
 
 .card .banner {
-    background-image: url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1350&q=80);
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -382,8 +381,449 @@ body {
     align-items: flex-end;
     justify-content: center;
     box-sizing: border-box;
-    width: 100%; /* Добавь эту строку */
-    position: relative; /* И эту */
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    overflow: visible; /* Изменено с hidden на visible */
+}
+
+.card .banner img.profile-avatar {
+    width: var(--dp-size);
+    height: var(--dp-size);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    transform: translateY(50%);
+    transition: transform 200ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    border: 4px solid white;
+    object-fit: cover;
+    position: relative;
+    z-index: 3;
+}
+
+.card .banner:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+/* Стили для редактора обрезки баннера */
+.banner-crop-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.card .banner:hover .banner-edit-icon {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.banner-edit-icon {
+    position: absolute;
+    top: 25%;
+    transform: translate(-50%, -20px);
+    background: rgba(255, 255, 255, 0.281);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 2;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.banner-edit-icon i {
+    font-size: 20px;
+    color: #ffffff;
+}
+
+/* Модальное окно редактирования баннера */
+.banner-edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    animation: fadeIn 0.3s ease;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.banner-edit-modal-content {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.22) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 90vw;
+    max-height: 90vh;
+    width: 800px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    animation: slideUp 0.3s ease;
+    box-sizing: border-box;
+}
+
+.banner-edit-preview {
+    width: 100%;
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+.banner-crop-area::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.banner-crop-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    cursor: move;
+}
+
+.banner-crop-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.banner-crop-area {
+    position: absolute;
+    border: 2px solid #f5d86e;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+    cursor: move;
+    z-index: 10;
+}
+
+.crop-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #f5d86e;
+    border: 2px solid #fff;
+    border-radius: 2px;
+}
+
+.crop-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
+.crop-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
+.crop-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+.crop-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+
+
+.banner-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.banner-crop-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-slider {
+    flex: 1;
+    max-width: 200px;
+}
+
+.zoom-slider input {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, 
+        rgba(245, 216, 110, 0.8) 0%, 
+        rgba(245, 216, 110, 0.8) var(--slider-progress, 50%), 
+        rgba(255, 255, 255, 0.2) var(--slider-progress, 50%), 
+        rgba(255, 255, 255, 0.2) 100%
+    );
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.banner-upload-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.banner-upload-placeholder:hover {
+    border-color: rgba(245, 216, 110, 0.5);
+    color: rgba(245, 216, 110, 0.8);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.placeholder-content i {
+    font-size: 64px;
+    margin-bottom: 15px;
+    display: block;
+    opacity: 0.7;
+}
+
+.placeholder-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.placeholder-content p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.placeholder-content small {
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+/* Адаптивность для плейсхолдера */
+@media (max-width: 768px) {
+    .placeholder-content i {
+        font-size: 48px;
+        margin-bottom: 12px;
+    }
+    
+    .placeholder-content h3 {
+        font-size: 16px;
+    }
+    
+    .placeholder-content p {
+        font-size: 13px;
+    }
+    
+    .placeholder-content small {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .placeholder-content i {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    
+    .placeholder-content h3 {
+        font-size: 15px;
+    }
+    
+    .placeholder-content p {
+        font-size: 12px;
+    }
+    
+    .banner-upload-placeholder {
+        padding: 15px;
+    }
+}
+
+.zoom-slider input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #f5d86e;
+    cursor: pointer;
+}
+
+.zoom-value {
+    min-width: 40px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+.banner-edit-modal-content-title{
+    margin-bottom: 10px;
+}
+
+.banner-control-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #fff;
+}
+
+.btn-upload-banner {
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.377) 0%,
+        rgba(240, 193, 25, 0.295) 50%,
+        rgba(243, 196, 24, 0.377) 100%
+    );
+    border: 1px solid rgba(245, 216, 110, 0.3);
+}
+
+.btn-upload-banner:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 216, 110, 0.3);
+}
+
+.btn-remove-banner {
+    background: rgba(220, 53, 69, 0.3);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+.btn-remove-banner:hover {
+    background: rgba(220, 53, 69, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+}
+
+.banner-edit-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.banner-edit-buttons button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.banner-edit-buttons .btn-cancel {
+    background: rgba(100, 100, 100, 0.3);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.banner-edit-buttons .btn-cancel:hover {
+    background: rgba(120, 120, 120, 0.4);
+    transform: translateY(-2px);
+}
+
+.banner-edit-buttons .btn-save {
+    background: linear-gradient(
+        135deg,
+        rgba(243, 194, 17, 0.377) 0%,
+        rgba(240, 193, 25, 0.295) 50%,
+        rgba(243, 196, 24, 0.377) 100%
+    );
+    color: #fff;
+    border: 1px solid rgba(245, 216, 110, 0.3);
+}
+
+.banner-edit-buttons .btn-save:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 213, 99, 0.35) 0%,
+        rgba(248, 213, 87, 0.22) 50%,
+        rgba(245, 212, 92, 0.35) 100%
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 216, 110, 0.3);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .banner-edit-modal-content {
+        padding: 20px;
+        width: 95%;
+    }
+    
+    .banner-edit-preview {
+        height: 200px;
+    }
+    
+    .banner-controls {
+        flex-direction: column;
+    }
+    
+    .banner-control-btn {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .banner-edit-preview {
+        height: 150px;
+    }
 }
 
 .card .banner svg,
@@ -861,7 +1301,6 @@ body {
     );
 }
 
-/* Стили для модального окна редактирования профиля */
 .profile-edit-modal {
     position: fixed;
     top: 0;
@@ -875,6 +1314,16 @@ body {
     justify-content: center;
     z-index: 10000;
     animation: fadeIn 0.3s ease;
+    padding: 20px; /* Добавляем отступы */
+    box-sizing: border-box;
+
+        /* Полностью скрываем скроллбар */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE и Edge */
+}
+
+body.modal-open {
+    overflow: hidden;
 }
 
 @keyframes fadeIn {
@@ -886,6 +1335,7 @@ body {
     }
 }
 
+/* Скрываем скроллбар но оставляем функциональность */
 .profile-edit-modal-content {
     background: linear-gradient(
         135deg,
@@ -899,11 +1349,40 @@ body {
     padding: 30px;
     max-width: 500px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto; /* Функциональность скролла остается */
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.25);
     animation: slideUp 0.3s ease;
+    box-sizing: border-box;
+    
+    /* Полностью скрываем скроллбар */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE и Edge */
+}
+
+/* Webkit браузеры (Chrome, Safari, Opera) */
+.profile-edit-modal-content::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.profile-edit-modal-content::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.profile-edit-modal-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+}
+
+.profile-edit-modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 @keyframes slideUp {
@@ -1004,6 +1483,35 @@ body {
 /* Подсветка синтаксиса в текстовом поле (опционально) */
 .profile-edit-form textarea:focus {
     background: rgba(255, 255, 255, 0.12);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .profile-edit-modal {
+        padding: 10px;
+        align-items: flex-start; /* Выравниваем по верху на мобильных */
+    }
+    
+    .profile-edit-modal-content {
+        max-height: 95vh;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .profile-edit-form textarea {
+        min-height: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-edit-modal-content {
+        padding: 20px;
+        width: 95%;
+    }
+    
+    .profile-edit-form textarea {
+        min-height: 80px;
+    }
 }
 
 .profile-edit-buttons button {

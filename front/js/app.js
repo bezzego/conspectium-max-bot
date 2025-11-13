@@ -48,6 +48,8 @@ if (typeof window.copyToClipboard === 'undefined') {
             console.error('Failed to clear user from localStorage', e);
         }
     }
+
+    
     
     function logout() {
         clearAuthState();
@@ -1087,7 +1089,79 @@ if (typeof window.copyToClipboard === 'undefined') {
         return profileUrl;
     }
 
+        async function uploadBanner(file) {
+        await ensureAuth();
+        const formData = new FormData();
+        formData.append('banner', file);
+        
+        console.log('Uploading banner...', file);
+        
+        const attempt = async (retry = false) => {
+            const response = await fetch(`${API_BASE}/user/banner`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${state.token}`,
+                },
+                body: formData,
+            });
+            
+            if (response.status === 401 || response.status === 403) {
+                if (retry) {
+                    const text = await response.text();
+                    throw new Error(text || 'Не удалось загрузить баннер');
+                }
+                clearAuthState();
+                await ensureAuth();
+                return attempt(true);
+            }
+            
+            if (!response.ok) {
+                // Обработка ошибки 413 (Request Entity Too Large)
+                if (response.status === 413) {
+                    const text = await response.text();
+                    if (text.includes('<html>') || text.includes('Request Entity Too Large')) {
+                        throw new Error('Файл слишком большой для загрузки. Максимальный размер: 10 МБ. Если файл меньше 10 МБ, обратитесь к администратору.');
+                    }
+                    try {
+                        const errorData = JSON.parse(text);
+                        throw new Error(errorData.detail || errorData.message || 'Файл слишком большой для загрузки. Максимальный размер: 10 МБ.');
+                    } catch (e) {
+                        throw new Error('Файл слишком большой для загрузки. Максимальный размер: 10 МБ.');
+                    }
+                }
+                
+                const text = await response.text();
+                let errorMessage = 'Не удалось загрузить баннер';
+                try {
+                    const errorData = JSON.parse(text);
+                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                } catch (e) {
+                    if (text.includes('413') || text.includes('Request Entity Too Large') || text.includes('too large')) {
+                        errorMessage = 'Файл слишком большой для загрузки. Максимальный размер: 10 МБ.';
+                    } else if (text && text.length < 500 && !text.includes('<html>')) {
+                        errorMessage = text;
+                    } else {
+                        errorMessage = `Ошибка ${response.status}: Не удалось загрузить баннер`;
+                    }
+                }
+                throw new Error(errorMessage);
+            }
+            
+            const result = await response.json();
+            // Обновляем данные пользователя
+            if (result.success && state.user) {
+                state.user.banner_url = result.data.banner_url;
+                state.user.banner_id = result.data.banner_id;
+                setUser(state.user);
+            }
+            return result.data;
+        };
+        
+        return attempt();
+    }
+
     window.ConspectiumApp = {
+        
         ready: () => getReadyPromise(),
         authFetch,
         createElement,
@@ -1100,6 +1174,7 @@ if (typeof window.copyToClipboard === 'undefined') {
         createManualQuiz,
         updateProfile,
         uploadAvatar,
+        uploadBanner, // ← ДОБАВЬТЕ ЭТУ СТРОКУ
         registerUser,
         loginUser,
         changePassword,
@@ -1130,5 +1205,79 @@ if (typeof window.copyToClipboard === 'undefined') {
         unfollowUser,
         updateUserProfile,
         shareProfile,
+ 
     };
+
+        async function uploadBanner(file) {
+        await ensureAuth();
+        const formData = new FormData();
+        formData.append('banner', file);
+        
+        console.log('Uploading banner...', file);
+        
+        const attempt = async (retry = false) => {
+            const response = await fetch(`${API_BASE}/user/banner`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${state.token}`,
+                },
+                body: formData,
+            });
+            
+            if (response.status === 401 || response.status === 403) {
+                if (retry) {
+                    const text = await response.text();
+                    throw new Error(text || 'Не удалось загрузить баннер');
+                }
+                clearAuthState();
+                await ensureAuth();
+                return attempt(true);
+            }
+            
+            if (!response.ok) {
+                // Обработка ошибки 413 (Request Entity Too Large)
+                if (response.status === 413) {
+                    const text = await response.text();
+                    if (text.includes('<html>') || text.includes('Request Entity Too Large')) {
+                        throw new Error('Файл слишком большой для загрузки. Максимальный размер: 10 МБ. Если файл меньше 10 МБ, обратитесь к администратору.');
+                    }
+                    try {
+                        const errorData = JSON.parse(text);
+                        throw new Error(errorData.detail || errorData.message || 'Файл слишком большой для загрузки. Максимальный размер: 10 МБ.');
+                    } catch (e) {
+                        throw new Error('Файл слишком большой для загрузки. Максимальный размер: 10 МБ.');
+                    }
+                }
+                
+                const text = await response.text();
+                let errorMessage = 'Не удалось загрузить баннер';
+                try {
+                    const errorData = JSON.parse(text);
+                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                } catch (e) {
+                    if (text.includes('413') || text.includes('Request Entity Too Large') || text.includes('too large')) {
+                        errorMessage = 'Файл слишком большой для загрузки. Максимальный размер: 10 МБ.';
+                    } else if (text && text.length < 500 && !text.includes('<html>')) {
+                        errorMessage = text;
+                    } else {
+                        errorMessage = `Ошибка ${response.status}: Не удалось загрузить баннер`;
+                    }
+                }
+                throw new Error(errorMessage);
+            }
+            
+            const result = await response.json();
+            // Обновляем данные пользователя
+            if (result.success && state.user) {
+                state.user.banner_url = result.data.banner_url;
+                state.user.banner_id = result.data.banner_id;
+                setUser(state.user);
+            }
+            return result.data;
+        };
+        
+        return attempt();
+    }
+
 })();
+
