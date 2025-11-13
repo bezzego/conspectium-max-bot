@@ -20,12 +20,6 @@ class Settings(BaseSettings):
     google_model: str = "gemini-2.5-flash"
     google_api_key_text: Optional[str] = None
 
-    max_api_base_url: str = "https://platform-api.max.ru"
-    max_bot_token: Optional[str] = None
-    max_mini_app_url: str = "https://conspectium-hackflow.ru/"
-    max_welcome_message: str = "Привет! Я бот Конспектиума. Нажми кнопку ниже, чтобы открыть мини-приложение."
-    max_welcome_button_text: str = "Открыть Конспектиум"
-
     audio_storage_dir: str = "var/audio"
     avatar_storage_dir: str = "var/avatars"
     max_upload_size_mb: int = 50

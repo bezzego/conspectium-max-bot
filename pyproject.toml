@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "conspectium-backend"
 version = "0.1.0"
-description = "Backend service for Conspectium MAX Mini App"
+description = "Backend service for Conspectium Mini App"
 authors = ["Conspectium Team"]
 readme = "README.md"
 packages = [{include = "app"}]
