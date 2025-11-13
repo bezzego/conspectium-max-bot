@@ -297,7 +297,6 @@
 .answer-option {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 12px;
     cursor: pointer;
     padding: 8px 0;
     opacity: 0;
@@ -309,6 +308,8 @@
 }
 
 .question-item.expanded .answer-option {
+    opacity: 1;
+    transform: translateX(0);
     background: linear-gradient(
         135deg,
         rgba(255, 255, 255, 0.12) 0%,
@@ -320,33 +321,21 @@
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     display: flex;
-    align-items: center;
-    padding: 20px;
+    align-items: flex-start; /* Изменено с center на flex-start */
+    padding: 18px 20px;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    opacity: 1;
-    transform: translateX(0);
     box-shadow: 
         0 6px 25px rgba(0, 0, 0, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         inset 0 -1px 0 rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    min-height: 70px;
-    height: auto;
-    overflow: hidden;
-}
-
-.question-item.expanded .answer-option:hover {
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0.08) 50%,
-        rgba(255, 255, 255, 0.15) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transform: translateX(5px);
-    box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    min-height: 60px; /* Минимальная высота */
+    height: auto; /* Автоматическая высота */
+    overflow: visible;
+    flex-wrap: nowrap;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, opacity;
 }
 
 .checkmark {
@@ -421,6 +410,23 @@
     font-weight: 500;
     display: flex;
     align-items: center;
+    overflow: visible;
+    max-height: none;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* СТИЛИ ДЛЯ СОСТОЯНИЙ ПОСЛЕ ЗАВЕРШЕНИЯ ТЕСТА */
+.answer-option--correct,
+.answer-option--wrong {
+    height: auto; /* Автоматическая высота для выделенных ответов */
+    min-height: 60px; /* Сохраняем минимальную высоту */
+}
+
+.answer-option--correct .answer-text,
+.answer-option--wrong .answer-text {
+    height: auto; /* Автоматическая высота текста */
+    min-height: auto;
 }
 
 .answer-option:hover .answer-text {
@@ -540,6 +546,10 @@
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, opacity;
+    /* Делаем контейнер адаптивным */
+    min-height: auto;
+    height: auto;
+    max-height: none;
 }
 
 .question-item.expanded .question-text {
@@ -604,37 +614,6 @@
     opacity: 1;
 }
 
-.question-item.expanded .answer-option {
-    opacity: 1;
-    transform: translateX(0);
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.12) 0%,
-        rgba(255, 255, 255, 0.06) 50%,
-        rgba(255, 255, 255, 0.12) 100%
-    );
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    display: flex;
-    align-items: flex-start;
-    padding: 18px 20px;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 
-        0 6px 25px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    min-height: 60px;
-    height: auto;
-    overflow: visible;
-    flex-wrap: nowrap;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    will-change: transform, opacity;
-}
-
 .question-item.expanded .answer-option:hover {
     background: linear-gradient(
         135deg,
@@ -648,6 +627,7 @@
         0 12px 35px rgba(0, 0, 0, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+    height: auto; /* Сохраняем автоматическую высоту при ховере */
 }
 
 .question-item.expanded .checkmark {
@@ -663,7 +643,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    align-self: flex-start;
+    align-self: flex-start; /* Выравнивание по верху */
+    margin-top: 0; /* Убираем отступ сверху */
 }
 
 .question-item.expanded .answer-text {
@@ -678,7 +659,13 @@
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     font-weight: 500;
     white-space: normal;
-    align-self: flex-start;
+    align-self: flex-start; /* Выравнивание по верху */
+    padding: 0;
+    margin: 0;
+    /* Убираем фиксированную высоту и делаем адаптивной */
+    min-height: auto;
+    height: auto;
+    display: block; /* Изменено с flex на block */
 }
 
 @media (max-width: 768px) {
@@ -686,6 +673,7 @@
         padding: 15px;
         border-radius: 16px;
         align-items: flex-start;
+        min-height: 55px; /* Минимальная высота для мобильных */
     }
     
     .question-item.expanded .answer-text {
@@ -698,6 +686,7 @@
         width: 20px;
         height: 20px;
         margin-right: 12px;
+        align-self: flex-start;
     }
 }
 
@@ -705,13 +694,14 @@
     .question-item.expanded .answer-option {
         padding: 12px;
         border-radius: 14px;
-        min-height: 50px;
+        min-height: 50px; /* Минимальная высота для маленьких экранов */
     }
     
     .question-item.expanded .checkmark {
         width: 18px;
         height: 18px;
         margin-right: 10px;
+        align-self: flex-start;
     }
     
     .question-item.expanded .answer-text {
@@ -752,7 +742,7 @@
 
 .answer-feedback--visible {
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Выравнивание по верху */
     padding: 20px;
     background: linear-gradient(
         135deg,
@@ -769,6 +759,12 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         inset 0 -1px 0 rgba(0, 0, 0, 0.1);
     min-height: 70px;
+    height: auto; /* Автоматическая высота */
+}
+
+.answer-feedback .checkmark {
+    align-self: flex-start; /* Чекбокс по верху */
+    margin-top: 0;
 }
 
 .answer-feedback--success,
@@ -793,7 +789,6 @@
 .answer-feedback .checkmark::after {
     content: '✓';
     position: absolute;
-    color: #333;
     font-size: 12px;
     font-weight: bold;
     top: 50%;
@@ -1076,7 +1071,6 @@
     .question-item.expanded .question-text {
         padding: 15px 40px 15px 15px;
         font-size: clamp(16px, 4vw, 20px);
-        margin-bottom: 15px;
         border-radius: 16px;
     }
     
@@ -1116,8 +1110,6 @@
 .history-hidden .quiz-history,
 .history-hidden .history-section,
 .history-hidden .history-container,
-.history-hidden [class*="history"],
-.history-hidden .results-history,
 .history-hidden .attempts-history,
 .history-hidden #quizResult {
     display: none;
