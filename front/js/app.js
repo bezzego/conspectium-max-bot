@@ -1,104 +1,19 @@
-// Глобальная функция копирования в буфер обмена с fallback для Safari
-window.copyToClipboard = async function(text) {
-    // Проверяем, доступен ли Clipboard API
-    const hasClipboardAPI = navigator.clipboard && navigator.clipboard.writeText;
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || /iPad|iPhone|iPod/.test(navigator.userAgent);
-    
-    // Для Safari лучше сразу использовать fallback метод
-    if (isSafari) {
+// Функция copyToClipboard теперь определена в copy_clipboard.js
+// Если она еще не определена, создаем простую заглушку
+if (typeof window.copyToClipboard === 'undefined') {
+    window.copyToClipboard = async function(text) {
+        console.warn('copyToClipboard not initialized, using fallback');
         try {
-            // Создаем временный textarea для копирования
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.top = '0';
-            textArea.style.left = '0';
-            textArea.style.width = '2em';
-            textArea.style.height = '2em';
-            textArea.style.padding = '0';
-            textArea.style.border = 'none';
-            textArea.style.outline = 'none';
-            textArea.style.boxShadow = 'none';
-            textArea.style.background = 'transparent';
-            textArea.style.opacity = '0';
-            textArea.style.pointerEvents = 'none';
-            textArea.setAttribute('readonly', '');
-            textArea.setAttribute('aria-hidden', 'true');
-            
-            document.body.appendChild(textArea);
-            
-            // Для iOS Safari нужен специальный подход
-            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                textArea.contentEditable = 'true';
-                textArea.readOnly = false;
-                const range = document.createRange();
-                range.selectNodeContents(textArea);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-                textArea.setSelectionRange(0, 999999);
-            } else {
-                // Для обычного Safari
-                textArea.focus();
-                textArea.select();
-                textArea.setSelectionRange(0, text.length);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+                return true;
             }
-            
-            const successful = document.execCommand('copy');
-            document.body.removeChild(textArea);
-            
-            if (!successful) {
-                throw new Error('execCommand copy failed');
-            }
-            
-            return true;
         } catch (err) {
-            console.warn('Safari fallback failed, trying Clipboard API:', err);
-            // Если fallback не сработал, пробуем Clipboard API
+            console.error('Copy failed:', err);
         }
-    }
-    
-    // Пробуем современный Clipboard API (для Chrome, Firefox, и если Safari fallback не сработал)
-    if (hasClipboardAPI) {
-        try {
-            await navigator.clipboard.writeText(text);
-            return true;
-        } catch (err) {
-            console.warn('Clipboard API failed, trying fallback:', err);
-            // Если не получилось, пробуем fallback
-        }
-    }
-    
-    // Fallback метод для других браузеров
-    try {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.top = '-9999px';
-        textArea.style.left = '-9999px';
-        textArea.style.opacity = '0';
-        textArea.style.pointerEvents = 'none';
-        textArea.setAttribute('readonly', '');
-        textArea.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(textArea);
-        
-        textArea.focus();
-        textArea.select();
-        textArea.setSelectionRange(0, text.length);
-        
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        
-        if (!successful) {
-            throw new Error('execCommand copy failed');
-        }
-        
-        return true;
-    } catch (err) {
-        console.error('All copy methods failed:', err);
         return false;
-    }
-};
+    };
+}
 
 (() => {
     const API_BASE = '/api';

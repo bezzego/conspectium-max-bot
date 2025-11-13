@@ -626,17 +626,43 @@
         }
     }
     
-    async function copyInviteCode(code) {
-        const event = window.event || arguments[0];
+    function copyInviteCode(code, event) {
         if (event) {
             event.preventDefault();
             event.stopPropagation();
         }
         
-        const success = await window.copyToClipboard(code);
+        // Для Safari используем синхронную версию, если доступна
+        let success = false;
+        if (window.copyToClipboardSync) {
+            success = window.copyToClipboardSync(code);
+        } else {
+            // Используем async версию, но обрабатываем результат сразу
+            window.copyToClipboard(code).then((result) => {
+                success = result;
+                if (success) {
+                    showNotification('Код скопирован!');
+                    const btn = event ? event.target.closest('.invite-copy-btn') : null;
+                    if (btn) {
+                        const icon = btn.querySelector('i');
+                        if (icon) {
+                            icon.className = 'fas fa-check';
+                            setTimeout(() => {
+                                icon.className = 'far fa-copy';
+                            }, 2000);
+                        }
+                    }
+                } else {
+                    showNotification('Не удалось скопировать код', 'error');
+                }
+            });
+            return; // Выходим для async случая
+        }
+        
+        // Синхронная обработка результата
         if (success) {
             showNotification('Код скопирован!');
-            const btn = event.target.closest('.invite-copy-btn');
+            const btn = event ? event.target.closest('.invite-copy-btn') : null;
             if (btn) {
                 const icon = btn.querySelector('i');
                 if (icon) {
@@ -651,17 +677,43 @@
         }
     }
     
-    async function copyInviteLink(link) {
-        const event = window.event || arguments[0];
+    function copyInviteLink(link, event) {
         if (event) {
             event.preventDefault();
             event.stopPropagation();
         }
         
-        const success = await window.copyToClipboard(link);
+        // Для Safari используем синхронную версию, если доступна
+        let success = false;
+        if (window.copyToClipboardSync) {
+            success = window.copyToClipboardSync(link);
+        } else {
+            // Используем async версию
+            window.copyToClipboard(link).then((result) => {
+                success = result;
+                if (success) {
+                    showNotification('Ссылка скопирована!');
+                    const btn = event ? event.target.closest('.invite-copy-btn') : null;
+                    if (btn) {
+                        const icon = btn.querySelector('i');
+                        if (icon) {
+                            icon.className = 'fas fa-check';
+                            setTimeout(() => {
+                                icon.className = 'far fa-copy';
+                            }, 2000);
+                        }
+                    }
+                } else {
+                    showNotification('Не удалось скопировать ссылку', 'error');
+                }
+            });
+            return; // Выходим для async случая
+        }
+        
+        // Синхронная обработка результата
         if (success) {
             showNotification('Ссылка скопирована!');
-            const btn = event.target.closest('.invite-copy-btn');
+            const btn = event ? event.target.closest('.invite-copy-btn') : null;
             if (btn) {
                 const icon = btn.querySelector('i');
                 if (icon) {
@@ -1000,18 +1052,23 @@
     window.startTournament = startTournament;
     window.closeInviteModal = closeInviteModal;
     // Экспортируем функции в глобальную область для использования в onclick
-    // Важно: для Safari нужно, чтобы копирование происходило синхронно в контексте клика
-    window.copyInviteCode = function(code) {
-        // Вызываем асинхронно, но в контексте пользовательского действия
-        copyInviteCode(code).catch(err => {
+    // Export functions to global scope for use in onclick attributes
+    // Important: for Safari, copying must occur synchronously in the click context
+    window.copyInviteCode = function(code, event) {
+        try {
+            copyInviteCode(code, event || window.event);
+        } catch (err) {
             console.error('Failed to copy invite code:', err);
-        });
+            showNotification('Не удалось скопировать код', 'error');
+        }
     };
-    window.copyInviteLink = function(link) {
-        // Вызываем асинхронно, но в контексте пользовательского действия
-        copyInviteLink(link).catch(err => {
+    window.copyInviteLink = function(link, event) {
+        try {
+            copyInviteLink(link, event || window.event);
+        } catch (err) {
             console.error('Failed to copy invite link:', err);
-        });
+            showNotification('Не удалось скопировать ссылку', 'error');
+        }
     };
     window.shareInviteLink = shareInviteLink;
     window.leaveLobby = leaveLobby;
