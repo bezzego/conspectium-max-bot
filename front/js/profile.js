@@ -343,10 +343,10 @@
                                 <div class="avatar-edit-buttons">
                                     <input type="file" id="avatarFileInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style="display: none;">
                                     <button type="button" class="btn-upload-avatar" id="uploadAvatarBtn">
-                                        <i class="fas fa-upload"></i> Загрузить фото
+                                        Загрузить фото
                                     </button>
                                     ${avatarUrl ? `<button type="button" class="btn-remove-avatar" id="removeAvatarBtn">
-                                        <i class="fas fa-trash"></i> Удалить
+                                        <i class="fas fa-trash"></i>
                                     </button>` : ''}
                                 </div>
                             </div>

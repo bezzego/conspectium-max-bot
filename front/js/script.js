@@ -2562,7 +2562,7 @@ function showQuizShareModal(app, quizzes) {
         item.innerHTML = `
             <div class="quiz-title">${quiz.title || 'Без названия'}</div>
             <button class="share-btn" data-quiz-id="${quiz.id}">
-                <i class="fas fa-share"></i> Поделиться
+                <i class="fas fa-share"></i>
             </button>
         `;
         const shareBtn = item.querySelector('.share-btn');

@@ -230,8 +230,6 @@ function renderQuestions(questions) {
         questionText.className = 'question-text';
         questionText.textContent = `${index + 1}. ${question.title}`;
 
-        // УБИРАЕМ создание крестика здесь - он будет создаваться только при открытии вопроса
-
         const answersContainer = document.createElement('div');
         answersContainer.className = 'answers-container';
 
@@ -353,24 +351,21 @@ function openExpandedQuestion(question) {
     // Добавляем крестик
     addCloseButtonToQuestion(question);
 
-    // Принудительно запускаем анимацию
-    forceQuestionAnimation(question);
+    // Для мобильных - принудительная перерисовка
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        setTimeout(() => {
+            forceMobileRepaint(question);
+            forceQuestionAnimation(question);
+        }, 100);
+    } else {
+        forceQuestionAnimation(question);
+    }
 
     hideSubmitButton();
-
-    // Показываем навигацию
     showNavigation();
-
-    // Прокручиваем к верху
     window.scrollTo(0, 0);
     
-    // Принудительно обновляем высоту preview
-    const preview = document.querySelector('.preview');
-    if (preview) {
-        preview.style.minHeight = 'calc(100vh + 10px)';
-    }
 }
-
 
 function closeExpandedQuestion() {
     if (expanded) {
@@ -512,42 +507,6 @@ function forceMobileRepaint(element) {
     
     // Принудительный reflow
     void element.offsetWidth;
-}
-
-// Обнови функцию openExpandedQuestion для мобильных
-function openExpandedQuestion(question) {
-    // Закрываем предыдущий открытый вопрос
-    if (expanded && expanded !== question) {
-        closeExpandedQuestion();
-    }
-
-    // Открываем новый вопрос
-    question.classList.add('expanded');
-    expanded = question;
-    document.body.classList.add('question-expanded');
-    document.body.classList.add('history-hidden');
-
-    // Добавляем крестик
-    addCloseButtonToQuestion(question);
-
-    // Для мобильных - принудительная перерисовка
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        setTimeout(() => {
-            forceMobileRepaint(question);
-            forceQuestionAnimation(question);
-        }, 100);
-    } else {
-        forceQuestionAnimation(question);
-    }
-
-    hideSubmitButton();
-    showNavigation();
-    window.scrollTo(0, 0);
-    
-    const preview = document.querySelector('.preview');
-    if (preview) {
-        preview.style.minHeight = 'calc(100vh + 10px)';
-    }
 }
 
 function forceQuestionAnimation(question) {
@@ -1077,9 +1036,10 @@ function formatDateTime(value) {
             const item = document.querySelector(`.question-item[data-question="${question.id}"]`);
             if (!item) return;
 
+            const answersContainer = item.querySelector('.answers-container');
             const answers = question.answers || [];
-            const selectedInput = item.querySelector(`input[name="question-${question.id}"]:checked`);
-            const selectedAnswerId = selectedInput ? Number(selectedInput.value) : null;
+            const selected = document.querySelector(`input[name="question-${question.id}"]:checked`);
+            const selectedAnswerId = selected ? Number(selected.value) : null;
             const correctAnswer = answers.find((answer) => answer.is_correct);
 
             item.classList.remove('question-item--correct', 'question-item--wrong', 'question-item--skipped');
@@ -1121,11 +1081,17 @@ function formatDateTime(value) {
             const feedback = item.querySelector('.answer-feedback');
             if (feedback && correctAnswer) {
                 const labelText = isCorrectSelection ? 'Отлично! Правильный ответ:' : 'Правильный ответ:';
-                feedback.innerHTML = `<span class="answer-feedback__label">${labelText}</span> <span class="answer-feedback__text">${escapeHtml(correctAnswer.text)}</span>`;
+                const checkmarkHtml = '<span class="checkmark"></span>';
+                feedback.innerHTML = checkmarkHtml + `<span class="answer-feedback__label">${labelText}</span> <span class="answer-feedback__text">${escapeHtml(correctAnswer.text)}</span>`;
                 feedback.classList.remove('answer-feedback--success', 'answer-feedback--error');
                 feedback.classList.add('answer-feedback--visible');
                 feedback.classList.add(isCorrectSelection ? 'answer-feedback--success' : 'answer-feedback--error');
             }
+
+            // Hide all answer options after feedback is shown
+            answerOptions.forEach((option) => {
+                option.style.display = 'none';
+            });
         });
     }
 

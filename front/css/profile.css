@@ -93,6 +93,7 @@ body {
 }
 
 .logo {
+    margin-top: 5px;
     height: 60px;
     width: 270px;
     object-fit: contain;

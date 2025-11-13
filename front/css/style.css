@@ -156,6 +156,12 @@ body {
     }
 }
 
+@media (min-height: 870px) {
+    .top-bar {
+        margin-top: 10px;
+    }
+}
+
 
 /* Адаптивность для очень маленьких экранов */
 @media (max-width: 480px) {

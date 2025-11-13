@@ -11,7 +11,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
-    justify-content: center; /* Изменено с space-between на center */
+    justify-content: center;
     padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 24px);
     margin-bottom: 20px;
     position: relative;
@@ -25,7 +25,6 @@
     box-sizing: border-box;
 }
 
-/* Стили для кнопки назад */
 .back-btn {
     position: absolute;
     left: 20px;
@@ -40,12 +39,10 @@
     font-size: 30px;
 }
 
-/* Скрываем плейсхолдер на всех страницах */
 .back-btn-placeholder {
     display: none;
 }
 
-/* Стили для логотипа */
 .brand {
     display: flex;
     justify-content: center;
@@ -62,13 +59,11 @@
     transition: all 0.4s ease;
 }
 
-/* Эффект при наведении на логотип */
 .logo-link:hover .logo {
     transform: scale(1.05);
     filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
-/* Остальные стили хедера остаются без изменений */
 .top-bar::before {
     content: '';
     position: absolute;
@@ -108,23 +103,6 @@
     pointer-events: none;
 }
 
-
-
-/* Стили для логотипа */
-.brand {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-/* Эффект при наведении на логотип */
-.logo-link:hover .logo {
-    transform: scale(1.05);
-    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
-}
-
-/* Адаптивность для десктопов */
 @media (min-width: 924px) {
     .top-bar {
         width: calc(100%);
@@ -133,14 +111,12 @@
     }
 }
 
-/* Адаптивность для очень маленьких экранов */
 @media (max-width: 480px) {
     .top-bar {
         max-width: min(1000px, 95vw);
         padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 18px);
         margin-bottom: 15px;
     }
-
 }
 
 @media (max-width: 360px) {
@@ -165,7 +141,6 @@
     transition: opacity 0.3s ease;
 }
 
-/* ОСНОВНОЙ КОНТЕЙНЕР ПРЕВЬЮ */
 .preview {
     background: linear-gradient(
         135deg,
@@ -181,8 +156,7 @@
     margin-bottom: 30px;    
     overflow: hidden;
     width: 100%;
-    min-height: 500px;
-    max-height: none; /* Убираем ограничение максимальной высоты */
+    min-height: 700px;
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.35),
@@ -190,14 +164,6 @@
     display: flex;
     flex-direction: column;
     position: relative;
-}
-
-.question-item.expanded ~ .preview {
-    min-height: calc(100vh + 10px); /* На 10px больше высоты экрана */
-    height: auto;
-    max-height: none;
-    overflow: visible;
-
 }
 
 .quiz-head {
@@ -223,7 +189,6 @@
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* КОНТЕЙНЕР ВОПРОСОВ */
 .questions-container {
     flex: 1;
     padding: 25px 20px;
@@ -231,14 +196,9 @@
     flex-direction: column;
     gap: 15px;
     position: relative;
-    overflow: visible;
+    overflow-y: auto;
     border-radius: 20px;
-    min-height: 400px; /* Минимальная высота для нормального отображения */
-}
-
-.question-item.expanded ~ .preview .questions-container {
-    min-height: calc(100vh - 100px);
-    height: auto;
+    min-height: 400px;
 }
 
 .questions-container::-webkit-scrollbar {
@@ -260,7 +220,6 @@
     background: rgba(255, 255, 255, 0.5);
 }
 
-/* ВОПРОСЫ - ОСНОВНЫЕ СТИЛИ */
 .question-item {
     position: relative;
     background: linear-gradient(
@@ -299,7 +258,6 @@
         inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 }
 
-/* Убираем крестик из обычного состояния вопроса */
 .question-text {
     color: #fff;
     font-size: 15px;
@@ -313,13 +271,9 @@
     align-items: center;
     transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-    max-height: none;
-    overflow: visible;
-    /* Убираем позиционирование для крестика в обычном состоянии */
     position: relative;
 }
 
-/* КОНТЕЙНЕР ОТВЕТОВ В СВЕРНУТОМ СОСТОЯНИИ */
 .answers-container {
     padding: 0 20px;
     opacity: 0;
@@ -333,7 +287,6 @@
 .question-item.expanded .answers-container {
     opacity: 1;
     transform: translateY(0) scale(1);
-    max-height: none;
     padding: 0 20px 20px 20px;
     overflow: visible;
     display: flex;
@@ -363,13 +316,12 @@
         rgba(255, 255, 255, 0.12) 100%
     );
     backdrop-filter: blur(15px);
-    -webkit-backpackdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     display: flex;
     align-items: center;
     padding: 20px;
-    margin-bottom: 0;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     opacity: 1;
     transform: translateX(0);
@@ -397,7 +349,6 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* ЧЕКБОКСЫ */
 .checkmark {
     width: 24px;
     height: 24px;
@@ -411,11 +362,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Центрируем по вертикали */
     align-self: center;
-    margin-top: 0;
 }
-
 
 .answer-option input[type="radio"] {
     position: absolute;
@@ -462,7 +410,6 @@
     font-size: 16px;
     line-height: 1.5;
     flex: 1;
-    /* Правильный перенос текста */
     word-wrap: break-word;
     overflow-wrap: break-word;
     word-break: break-word;
@@ -472,11 +419,8 @@
     transition: color 0.3s ease;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     font-weight: 500;
-    /* Выравнивание по центру */
     display: flex;
     align-items: center;
-    padding: 0;
-    margin: 0;
 }
 
 .answer-option:hover .answer-text {
@@ -491,8 +435,6 @@
     bottom: 0;
     width: 100%;
     height: 100%;
-    min-height: 100vh;
-    max-height: 100vh;
     border-radius: 0;
     z-index: 1500;
     background: linear-gradient(
@@ -508,8 +450,7 @@
     padding: 0;
     border: none;
     box-shadow: none;
-    animation: fadeInQuestion 0.4s ease-out forwards !important;
-    /* Принудительная активация GPU */
+    animation: fadeInQuestion 0.4s ease-out forwards;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, opacity;
@@ -519,7 +460,7 @@
     from {
         opacity: 0;
         backdrop-filter: blur(0px);
-        background: rgba(0, 0, 0, 0.9); /* Начинаем с более темного фона */
+        background: rgba(0, 0, 0, 0.9);
     }
     to {
         opacity: 1;
@@ -533,29 +474,21 @@
     }
 }
 
-/* КОНТЕНТ В ПОЛНОЭКРАННОМ РЕЖИМЕ - ДОБАВЛЯЕМ СКРОЛЛ */
 .question-item.expanded .question-content {
-    padding: 60px 20px 140px 20px;
+    padding: 60px 20px 100px 20px;
     max-width: 800px;
     margin: 0 auto;
-    min-height: auto;
-    height: auto;
-    max-height: none;
     position: relative;
     z-index: 2;
     overflow: visible;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
     animation: slideInContent 0.5s ease-out 0.1s both;
-    /* Принудительная активация GPU */
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, opacity;
-    /* Гарантируем видимость */
-    opacity: 1 !important;
 }
 
-/* Стилизация скроллбара для Webkit браузеров */
 .question-item.expanded .question-content::-webkit-scrollbar {
     width: 6px;
 }
@@ -575,29 +508,19 @@
     background: rgba(255, 255, 255, 0.5);
 }
 
-/* АДАПТИВНОСТЬ ДЛЯ IPAD И ПЛАНШЕТОВ */
 @media (min-width: 769px) and (max-width: 1024px) {
     .preview {
-        min-height: 600px; /* Увеличиваем минимальную высоту для планшетов */
-    }
-    
-    .question-item.expanded ~ .preview {
-        min-height: calc(100vh + 20px); /* Еще больше места для iPad */
+        min-height: 800px;
     }
     
     .question-item.expanded .question-content {
-        max-width: 90%; /* Шире контент */
+        max-width: 90%;
     }
 }
 
-/* АДАПТИВНОСТЬ ДЛЯ БОЛЬШИХ ЭКРАНОВ */
 @media (min-width: 1025px) {
     .preview {
         min-height: 550px;
-    }
-    
-    .question-item.expanded ~ .preview {
-        min-height: calc(100vh + 15px);
     }
     
     .question-item.expanded .question-content {
@@ -605,54 +528,26 @@
     }
 }
 
-/* ОБЕСПЕЧИВАЕМ ПРОКРУТКУ ДЛЯ ДЛИННЫХ ВОПРОСОВ */
 .question-item.expanded .answers-container {
-    opacity: 1 !important;
-    transform: translateY(0) scale(1) !important;
-    -webkit-transform: translateY(0) scale(1) !important;
-    max-height: none !important;
+    opacity: 1;
+    transform: translateY(0) scale(1);
     padding: 0 20px 20px 20px;
     overflow: visible;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-    /* Принудительная активация GPU */
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, opacity;
 }
 
-/* УБЕДИТЕСЬ ЧТО КНОПКИ НАХОДЯТСЯ НА СВОЕМ МЕСТЕ */
-body.question-expanded .primary-btn {
-    display: flex !important;
-    position: fixed !important;
-    bottom: 10px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    z-index: 1003 !important;
-}
-
-/* СТРЕЛКИ НАВИГАЦИИ ДОЛЖНЫ БЫТЬ ВИДИМЫ */
-.question-item.expanded ~ .nav-arrow {
-    opacity: 1;
-    visibility: visible;
-    z-index: 1600;
-}
-
-/* УБЕДИТЕСЬ ЧТО ВСЕ ЭЛЕМЕНТЫ ВИДИМЫ */
-.question-item.expanded {
-    overflow-y: auto !important;
-    min-height: 100vh;
-    height: auto;
-}
 .question-item.expanded .question-text {
     font-size: clamp(20px, 5vw, 24px);
     padding: 30px 50px 25px 50px;
     margin-bottom: 25px;
     border-bottom: 2px solid rgba(255, 255, 255, 0.2);
     text-align: center;
-    max-height: none;
     color: #fff;
     font-weight: 600;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
@@ -671,21 +566,16 @@ body.question-expanded .primary-btn {
         0 8px 32px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
-    min-height: auto;
-    height: auto;
-    overflow: visible;
 }
 
 .question-text .question-text__close {
     display: none;
 }
 
-/* Показываем крестик только в полноэкранном режиме */
 .question-item.expanded .question-text .question-text__close {
     display: flex;
 }
 
-/* КРЕСТИК ЗАКРЫТИЯ */
 .question-text__close {
     position: absolute;
     top: 50%;
@@ -714,25 +604,9 @@ body.question-expanded .primary-btn {
     opacity: 1;
 }
 
-/* ОТВЕТЫ В ПОЛНОЭКРАННОМ РЕЖИМЕ */
-.question-item.expanded .answers-container {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    max-height: none !important;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background: transparent;
-    min-height: auto;
-    height: auto;
-    overflow: visible;
-}
-
 .question-item.expanded .answer-option {
-    opacity: 1 !important;
-    transform: translateX(0) !important;
-    -webkit-transform: translateX(0) !important;
+    opacity: 1;
+    transform: translateX(0);
     background: linear-gradient(
         135deg,
         rgba(255, 255, 255, 0.12) 0%,
@@ -746,7 +620,6 @@ body.question-expanded .primary-btn {
     display: flex;
     align-items: flex-start;
     padding: 18px 20px;
-    margin-bottom: 0;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow: 
         0 6px 25px rgba(0, 0, 0, 0.15),
@@ -757,17 +630,9 @@ body.question-expanded .primary-btn {
     height: auto;
     overflow: visible;
     flex-wrap: nowrap;
-    /* Принудительная активация GPU */
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, opacity;
-}
-
-
-.question-item.expanded {
-    overflow-y: auto !important;
-    min-height: 100vh;
-    height: auto;
 }
 
 .question-item.expanded .answer-option:hover {
@@ -798,8 +663,21 @@ body.question-expanded .primary-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Центрируем относительно первой строки текста */
-    margin-top: 0;
+    align-self: flex-start;
+}
+
+.question-item.expanded .answer-text {
+    color: #fff;
+    font-size: 16px;
+    line-height: 1.5;
+    flex: 1;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    font-weight: 500;
+    white-space: normal;
     align-self: flex-start;
 }
 
@@ -823,30 +701,6 @@ body.question-expanded .primary-btn {
     }
 }
 
-/* Медиа-запросы для мобильных устройств */
-@media (max-width: 768px) {
-    .question-item.expanded {
-        -webkit-overflow-scrolling: touch;
-        transform: translate3d(0, 0, 0);
-        -webkit-transform: translate3d(0, 0, 0);
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        perspective: 1000px;
-    }
-    
-    .question-item.expanded .question-content {
-        /* Принудительная перерисовка для iOS */
-        transform: translate3d(0, 0, 0);
-        -webkit-transform: translate3d(0, 0, 0);
-    }
-    
-    .question-item.expanded .answers-container {
-        /* Принудительная перерисовка для iOS */
-        transform: translate3d(0, 0, 0);
-        -webkit-transform: translate3d(0, 0, 0);
-    }
-}
-
 @media (max-width: 480px) {
     .question-item.expanded .answer-option {
         padding: 12px;
@@ -866,37 +720,15 @@ body.question-expanded .primary-btn {
     }
 }
 
-.question-item.expanded .answer-text {
-    color: #fff;
-    font-size: 16px;
-    line-height: 1.5;
-    flex: 1;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    transition: all 0.3s ease;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-    font-weight: 500;
-    white-space: normal;
-    min-height: auto;
-    height: auto;
-    /* Текст начинается с того же уровня, что и чекбокс */
-    padding-top: 0;
-    align-self: flex-start;
-}
-
-/* СКРЫВАЕМ ДРУГИЕ ВОПРОСЫ КОГДА ОДИН РАСКРЫТ */
 .questions-container:has(.question-item.expanded) .question-item:not(.expanded) {
     display: none;
 }
 
-/* СКРЫВАЕМ ХЕДЕР И ЗАГОЛОВОК ПРИ ОТКРЫТОМ ВОПРОСЕ */
 .question-item.expanded ~ .top-bar,
 .question-item.expanded ~ .title {
-    display: none !important;
+    display: none;
 }
 
-/* БЛОК ОБРАТНОЙ СВЯЗИ */
 .answer-feedback {
     display: none;
     margin-top: 18px;
@@ -919,15 +751,54 @@ body.question-expanded .primary-btn {
 }
 
 .answer-feedback--visible {
-    display: block;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(
+        135deg,
+        rgba(56, 142, 60, 0.12) 0%,
+        rgba(56, 142, 60, 0.08) 50%,
+        rgba(56, 142, 60, 0.12) 100%
+    );
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 18px;
+    border: 2px solid rgba(56, 142, 60, 0.45);
+    box-shadow: 
+        0 6px 25px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    min-height: 70px;
 }
 
-.answer-feedback--success {
-    border-left: 4px solid rgba(56, 142, 60, 0.7);
-}
-
+.answer-feedback--success,
 .answer-feedback--error {
-    border-left: 4px solid rgba(211, 47, 47, 0.7);
+    border-left: none;
+}
+
+.answer-feedback .checkmark {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(56, 142, 60, 0.7);
+    background: rgba(56, 142, 60, 0.2);
+    border-radius: 50%;
+    margin-right: 16px;
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.answer-feedback .checkmark::after {
+    content: '✓';
+    position: absolute;
+    color: #333;
+    font-size: 12px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .answer-feedback__label {
@@ -941,7 +812,6 @@ body.question-expanded .primary-btn {
     color: rgba(255, 255, 255, 0.9);
 }
 
-/* СТИЛИ ДЛЯ ПРАВИЛЬНЫХ/НЕПРАВИЛЬНЫХ ОТВЕТОВ */
 .answer-option--locked {
     pointer-events: none;
 }
@@ -951,13 +821,13 @@ body.question-expanded .primary-btn {
 }
 
 .answer-option--correct {
-    border: 2px solid rgba(56, 142, 60, 0.45) !important;
+    border: 2px solid rgba(56, 142, 60, 0.45);
     background: linear-gradient(
         135deg,
         rgba(56, 142, 60, 0.12) 0%,
         rgba(56, 142, 60, 0.08) 50%,
         rgba(56, 142, 60, 0.12) 100%
-    ) !important;
+    );
 }
 
 .answer-option--correct .checkmark {
@@ -966,13 +836,13 @@ body.question-expanded .primary-btn {
 }
 
 .answer-option--wrong {
-    border: 2px solid rgba(211, 47, 47, 0.55) !important;
+    border: 2px solid rgba(211, 47, 47, 0.55);
     background: linear-gradient(
         135deg,
         rgba(211, 47, 47, 0.13) 0%,
         rgba(211, 47, 47, 0.08) 50%,
         rgba(211, 47, 47, 0.13) 100%
-    ) !important;
+    );
 }
 
 .answer-option--wrong .checkmark {
@@ -984,7 +854,6 @@ body.question-expanded .primary-btn {
     color: #ffcccc;
 }
 
-/* КНОПКА ЗАВЕРШЕНИЯ ТЕСТА */
 .primary-btn {
     font-family: 'Manrope', sans-serif;
     width: 100%;
@@ -1009,11 +878,8 @@ body.question-expanded .primary-btn {
     justify-content: center;
     gap: 10px;
     transition: all 0.3s;
-    margin: 20px auto; /* Изменено с fixed на auto */
-    position: relative; /* Изменено с fixed на relative */
-    bottom: auto; /* Убираем фиксированное позиционирование */
-    left: auto;
-    transform: none; /* Убираем трансформацию */
+    margin: 20px auto;
+    position: relative;
     box-sizing: border-box;
     z-index: 1002;
     box-shadow: 
@@ -1029,14 +895,13 @@ body.question-expanded .primary-btn {
         rgba(248, 213, 87, 0.22) 50%,
         rgba(245, 212, 92, 0.35) 100%
     );
-    transform: translateY(-2px); /* Убираем translateX */
+    transform: translateY(-2px);
     box-shadow: 
         0 12px 40px rgba(245, 216, 110, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.5),
         inset 0 -1px 0 rgba(179, 152, 46, 0.25);
 }
 
-/* БЛОК РЕЗУЛЬТАТОВ */
 .quiz-result {
     background: linear-gradient(
         135deg,
@@ -1089,8 +954,6 @@ body.question-expanded .primary-btn {
     margin-right: 8px;
 }
 
-
-/* КНОПКА ЗАКРЫТИЯ */
 .close-expanded {
     position: fixed;
     top: 20px;
@@ -1121,9 +984,6 @@ body.question-expanded .primary-btn {
     display: flex;
 }
 
-
-
-/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ */
 @media (max-width: 768px) {
     .preview {
         margin-bottom: 20px;
@@ -1133,7 +993,6 @@ body.question-expanded .primary-btn {
         padding: 20px 15px;
         gap: 12px;
         border-radius: 20px;
-
     }
     
     .question-item {
@@ -1148,7 +1007,7 @@ body.question-expanded .primary-btn {
     }
     
     .question-item.expanded .question-content {
-        padding: 60px 15px 120px 15px;
+        padding: 60px 15px 100px 15px;
     }
     
     .question-item.expanded .question-text {
@@ -1182,15 +1041,6 @@ body.question-expanded .primary-btn {
         border-radius: 16px;
     }
     
-    .nav-arrow {
-        width: 40px;
-        height: 40px;
-        bottom: 120px;
-    }
-    
-    .nav-arrow.prev { left: 20px; }
-    .nav-arrow.next { right: 20px; }
-    
     .primary-btn {
         padding: 14px 20px;
         font-size: 16px;
@@ -1205,8 +1055,7 @@ body.question-expanded .primary-btn {
     .questions-container {
         padding: 15px 10px;
         gap: 10px;
-            border-radius: 20px;
-
+        border-radius: 20px;
     }
     
     .question-item {
@@ -1221,7 +1070,7 @@ body.question-expanded .primary-btn {
     }
     
     .question-item.expanded .question-content {
-        padding: 30px 20px 30px 20px;
+        padding: 30px 20px 100px 20px;
     }
     
     .question-item.expanded .question-text {
@@ -1254,19 +1103,6 @@ body.question-expanded .primary-btn {
         line-height: 1.4;
     }
     
-    .nav-arrow {
-        width: 36px;
-        height: 36px;
-        bottom: 100px;
-    }
-    
-    .nav-arrow i {
-        font-size: 16px;
-    }
-    
-    .nav-arrow.prev { left: 15px; }
-    .nav-arrow.next { right: 15px; }
-    
     .primary-btn {
         padding: 12px 18px;
         font-size: 15px;
@@ -1274,23 +1110,8 @@ body.question-expanded .primary-btn {
     }
 }
 
-@media (min-height: 900px) {
-        .nav-arrow {
-        width: 36px;
-        height: 36px;
-        margin-bottom: 500px;
-    }
-}
 
-@media (min-height: 800px) {
-        .nav-arrow {
-        width: 36px;
-        height: 36px;
-        margin-bottom: 140px;
-    }
-}
 
-/* Скрываем все что связано с историей при открытом вопросе */
 .history-hidden #quizHistory,
 .history-hidden .quiz-history,
 .history-hidden .history-section,
@@ -1299,17 +1120,16 @@ body.question-expanded .primary-btn {
 .history-hidden .results-history,
 .history-hidden .attempts-history,
 .history-hidden #quizResult {
-    display: none !important;
+    display: none;
     opacity: 0;
     pointer-events: none;
 }
 
-/* Дополнительно скрываем по текстовому содержанию */
 .history-hidden *:contains("История"),
 .history-hidden *:contains("история"),
 .history-hidden *:contains("прохождени"),
 .history-hidden *:contains("результат") {
-    display: none !important;
+    display: none;
 }
 
 .history-section,
@@ -1321,14 +1141,14 @@ body.question-expanded .primary-btn {
 .question-expanded .history-section,
 .question-expanded #quizHistory,
 .question-expanded #quizResult {
-    display: none !important;
+    display: none;
     opacity: 0;
     transform: translateY(20px);
     pointer-events: none;
 }
 
 .hidden {
-    display: none !important;
+    display: none;
 }
 
 @media (max-width: 410px) {
@@ -1343,80 +1163,18 @@ body.question-expanded .primary-btn {
     }
 }
 
-/* ГАРАНТИРУЕМ, ЧТО ВСЕ ЭЛЕМЕНТЫ ВИДИМЫ В ПОЛНОЭКРАННОМ РЕЖИМЕ */
-.question-item.expanded {
-    overflow-y: auto !important;
-}
-
-.question-item.expanded * {
-    overflow: visible !important;
-    max-height: none !important;
-}
-
-/* Скрываем блок результатов в полноэкранном режиме */
 .question-item.expanded ~ .quiz-result {
     display: none;
 }
 
-/* АДАПТИВНОСТЬ ДЛЯ IPAD И ПЛАНШЕТОВ */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .question-item.expanded .question-content {
-        max-width: 90%;
-        min-height: calc(100vh - 150px); /* Меньше отступов на планшетах */
-    }
-}
-
-/* АДАПТИВНОСТЬ ДЛЯ БОЛЬШИХ ЭКРАНОВ */
-@media (min-width: 1025px) {
-    .question-item.expanded .question-content {
-        max-width: 850px;
-        min-height: calc(100vh - 220px); /* Больше места для контента */
-    }
-}
-
-/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ */
-@media (max-width: 768px) {
-    .question-item.expanded .question-content {
-        min-height: calc(100vh - 180px);
-    }
-}
-
-@media (max-width: 480px) {
-    .question-item.expanded .question-content {
-        min-height: calc(100vh - 160px);
-    }
-}
-
-/* ОБЕСПЕЧИВАЕМ ПРОКРУТКУ ДЛЯ ОЧЕНЬ ДЛИННЫХ ВОПРОСОВ */
-.question-item.expanded .answers-container {
-    max-height: none !important;
-    overflow: visible !important;
-    min-height: auto;
-    height: auto;
-}
-
-/* УБЕДИТЕСЬ ЧТО ВСЕ ЭЛЕМЕНТЫ В КОНТЕЙНЕРЕ ВИДИМЫ */
-.question-item.expanded .question-content * {
-    max-height: none !important;
-    overflow: visible !important;
-}
-
-/* СТРЕЛКИ НАВИГАЦИИ ДОЛЖНЫ БЫТЬ ВИДИМЫ */
-.question-item.expanded ~ .nav-arrow {
-    opacity: 1;
-    visibility: visible;
-    z-index: 1600;
-}
-
 .question-item.expanded ~ .primary-btn {
-    display: none !important;
+    display: none;
 }
 
 body.question-expanded .primary-btn {
-    display: none !important;
+    display: none;
 }
 
-/* СТИЛИ ДЛЯ ИСТОРИИ ПРОХОЖДЕНИЙ */
 .quiz-history {
     background: linear-gradient(
         135deg,
@@ -1501,7 +1259,6 @@ body.question-expanded .primary-btn {
         inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* ЖЕЛТЫЙ КРУЖОК С НОМЕРОМ */
 .history-index {
     display: flex;
     align-items: center;
@@ -1559,7 +1316,6 @@ body.question-expanded .primary-btn {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* СТИЛЬ ДЛЯ ПОСЛЕДНЕЙ ПОПЫТКИ */
 .history-item--latest {
     background: linear-gradient(
         135deg,
@@ -1588,7 +1344,6 @@ body.question-expanded .primary-btn {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* АДАПТИВНОСТЬ */
 @media (max-width: 768px) {
     .quiz-history {
         padding: 20px;
@@ -1642,7 +1397,6 @@ body.question-expanded .primary-btn {
     }
 }
 
-/* ОСНОВНЫЕ СТИЛИ ДЛЯ СТРЕЛОК НАВИГАЦИИ */
 .nav-arrow {
     position: absolute;
     bottom: 30px;
@@ -1679,13 +1433,11 @@ body.question-expanded .primary-btn {
     right: 20px;
 }
 
-/* ПОКАЗЫВАЕМ СТРЕЛКИ КОГДА ВОПРОС РАСКРЫТ */
 .question-item.expanded ~ .nav-arrow {
     opacity: 1;
     visibility: visible;
 }
 
-/* АДАПТИВНОСТЬ */
 @media (max-width: 768px) {
     .nav-arrow {
         width: 44px;
@@ -1720,11 +1472,6 @@ body.question-expanded .primary-btn {
     }
 }
 
-/* УБЕДИТЕСЬ, ЧТО PREVIEW ИМЕЕТ ОТНОСИТЕЛЬНОЕ ПОЗИЦИОНИРОВАНИЕ */
-.preview {
-    position: relative;
-}
-/* УБИРАЕМ СТАРЫЕ СТИЛИ СТРЕЛОК (если они есть) */
 .questions-container .nav-arrow {
-    display: none !important;
+    display: none;
 }
