@@ -133,12 +133,16 @@
 
             <!-- Лобби -->
             <div class="lobby-container" id="lobbyContainer">
+                <button class="leave-lobby-btn" onclick="leaveLobby()" title="Покинуть лобби">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Выйти</span>
+                </button>
                 <div class="lobby-header">
                     <div class="lobby-title" id="lobbyTitle">Лобби: Математика для начинающих</div>
                     <div class="lobby-info">
                         <div class="lobby-code">
                             <span id="lobbyCode">TOUR#A1B2C3</span>
-                            <button class="copy-btn" onclick="copyLobbyCode()">
+                            <button class="copy-btn" onclick="copyLobbyCode()" title="Скопировать код">
                                 <i class="far fa-copy"></i>
                             </button>
                         </div>
