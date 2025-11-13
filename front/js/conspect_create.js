@@ -108,7 +108,10 @@
                 app.showLoading('Генерируем ссылку...');
                 const shareToken = await app.getShareToken('conspect', latestConspectId);
                 const shareUrl = `${window.location.origin}/front/html/conspect_shared.html?token=${shareToken}`;
-                const success = await copyToClipboard(shareUrl);
+                // Используем функцию копирования из app
+                const success = app.copyToClipboard 
+                    ? await app.copyToClipboard(shareUrl)
+                    : false;
                 app.hideLoading();
                 if (success) {
                     app.notify('Ссылка скопирована в буфер обмена!', 'success');
