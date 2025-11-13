@@ -67,6 +67,7 @@ class QuizListResponse(BaseModel):
 
 class QuizResultCreate(BaseModel):
     answers: List[int]
+    lobby_id: Optional[int] = None  # ID лобби турнира, если это турнирный тест
 
 
 class QuizResultRead(BaseModel):

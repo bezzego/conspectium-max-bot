@@ -10,6 +10,282 @@
     <link rel="stylesheet" href="/front/css/main.css">
     <link rel="stylesheet" href="/front/css/liquid_glass.css">
     <link rel="stylesheet" href="/front/css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Стили для публичного конспекта */
+        .shared-conspect-card {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.18) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.18) 100%
+            );
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            margin: 20px auto;
+            max-width: 800px;
+            position: relative;
+        }
+        
+        .shared-conspect-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.08) 25%,
+                transparent 60%
+            );
+            opacity: 0.4;
+            pointer-events: none;
+            border-radius: 25px;
+        }
+        
+        .shared-conspect-header {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.22) 0%,
+                rgba(255, 255, 255, 0.12) 50%,
+                rgba(255, 255, 255, 0.22) 100%
+            );
+            backdrop-filter: blur(12px);
+            padding: 25px 30px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .shared-conspect-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            line-height: 1.3;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .shared-conspect-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .shared-conspect-meta {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 15px;
+            font-weight: 500;
+            margin: 0;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .shared-conspect-body {
+            padding: 25px 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .shared-conspect-variant-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .variant-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fff;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .variant-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .variant-btn.active {
+            background: linear-gradient(
+                135deg,
+                rgba(245, 216, 110, 0.8) 0%,
+                rgba(240, 213, 124, 0.9) 100%
+            );
+            color: #1f1f1f;
+            border-color: rgba(245, 216, 110, 0.5);
+            box-shadow: 0 4px 15px rgba(245, 216, 110, 0.3);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        }
+        
+        .shared-conspect-summary {
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 400;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .markdown-viewer h1,
+        .markdown-viewer h2,
+        .markdown-viewer h3 {
+            font-weight: 700;
+            margin: 24px 0 12px;
+            line-height: 1.3;
+            color: #fff;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .markdown-viewer h1 { 
+            font-size: 26px; 
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        .markdown-viewer h2 { 
+            font-size: 22px; 
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+        .markdown-viewer h3 { 
+            font-size: 19px; 
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .markdown-viewer p {
+            margin: 0 0 14px;
+        }
+        
+        .markdown-viewer ul,
+        .markdown-viewer ol {
+            padding-left: 24px;
+            margin: 0 0 18px;
+        }
+        
+        .markdown-viewer li {
+            margin-bottom: 8px;
+        }
+        
+        .markdown-viewer blockquote {
+            border-left: 3px solid #f5d86e;
+            padding-left: 15px;
+            margin: 16px 0;
+            color: rgba(255, 255, 255, 0.95);
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .markdown-viewer code {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .shared-conspect-keypoints {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .shared-conspect-keypoints h3 {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-size: 20px;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .shared-conspect-keypoints-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .shared-conspect-keypoints-list li {
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            font-weight: 500;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .shared-conspect-keypoints-list li::before {
+            content: '•';
+            color: #f5d86e;
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .shared-conspect-card {
+                margin: 15px;
+                border-radius: 20px;
+            }
+            
+            .shared-conspect-header {
+                padding: 20px 20px 15px;
+            }
+            
+            .shared-conspect-title {
+                font-size: 20px;
+            }
+            
+            .shared-conspect-body {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .shared-conspect-card {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .shared-conspect-header {
+                padding: 15px;
+            }
+            
+            .shared-conspect-title {
+                font-size: 18px;
+            }
+            
+            .shared-conspect-body {
+                padding: 15px;
+            }
+            
+            .variant-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+        }
+    </style>
 </head>
 <body class="page-conspect-shared">
     <div class="container">
@@ -57,24 +333,156 @@
                 const contentDiv = document.getElementById('conspectContent');
                 contentDiv.style.display = 'block';
                 
-                // Сохраняем токен в конспекте для использования при сохранении
+                // Сохраняем токен в конспекте
                 conspect.share_token = token;
                 
-                // Используем существующую функцию для отображения конспекта
-                if (window.showConspectModal) {
-                    showConspectModal(conspect, { isPublic: true, shareToken: token });
-                } else {
-                    // Простое отображение, если функция недоступна
-                    contentDiv.innerHTML = `
-                        <h1>${conspect.title || 'Без названия'}</h1>
-                        <p>${conspect.summary || 'Описание отсутствует'}</p>
-                    `;
-                }
+                // Отображаем конспект прямо на странице (не в модальном окне)
+                renderSharedConspect(conspect, contentDiv);
             } catch (err) {
                 console.error(err);
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('errorState').style.display = 'block';
                 document.getElementById('errorMessage').textContent = err.message || 'Не удалось загрузить конспект';
+            }
+            
+            // Функция для отображения публичного конспекта
+            function renderSharedConspect(conspect, container) {
+                // Получаем функции из script.js если они доступны
+                const escapeHtml = (text) => {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                };
+                
+                const renderMarkdown = (markdown) => {
+                    if (!markdown) return '<p>Описание отсутствует.</p>';
+                    const lines = markdown.split(/\r?\n/);
+                    const htmlParts = [];
+                    for (const line of lines) {
+                        if (line.trim() === '') {
+                            htmlParts.push('<br>');
+                        } else {
+                            htmlParts.push(`<p>${escapeHtml(line)}</p>`);
+                        }
+                    }
+                    return htmlParts.join('');
+                };
+                
+                const getPreferredMarkdown = (conspect) => {
+                    return (
+                        conspect.compressed_markdown ||
+                        conspect.brief_markdown ||
+                        conspect.full_markdown ||
+                        conspect.summary ||
+                        ''
+                    );
+                };
+                
+                const createdAtSource = conspect.generated_at || conspect.updated_at || conspect.created_at;
+                const createdAt = createdAtSource ? new Date(createdAtSource).toLocaleString('ru-RU') : '';
+                
+                let activeVariant = 'summary';
+                const variantState = {
+                    full: conspect.full_markdown,
+                    brief: conspect.brief_markdown,
+                    compressed: conspect.compressed_markdown,
+                };
+                
+                if (variantState.compressed) activeVariant = 'compressed';
+                else if (variantState.brief) activeVariant = 'brief';
+                else if (variantState.full) activeVariant = 'full';
+                
+                const keyPoints = (conspect.keywords || []).map((point) => escapeHtml(point));
+                const preferredMarkdown = getPreferredMarkdown(conspect);
+                
+                // Создаем структуру как в модальном окне, но для страницы
+                container.innerHTML = `
+                    <article class="shared-conspect-card glass-card">
+                        <div class="shared-conspect-header">
+                            <div class="shared-conspect-header-content">
+                                <h1 class="shared-conspect-title">${escapeHtml(conspect.title || 'Без названия')}</h1>
+                                ${createdAt ? `
+                                    <div class="shared-conspect-meta-row">
+                                        <p class="shared-conspect-meta">Создан: ${createdAt}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="shared-conspect-body">
+                            ${variantState.full || variantState.brief || variantState.compressed ? `
+                                <div class="shared-conspect-variant-toggle">
+                                    ${variantState.compressed ? `
+                                        <button class="variant-btn ${activeVariant === 'compressed' ? 'active' : ''}" 
+                                                data-variant="compressed" onclick="switchVariant(this, 'compressed')">
+                                            Выжимка
+                                        </button>
+                                    ` : ''}
+                                    ${variantState.brief ? `
+                                        <button class="variant-btn ${activeVariant === 'brief' ? 'active' : ''}" 
+                                                data-variant="brief" onclick="switchVariant(this, 'brief')">
+                                            Краткая версия
+                                        </button>
+                                    ` : ''}
+                                    ${variantState.full ? `
+                                        <button class="variant-btn ${activeVariant === 'full' ? 'active' : ''}" 
+                                                data-variant="full" onclick="switchVariant(this, 'full')">
+                                            Полная версия
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                            
+                            <div class="shared-conspect-summary markdown-viewer" id="conspectContent">
+                                ${renderMarkdown(preferredMarkdown || conspect.summary || '')}
+                            </div>
+                            
+                            ${keyPoints.length > 0 ? `
+                                <div class="shared-conspect-keypoints">
+                                    <h3>Ключевые идеи</h3>
+                                    <ul class="shared-conspect-keypoints-list">
+                                        ${keyPoints.map(point => `<li>${escapeHtml(point)}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </article>
+                `;
+                
+                // Сохраняем данные вариантов для переключения
+                window.conspectVariants = {
+                    full: variantState.full,
+                    brief: variantState.brief,
+                    compressed: variantState.compressed,
+                    summary: conspect.summary || ''
+                };
+                window.currentVariant = activeVariant;
+                window.renderMarkdown = renderMarkdown;
+                
+                // Функция переключения вариантов
+                window.switchVariant = function(btn, variant) {
+                    const contentDiv = document.getElementById('conspectContent');
+                    const buttons = document.querySelectorAll('.variant-btn');
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    let content = '';
+                    if (variant === 'compressed' && window.conspectVariants.compressed) {
+                        content = window.renderMarkdown(window.conspectVariants.compressed);
+                    } else if (variant === 'brief' && window.conspectVariants.brief) {
+                        content = window.renderMarkdown(window.conspectVariants.brief);
+                    } else if (variant === 'full' && window.conspectVariants.full) {
+                        content = window.renderMarkdown(window.conspectVariants.full);
+                    } else {
+                        content = window.renderMarkdown(window.conspectVariants.summary);
+                    }
+                    
+                    if (contentDiv) {
+                        contentDiv.innerHTML = content;
+                    }
+                    window.currentVariant = variant;
+                };
             }
         });
     </script>

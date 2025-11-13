@@ -6,6 +6,7 @@
     <title>Публичный тест — Конспектиум</title>
     <link rel="icon" type="image/png" href="/img/short_icon_white.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/test.css">
     <link rel="stylesheet" href="/front/css/responsive.css">
@@ -67,7 +68,18 @@
                 console.error('Ошибка при загрузке теста:', err);
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('errorState').style.display = 'block';
-                const errorMessage = err.message || 'Не удалось загрузить тест';
+                // Извлекаем понятное сообщение об ошибке
+                let errorMessage = 'Не удалось загрузить тест';
+                if (err.message) {
+                    // Если сообщение содержит JSON, пытаемся извлечь detail
+                    try {
+                        const parsed = JSON.parse(err.message);
+                        errorMessage = parsed.detail || parsed.message || errorMessage;
+                    } catch (e) {
+                        // Если это не JSON, используем сообщение как есть
+                        errorMessage = err.message;
+                    }
+                }
                 document.getElementById('errorMessage').textContent = errorMessage;
             }
         });

@@ -278,6 +278,91 @@ def get_shared_quiz(
     return quiz_read.model_copy(update={"results": [], "latest_result": None})
 
 
+@router.get("/tournament/{quiz_id}", response_model=QuizRead, summary="Получить тест турнира")
+def get_tournament_quiz(
+    quiz_id: int,
+    lobby_id: int,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> QuizRead:
+    """Получает тест для турнира (доступен участникам лобби)"""
+    from app.models.tournament import TournamentLobby, TournamentParticipant
+    
+    # Проверяем, что пользователь является участником лобби
+    participant = (
+        db.query(TournamentParticipant)
+        .filter(
+            TournamentParticipant.lobby_id == lobby_id,
+            TournamentParticipant.user_id == user.id,
+        )
+        .first()
+    )
+    
+    if not participant:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Вы не являетесь участником этого турнира"
+        )
+    
+    # Проверяем, что лобби использует этот тест
+    lobby = (
+        db.query(TournamentLobby)
+        .filter(TournamentLobby.id == lobby_id)
+        .first()
+    )
+    
+    if not lobby:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Лобби не найдено"
+        )
+    
+    if lobby.quiz_id != quiz_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Тест не соответствует лобби"
+        )
+    
+    # Загружаем тест (не проверяем владельца, так как это турнирный тест)
+    quiz = (
+        db.query(Quiz)
+        .filter(Quiz.id == quiz_id)
+        .options(selectinload(Quiz.questions).selectinload(QuizQuestion.answers))
+        .one_or_none()
+    )
+    
+    if quiz is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Тест не найден"
+        )
+    
+    if quiz.status != QuizStatus.READY:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Тест еще не готов"
+        )
+    
+    # Загружаем результаты только текущего пользователя
+    result_rows = (
+        db.query(QuizResult)
+        .filter(QuizResult.quiz_id == quiz_id, QuizResult.user_id == user.id)
+        .order_by(QuizResult.created_at.desc())
+        .limit(20)
+        .all()
+    )
+    result_models = [QuizResultRead.model_validate(row) for row in result_rows]
+    latest_result = result_models[0] if result_models else None
+    
+    quiz_read = QuizRead.model_validate(quiz)
+    return quiz_read.model_copy(
+        update={
+            "results": result_models,
+            "latest_result": latest_result,
+        }
+    )
+
+
 @router.get("/tournament/public", response_model=QuizListResponse, summary="Список публичных тестов для турнира")
 def list_public_tournament_quizzes(
     db: Session = Depends(deps.get_db_session),
@@ -340,6 +425,39 @@ def submit_quiz_result(
     if quiz is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Тест не найден")
 
+    # Если это турнирный тест, проверяем участие в лобби
+    if payload.lobby_id:
+        from app.models.tournament import TournamentLobby, TournamentParticipant, TournamentLobbyStatus
+        from datetime import datetime
+        
+        participant = (
+            db.query(TournamentParticipant)
+            .filter(
+                TournamentParticipant.lobby_id == payload.lobby_id,
+                TournamentParticipant.user_id == user.id,
+            )
+            .first()
+        )
+        
+        if not participant:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Вы не являетесь участником этого турнира"
+            )
+        
+        lobby = db.query(TournamentLobby).filter(TournamentLobby.id == payload.lobby_id).first()
+        if not lobby or lobby.quiz_id != quiz_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Тест не соответствует лобби"
+            )
+        
+        if lobby.status != TournamentLobbyStatus.STARTED:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Турнир еще не начат"
+            )
+
     answers = (
         db.query(QuizAnswer)
         .join(QuizQuestion, QuizQuestion.id == QuizAnswer.question_id)
@@ -363,6 +481,32 @@ def submit_quiz_result(
         answers_payload={"answers": payload.answers},
     )
     db.add(result)
+    db.flush()
+    
+    # Если это турнирный тест, обновляем информацию об участнике
+    if payload.lobby_id:
+        from app.models.tournament import TournamentParticipant
+        from datetime import datetime
+        
+        participant = (
+            db.query(TournamentParticipant)
+            .filter(
+                TournamentParticipant.lobby_id == payload.lobby_id,
+                TournamentParticipant.user_id == user.id,
+            )
+            .first()
+        )
+        
+        if participant:
+            participant.quiz_result_id = result.id
+            participant.score = int(round(score * 100, 2))
+            participant.finished_at = datetime.utcnow()
+            # Время прохождения можно вычислить, если есть started_at в лобби
+            if lobby and lobby.started_at:
+                time_elapsed = (datetime.utcnow() - lobby.started_at).total_seconds()
+                participant.time_seconds = int(time_elapsed)
+            db.add(participant)
+    
     db.commit()
     db.refresh(result)
     return QuizResultRead.model_validate(result)

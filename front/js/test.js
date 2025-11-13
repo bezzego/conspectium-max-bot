@@ -29,7 +29,8 @@
                 createNavigationElements();
             } catch (err) {
                 console.error('Ошибка загрузки общего теста:', err);
-                showEmptyState('Не удалось загрузить тест. Попробуй создать новый.');
+                const errorMessage = err.message || 'Не удалось загрузить тест. Попробуй создать новый.';
+                showEmptyState(errorMessage);
             }
             return;
         }
@@ -44,6 +45,7 @@
         }
 
         let quizId = params.get('quizId');
+        const lobbyId = params.get('lobbyId');
 
         if (!quizId) {
             const list = await fetchLatestQuiz(app);
@@ -56,7 +58,7 @@
             }
         }
 
-        await loadQuiz(app, quizId);
+        await loadQuiz(app, quizId, lobbyId);
         
         // Создаем элементы навигации после загрузки DOM
         createNavigationElements();
@@ -121,12 +123,28 @@
                 };
             }
         } catch (err) {
-            console.error(err);
-            showEmptyState('Не удалось загрузить тест. Попробуй создать новый.');
+            console.error('Ошибка загрузки общего теста:', err);
+            // Извлекаем понятное сообщение об ошибке
+            let errorMessage = 'Не удалось загрузить тест. Попробуй создать новый.';
+            if (err.message) {
+                // Если сообщение уже понятное (не JSON), используем его
+                if (!err.message.trim().startsWith('{')) {
+                    errorMessage = err.message;
+                } else {
+                    // Если это JSON, пытаемся извлечь detail
+                    try {
+                        const parsed = JSON.parse(err.message);
+                        errorMessage = parsed.detail || parsed.message || errorMessage;
+                    } catch (e) {
+                        errorMessage = err.message;
+                    }
+                }
+            }
+            showEmptyState(errorMessage);
         }
     }
 
-    async function loadQuiz(app, quizId) {
+    async function loadQuiz(app, quizId, lobbyId = null) {
         const questionsContainer = document.getElementById('quizQuestions');
         const titleEl = document.getElementById('quizTitle');
         const descriptionEl = document.getElementById('quizDescription');
@@ -139,7 +157,19 @@
         questionsContainer.innerHTML = '<p class="loading-state">Загружаем тест…</p>';
 
         try {
-            const quiz = await app.authFetch(`/quizzes/${quizId}`);
+            // Если это турнирный тест, используем специальный endpoint
+            let quiz;
+            if (lobbyId) {
+                try {
+                    quiz = await app.authFetch(`/quizzes/tournament/${quizId}?lobby_id=${lobbyId}`);
+                } catch (err) {
+                    console.error('Failed to load tournament quiz:', err);
+                    // Если не удалось загрузить через турнирный endpoint, пробуем обычный
+                    quiz = await app.authFetch(`/quizzes/${quizId}`);
+                }
+            } else {
+                quiz = await app.authFetch(`/quizzes/${quizId}`);
+            }
             quizState.id = quiz.id;
             quizState.questions = Array.isArray(quiz.questions) ? quiz.questions : [];
             quizState.results = Array.isArray(quiz.results) ? quiz.results : [];
@@ -160,8 +190,24 @@
                 };
             }
         } catch (err) {
-            console.error(err);
-            showEmptyState('Не удалось загрузить тест. Попробуй создать новый.');
+            console.error('Ошибка загрузки теста:', err);
+            // Извлекаем понятное сообщение об ошибке
+            let errorMessage = 'Не удалось загрузить тест. Попробуй создать новый.';
+            if (err.message) {
+                // Если сообщение уже понятное (не JSON), используем его
+                if (!err.message.trim().startsWith('{')) {
+                    errorMessage = err.message;
+                } else {
+                    // Если это JSON, пытаемся извлечь detail
+                    try {
+                        const parsed = JSON.parse(err.message);
+                        errorMessage = parsed.detail || parsed.message || errorMessage;
+                    } catch (e) {
+                        errorMessage = err.message;
+                    }
+                }
+            }
+            showEmptyState(errorMessage);
         }
     }
 
@@ -657,7 +703,7 @@ function forceQuestionAnimation(question) {
         }
     }
 
-   async function submitQuiz(app, quizId) {
+   async function submitQuiz(app, quizId, lobbyId = null) {
     const questions = quizState.questions;
     if (!questions.length) {
         app.notify('В этом тесте пока нет вопросов', 'info');
@@ -686,11 +732,17 @@ function forceQuestionAnimation(question) {
         // Показываем красивый лоадер
         showQuizResultsLoader();
         
+        // Формируем payload для отправки результатов
+        const payload = { answers };
+        if (lobbyId) {
+            payload.lobby_id = parseInt(lobbyId);
+        }
+        
         const [result] = await Promise.all([
             app.authFetch(`/quizzes/${quizId}/results`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ answers }),
+                body: JSON.stringify(payload),
             }),
             new Promise((resolve) => setTimeout(resolve, 4000)),
         ]);

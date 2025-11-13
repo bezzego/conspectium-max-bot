@@ -891,8 +891,21 @@
         // Публичный endpoint, не требует авторизации
         const response = await fetch(`${API_BASE}/conspects/share/${shareToken}`);
         if (!response.ok) {
-            const text = await response.text();
-            throw new Error(text || response.statusText);
+            let errorMessage = 'Не удалось загрузить конспект';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorData.message || errorMessage;
+            } catch (e) {
+                // Если не удалось распарсить JSON, используем текст
+                const text = await response.text();
+                try {
+                    const errorData = JSON.parse(text);
+                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                } catch (e2) {
+                    errorMessage = text || response.statusText || errorMessage;
+                }
+            }
+            throw new Error(errorMessage);
         }
         return response.json();
     }
@@ -901,8 +914,21 @@
         // Публичный endpoint, не требует авторизации
         const response = await fetch(`${API_BASE}/quizzes/share/${shareToken}`);
         if (!response.ok) {
-            const text = await response.text();
-            throw new Error(text || response.statusText);
+            let errorMessage = 'Не удалось загрузить тест';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorData.message || errorMessage;
+            } catch (e) {
+                // Если не удалось распарсить JSON, используем текст
+                const text = await response.text();
+                try {
+                    const errorData = JSON.parse(text);
+                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                } catch (e2) {
+                    errorMessage = text || response.statusText || errorMessage;
+                }
+            }
+            throw new Error(errorMessage);
         }
         return response.json();
     }
