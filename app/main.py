@@ -12,7 +12,7 @@ from app.db.session import init_db
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.project_name,
-        description="Backend API for the Conspectium MAX Mini App",
+        description="Backend API for the Conspectium Mini App",
         version="0.1.0",
         openapi_url=f"{settings.api_v1_prefix}/openapi.json",
         docs_url=f"{settings.api_v1_prefix}/docs",

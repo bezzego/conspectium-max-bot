@@ -29,13 +29,18 @@ Desktop.ini
 # Ignore MacOS files
 .AppleDouble
 .LSOverride
-# Ignore npm debug files
+# Node.js
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
+.npm
+.eslintcache
 # Ignore lock files
 package-lock.json
 yarn.lock
+.pnpm-store/
 # Ignore environment-specific files
 .env.local
 .env.development.local
