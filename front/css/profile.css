@@ -1686,3 +1686,21 @@ body.modal-open {
 .btn-remove-avatar i {
     font-size: 14px;
 }
+
+.card .desc::before,
+.card .desc-formatted::before {
+    content: '';
+    display: block;
+    width: calc(100% - 10px);
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0.2) 80%,
+        transparent 100%
+    );
+    margin: 0 auto 1.2rem;
+    border-radius: 1px;
+}
