@@ -114,15 +114,27 @@
         // Получаем app сразу (он должен быть доступен, так как app.js загружается первым)
         app = window.ConspectiumApp;
         
-        // Загружаем турниры сразу (не требует авторизации)
-        // Это не блокируется ожиданием app.js
-        await loadTournaments();
+        try {
+            // Загружаем турниры сразу (не требует авторизации)
+            // Это не блокируется ожиданием app.js
+            await loadTournaments();
+        } catch (err) {
+            console.error('Error loading tournaments:', err);
+            const grid = document.getElementById('tournamentsGrid');
+            if (grid) {
+                grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Ошибка при загрузке турниров</p>';
+            }
+        }
         
-        // Инициализируем навигацию и другие элементы
-        initNavigation();
-        setupEventListeners();
-        updateFilters();
-        initCustomSelects();
+        try {
+            // Инициализируем навигацию и другие элементы
+            initNavigation();
+            setupEventListeners();
+            updateFilters();
+            initCustomSelects();
+        } catch (err) {
+            console.error('Error initializing UI elements:', err);
+        }
         
         // Проверяем, есть ли код приглашения в URL
         const params = new URLSearchParams(window.location.search);
@@ -153,9 +165,11 @@
             grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Загружаем турниры...</p>';
             
             // Загружаем только публичные тесты (этот endpoint не требует авторизации)
-            const response = await fetch('/api/quizzes/tournament/public');
+            const API_BASE = '/api';
+            const response = await fetch(`${API_BASE}/quizzes/tournament/public`);
             if (!response.ok) {
-                console.error('Failed to load tournaments:', response.status, response.statusText);
+                const errorText = await response.text().catch(() => 'Unknown error');
+                console.error('Failed to load tournaments:', response.status, response.statusText, errorText);
                 grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Не удалось загрузить турниры</p>';
                 return;
             }
