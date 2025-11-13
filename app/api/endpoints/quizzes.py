@@ -278,6 +278,75 @@ def get_shared_quiz(
     return quiz_read.model_copy(update={"results": [], "latest_result": None})
 
 
+@router.get("/tournament/public", response_model=QuizListResponse, summary="Список публичных тестов для турнира")
+def list_public_tournament_quizzes(
+    db: Session = Depends(deps.get_db_session),
+    limit: int = 50,
+    offset: int = 0,
+) -> QuizListResponse:
+    """Получает список публичных тестов для турнира"""
+    from app.models.user import User
+    
+    try:
+        # Загружаем тесты с пользователями и подсчитываем вопросы одним запросом
+        quizzes_query = (
+            db.query(
+                Quiz,
+                User.nickname.label('user_nickname'),
+                User.avatar_url.label('user_avatar_url'),
+                func.count(QuizQuestion.id).label('questions_count')
+            )
+            .join(User, Quiz.user_id == User.id)
+            .outerjoin(QuizQuestion, QuizQuestion.quiz_id == Quiz.id)
+            .filter(
+                Quiz.is_public_tournament == True,  # noqa: E712
+                Quiz.status == QuizStatus.READY,
+            )
+            .group_by(Quiz.id, User.nickname, User.avatar_url)
+            .order_by(Quiz.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        
+        items = []
+        for quiz, user_nickname, user_avatar_url, questions_count in quizzes_query.all():
+            quiz_dict = {
+                "id": quiz.id,
+                "user_id": quiz.user_id,
+                "conspect_id": quiz.conspect_id,
+                "title": quiz.title,
+                "description": quiz.description,
+                "status": quiz.status,
+                "is_public_tournament": quiz.is_public_tournament,
+                "created_at": quiz.created_at,
+                "updated_at": quiz.updated_at,
+                "latest_result": None,
+                "user_nickname": user_nickname,
+                "user_avatar_url": user_avatar_url,
+                "questions_count": int(questions_count or 0),
+            }
+            try:
+                validated_item = QuizSummaryRead.model_validate(quiz_dict)
+                items.append(validated_item)
+            except Exception as e:
+                # Логируем ошибку валидации, но продолжаем обработку других элементов
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error validating quiz {quiz.id}: {e}", exc_info=True)
+                # Пропускаем этот элемент, если валидация не прошла
+                continue
+        
+        return QuizListResponse(items=items)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in list_public_tournament_quizzes: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка при загрузке турниров: {str(e)}"
+        )
+
+
 @router.get("/tournament/{quiz_id}", response_model=QuizRead, summary="Получить тест турнира")
 def get_tournament_quiz(
     quiz_id: int,
@@ -372,46 +441,64 @@ def list_public_tournament_quizzes(
     """Получает список публичных тестов для турнира"""
     from app.models.user import User
     
-    # Загружаем тесты с пользователями и подсчитываем вопросы одним запросом
-    quizzes_query = (
-        db.query(
-            Quiz,
-            User.nickname.label('user_nickname'),
-            User.avatar_url.label('user_avatar_url'),
-            func.count(QuizQuestion.id).label('questions_count')
+    try:
+        # Загружаем тесты с пользователями и подсчитываем вопросы одним запросом
+        quizzes_query = (
+            db.query(
+                Quiz,
+                User.nickname.label('user_nickname'),
+                User.avatar_url.label('user_avatar_url'),
+                func.count(QuizQuestion.id).label('questions_count')
+            )
+            .join(User, Quiz.user_id == User.id)
+            .outerjoin(QuizQuestion, QuizQuestion.quiz_id == Quiz.id)
+            .filter(
+                Quiz.is_public_tournament == True,  # noqa: E712
+                Quiz.status == QuizStatus.READY,
+            )
+            .group_by(Quiz.id, User.nickname, User.avatar_url)
+            .order_by(Quiz.created_at.desc())
+            .limit(limit)
+            .offset(offset)
         )
-        .join(User, Quiz.user_id == User.id)
-        .outerjoin(QuizQuestion, QuizQuestion.quiz_id == Quiz.id)
-        .filter(
-            Quiz.is_public_tournament == True,  # noqa: E712
-            Quiz.status == QuizStatus.READY,
+        
+        items = []
+        for quiz, user_nickname, user_avatar_url, questions_count in quizzes_query.all():
+            quiz_dict = {
+                "id": quiz.id,
+                "user_id": quiz.user_id,
+                "conspect_id": quiz.conspect_id,
+                "title": quiz.title,
+                "description": quiz.description,
+                "status": quiz.status,
+                "is_public_tournament": quiz.is_public_tournament,
+                "created_at": quiz.created_at,
+                "updated_at": quiz.updated_at,
+                "latest_result": None,
+                "user_nickname": user_nickname,
+                "user_avatar_url": user_avatar_url,
+                "questions_count": int(questions_count or 0),
+            }
+            try:
+                validated_item = QuizSummaryRead.model_validate(quiz_dict)
+                items.append(validated_item)
+            except Exception as e:
+                # Логируем ошибку валидации, но продолжаем обработку других элементов
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error validating quiz {quiz.id}: {e}", exc_info=True)
+                # Пропускаем этот элемент, если валидация не прошла
+                continue
+        
+        return QuizListResponse(items=items)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in list_public_tournament_quizzes: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка при загрузке турниров: {str(e)}"
         )
-        .group_by(Quiz.id, User.nickname, User.avatar_url)
-        .order_by(Quiz.created_at.desc())
-        .limit(limit)
-        .offset(offset)
-    )
-    
-    items = []
-    for quiz, user_nickname, user_avatar_url, questions_count in quizzes_query.all():
-        quiz_dict = {
-            "id": quiz.id,
-            "user_id": quiz.user_id,
-            "conspect_id": quiz.conspect_id,
-            "title": quiz.title,
-            "description": quiz.description,
-            "status": quiz.status,
-            "is_public_tournament": quiz.is_public_tournament,
-            "created_at": quiz.created_at,
-            "updated_at": quiz.updated_at,
-            "latest_result": None,
-            "user_nickname": user_nickname,
-            "user_avatar_url": user_avatar_url,
-            "questions_count": questions_count or 0,
-        }
-        items.append(QuizSummaryRead.model_validate(quiz_dict))
-    
-    return QuizListResponse(items=items)
 
 
 @router.post("/{quiz_id}/results", response_model=QuizResultRead, status_code=status.HTTP_201_CREATED)

@@ -166,29 +166,41 @@
             
             // Загружаем только публичные тесты (этот endpoint не требует авторизации)
             const API_BASE = '/api';
-            const response = await fetch(`${API_BASE}/quizzes/tournament/public`);
+            const url = `${API_BASE}/quizzes/tournament/public`;
+            console.log('Fetching tournaments from:', url);
+            
+            const response = await fetch(url);
+            console.log('Response status:', response.status, response.statusText);
+            
             if (!response.ok) {
-                const errorText = await response.text().catch(() => 'Unknown error');
+                let errorText = 'Unknown error';
+                try {
+                    errorText = await response.text();
+                    console.error('Error response body:', errorText);
+                } catch (e) {
+                    console.error('Failed to read error response:', e);
+                }
                 console.error('Failed to load tournaments:', response.status, response.statusText, errorText);
-                grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Не удалось загрузить турниры</p>';
+                grid.innerHTML = `<p style="color: white; text-align: center; padding: 40px;">Не удалось загрузить турниры (${response.status}: ${response.statusText})</p>`;
                 return;
             }
             
             const data = await response.json();
-            console.log('Loaded tournaments:', data);
+            console.log('Loaded tournaments data:', data);
             
-            if (data && data.items && data.items.length > 0) {
+            if (data && data.items && Array.isArray(data.items) && data.items.length > 0) {
                 console.log('Rendering', data.items.length, 'tournaments');
                 renderTournaments(data.items);
             } else {
+                console.log('No tournaments found, items:', data?.items);
                 grid.innerHTML = 
                     '<p style="color: white; text-align: center; padding: 40px;">Пока нет доступных турниров</p>';
             }
         } catch (err) {
-            console.error('Failed to load tournaments:', err);
+            console.error('Failed to load tournaments - exception:', err);
             const grid = document.getElementById('tournamentsGrid');
             if (grid) {
-                grid.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Ошибка при загрузке турниров</p>';
+                grid.innerHTML = `<p style="color: white; text-align: center; padding: 40px;">Ошибка при загрузке турниров: ${err.message || err}</p>`;
             }
         }
     }
