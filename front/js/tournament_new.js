@@ -299,7 +299,9 @@
         if (refreshInterval) {
             clearInterval(refreshInterval);
         }
-        refreshInterval = setInterval(async () => {
+        
+        // Функция проверки статуса лобби и перенаправления
+        const checkLobbyStatus = async () => {
             if (currentLobby && currentView === 'lobby') {
                 try {
                     const updatedLobby = await app.getTournamentLobby(currentLobby.id);
@@ -311,7 +313,14 @@
                             clearInterval(refreshInterval);
                             refreshInterval = null;
                         }
-                        window.location.href = `/front/html/test.html?quizId=${updatedLobby.quiz_id}&lobbyId=${updatedLobby.id}`;
+                        // Показываем уведомление перед перенаправлением
+                        if (app.notify) {
+                            app.notify('Турнир начался! Перенаправляем на тест...', 'success');
+                        }
+                        // Небольшая задержка для показа уведомления
+                        setTimeout(() => {
+                            window.location.href = `/front/html/test.html?quizId=${updatedLobby.quiz_id}&lobbyId=${updatedLobby.id}`;
+                        }, 500);
                         return;
                     }
                     
@@ -347,7 +356,13 @@
                     }
                 }
             }
-        }, 3000); // Обновляем каждые 3 секунды
+        };
+        
+        // Первая проверка сразу
+        checkLobbyStatus();
+        
+        // Затем периодические проверки каждые 1.5 секунды (быстрее для более быстрой реакции)
+        refreshInterval = setInterval(checkLobbyStatus, 1500);
     }
 
     function updateLobbyInfo(lobby) {
@@ -901,6 +916,14 @@
                 clearInterval(refreshInterval);
                 refreshInterval = null;
             }
+            
+            // Показываем уведомление о начале турнира
+            if (app.notify) {
+                app.notify('Турнир начался! Перенаправляем на тест...', 'success');
+            }
+            
+            // Небольшая задержка для показа уведомления и синхронизации с другими участниками
+            await new Promise(resolve => setTimeout(resolve, 800));
             
             // Перенаправляем на тест
             window.location.href = `/front/html/test.html?quizId=${updatedLobby.quiz_id}&lobbyId=${updatedLobby.id}`;
