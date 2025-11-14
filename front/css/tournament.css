@@ -312,6 +312,105 @@
             z-index: 2;
         }
         
+        /* Блок присоединения по коду */
+        .join-by-code-container {
+            margin-bottom: clamp(20px, 5vw, 25px);
+            padding: clamp(20px, 5vw, 25px);
+            border-radius: clamp(20px, 5vw, 25px);
+        }
+        
+        .join-by-code-header {
+            margin-bottom: clamp(15px, 4vw, 20px);
+        }
+        
+        .join-by-code-title {
+            font-size: clamp(18px, 4.5vw, 22px);
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 2vw, 12px);
+        }
+        
+        .join-by-code-title i {
+            color: #f5d86e;
+            font-size: clamp(20px, 5vw, 24px);
+        }
+        
+        .join-by-code-body {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 3vw, 16px);
+        }
+        
+        .join-code-input-group {
+            display: flex;
+            gap: clamp(10px, 2.5vw, 12px);
+            flex-wrap: wrap;
+        }
+        
+        .join-code-input {
+            flex: 1;
+            min-width: 200px;
+            padding: clamp(12px, 3vw, 14px) clamp(16px, 4vw, 20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: clamp(14px, 3.5vw, 18px);
+            color: #fff;
+            font-size: clamp(14px, 3.5vw, 16px);
+            font-family: 'Manrope', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            outline: none;
+            min-height: 44px;
+            box-sizing: border-box;
+        }
+        
+        .join-code-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 400;
+        }
+        
+        .join-code-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(245, 216, 110, 0.5);
+            box-shadow: 0 0 0 3px rgba(245, 216, 110, 0.2);
+        }
+        
+        .join-code-btn {
+            min-width: clamp(140px, 35vw, 160px);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(6px, 1.5vw, 8px);
+            font-size: clamp(14px, 3.5vw, 16px);
+            padding: clamp(12px, 3vw, 14px) clamp(16px, 4vw, 20px);
+            border-radius: clamp(14px, 3.5vw, 18px);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .join-code-btn i {
+            font-size: clamp(14px, 3.5vw, 16px);
+        }
+        
+        .join-code-hint {
+            font-size: clamp(12px, 3vw, 14px);
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+            line-height: 1.4;
+            text-align: center;
+        }
+        
         /* Сетка турниров */
         .tournaments-grid {
             display: grid;
@@ -1297,6 +1396,33 @@
             
             .details-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .join-by-code-container {
+                padding: clamp(16px, 4vw, 20px);
+                margin-bottom: clamp(15px, 4vw, 20px);
+            }
+            
+            .join-by-code-title {
+                font-size: clamp(16px, 4vw, 18px);
+            }
+            
+            .join-code-input-group {
+                flex-direction: column;
+            }
+            
+            .join-code-input {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .join-code-btn {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .join-code-hint {
+                font-size: clamp(11px, 2.8vw, 13px);
             }
         }
 

@@ -25,6 +25,7 @@
             // Инициализируем навигацию и другие элементы
             initNavigation();
             setupEventListeners();
+            setupJoinCodeInput();
             updateFilters();
             initCustomSelects();
         } catch (err) {
@@ -1104,12 +1105,66 @@
         }
     }
     
+    // Функция присоединения по коду
+    async function joinByCode() {
+        const codeInput = document.getElementById('joinCodeInput');
+        if (!codeInput || !app) return;
+        
+        const inviteCode = codeInput.value.trim().toUpperCase();
+        
+        if (!inviteCode) {
+            if (app.notify) {
+                app.notify('Введите код приглашения', 'error');
+            } else {
+                alert('Введите код приглашения');
+            }
+            return;
+        }
+        
+        // Проверяем авторизацию
+        try {
+            await app.ready();
+        } catch (err) {
+            if (app.notify) {
+                app.notify('Для присоединения к турниру необходимо войти в аккаунт', 'error');
+            } else {
+                alert('Для присоединения к турниру необходимо войти в аккаунт');
+            }
+            return;
+        }
+        
+        // Очищаем поле ввода
+        codeInput.value = '';
+        
+        // Присоединяемся к лобби
+        await joinLobbyByInviteCode(inviteCode);
+    }
+    
+    // Обработка Enter в поле ввода кода
+    function setupJoinCodeInput() {
+        const codeInput = document.getElementById('joinCodeInput');
+        if (codeInput) {
+            codeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    joinByCode();
+                }
+            });
+            
+            // Автоматическое преобразование в верхний регистр
+            codeInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+        }
+    }
+
     // Экспортируем функции для использования в HTML
     window.copyLobbyCode = copyLobbyCode;
     window.generateInviteLink = generateInviteLink;
     window.toggleReady = toggleReady;
     window.startTournament = startTournament;
     window.closeInviteModal = closeInviteModal;
+    window.joinByCode = joinByCode;
     // Экспортируем функции в глобальную область для использования в onclick
     // Export functions to global scope for use in onclick attributes
     // Important: for Safari, copying must occur synchronously in the click context

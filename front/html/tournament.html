@@ -127,6 +127,37 @@
 
             <div class="select-overlay" id="selectOverlay"></div>
 
+            <!-- Блок присоединения по коду -->
+            <div class="join-by-code-container glass-card">
+                <div class="join-by-code-header">
+                    <h3 class="join-by-code-title">
+                        <i class="fas fa-key"></i> Присоединиться по коду
+                    </h3>
+                </div>
+                <div class="join-by-code-body">
+                    <div class="join-code-input-group">
+                        <input 
+                            type="text" 
+                            id="joinCodeInput" 
+                            class="join-code-input" 
+                            placeholder="Введите код приглашения"
+                            maxlength="20"
+                            autocomplete="off"
+                        >
+                        <button 
+                            id="joinCodeBtn" 
+                            class="join-code-btn accent-btn"
+                            onclick="joinByCode()"
+                        >
+                            <i class="fas fa-sign-in-alt"></i> Присоединиться
+                        </button>
+                    </div>
+                    <p class="join-code-hint">
+                        Получили код приглашения? Введите его здесь, чтобы присоединиться к турниру
+                    </p>
+                </div>
+            </div>
+
             <!-- Сетка турниров -->
             <div class="tournaments-grid" id="tournamentsGrid">
                 <!-- Турниры будут добавляться через JavaScript -->
