@@ -9,6 +9,15 @@
     let closeBtn = null;
     let prevBtn = null;
     let nextBtn = null;
+    let leaderboardRefreshInterval = null;
+
+    // Очистка интервалов при уходе со страницы
+    window.addEventListener('beforeunload', () => {
+        if (leaderboardRefreshInterval) {
+            clearInterval(leaderboardRefreshInterval);
+            leaderboardRefreshInterval = null;
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', async () => {
         if (!document.body.classList.contains('page-test')) {
@@ -1116,115 +1125,179 @@ function formatDateTime(value) {
     }
 
     async function showTournamentLeaderboard(app, lobbyId) {
-        try {
-            // Загружаем турнирную таблицу
-            const leaderboard = await app.authFetch(`/tournament/${lobbyId}/leaderboard`);
+        // Останавливаем предыдущее обновление, если есть
+        if (leaderboardRefreshInterval) {
+            clearInterval(leaderboardRefreshInterval);
+            leaderboardRefreshInterval = null;
+        }
+        
+        // Скрываем контейнер с вопросами
+        const questionsContainer = document.getElementById('quizQuestions');
+        if (questionsContainer) {
+            questionsContainer.style.display = 'none';
+        }
+        
+        // Создаем или получаем контейнер для турнирной таблицы
+        let leaderboardContainer = document.getElementById('tournamentLeaderboard');
+        if (!leaderboardContainer) {
+            leaderboardContainer = document.createElement('div');
+            leaderboardContainer.id = 'tournamentLeaderboard';
+            leaderboardContainer.className = 'tournament-leaderboard glass-card';
             
-            // Скрываем контейнер с вопросами
-            const questionsContainer = document.getElementById('quizQuestions');
-            if (questionsContainer) {
-                questionsContainer.style.display = 'none';
+            const main = document.querySelector('main');
+            if (main) {
+                main.appendChild(leaderboardContainer);
             }
-            
-            // Создаем или получаем контейнер для турнирной таблицы
-            let leaderboardContainer = document.getElementById('tournamentLeaderboard');
-            if (!leaderboardContainer) {
-                leaderboardContainer = document.createElement('div');
-                leaderboardContainer.id = 'tournamentLeaderboard';
-                leaderboardContainer.className = 'tournament-leaderboard glass-card';
+        }
+        
+        // Функция обновления таблицы
+        const updateLeaderboard = async () => {
+            try {
+                // Загружаем турнирную таблицу
+                const leaderboard = await app.authFetch(`/tournament/${lobbyId}/leaderboard`);
                 
-                const main = document.querySelector('main');
-                if (main) {
-                    main.appendChild(leaderboardContainer);
-                }
-            }
-            
-            // Сортируем участников по месту (score по убыванию)
-            const participants = (leaderboard.participants || []).filter(p => p.finished_at !== null);
-            participants.sort((a, b) => {
-                // Сначала по score (убывание)
-                if (b.score !== a.score) {
-                    return (b.score || 0) - (a.score || 0);
-                }
-                // Если score одинаковый, по времени (возрастание)
-                if (a.time_seconds !== b.time_seconds) {
-                    return (a.time_seconds || Infinity) - (b.time_seconds || Infinity);
-                }
-                // Если все одинаково, по дате завершения (возрастание)
-                return new Date(a.finished_at) - new Date(b.finished_at);
-            });
-            
-            // Определяем место каждого участника
-            let currentPlace = 1;
-            participants.forEach((participant, index) => {
-                if (index > 0) {
-                    const prev = participants[index - 1];
-                    if (prev.score !== participant.score || 
-                        prev.time_seconds !== participant.time_seconds) {
-                        currentPlace = index + 1;
+                // Разделяем участников на завершивших и не завершивших
+                const allParticipants = leaderboard.participants || [];
+                const finishedParticipants = allParticipants.filter(p => p.finished_at !== null);
+                const inProgressParticipants = allParticipants.filter(p => p.finished_at === null);
+                
+                // Сортируем завершивших по месту (score по убыванию)
+                finishedParticipants.sort((a, b) => {
+                    // Сначала по score (убывание)
+                    if (b.score !== a.score) {
+                        return (b.score || 0) - (a.score || 0);
                     }
-                }
-                participant.place = currentPlace;
-            });
-            
-            const currentUserId = app?.state?.user?.id;
-            
-            // Формируем HTML таблицы
-            let leaderboardHtml = `
-                <div class="leaderboard-header">
-                    <h2 class="leaderboard-title">🏆 Турнирная таблица</h2>
-                </div>
-                <div class="leaderboard-list">
-            `;
-            
-            if (participants.length === 0) {
-                leaderboardHtml += `
-                    <div class="leaderboard-empty">
-                        <p>Пока никто не завершил тест</p>
+                    // Если score одинаковый, по времени (возрастание)
+                    if (a.time_seconds !== b.time_seconds) {
+                        return (a.time_seconds || Infinity) - (b.time_seconds || Infinity);
+                    }
+                    // Если все одинаково, по дате завершения (возрастание)
+                    return new Date(a.finished_at) - new Date(b.finished_at);
+                });
+                
+                // Определяем место каждого завершившего участника
+                let currentPlace = 1;
+                finishedParticipants.forEach((participant, index) => {
+                    if (index > 0) {
+                        const prev = finishedParticipants[index - 1];
+                        if (prev.score !== participant.score || 
+                            prev.time_seconds !== participant.time_seconds) {
+                            currentPlace = index + 1;
+                        }
+                    }
+                    participant.place = currentPlace;
+                });
+                
+                const currentUserId = app?.state?.user?.id;
+                const totalParticipants = allParticipants.length;
+                const finishedCount = finishedParticipants.length;
+                const waitingCount = inProgressParticipants.length;
+                
+                // Формируем HTML таблицы
+                let leaderboardHtml = `
+                    <div class="leaderboard-header">
+                        <h2 class="leaderboard-title">🏆 Турнирная таблица</h2>
+                        <div class="leaderboard-stats">
+                            <span>Завершили: ${finishedCount}/${totalParticipants}</span>
+                        </div>
                     </div>
+                    <div class="leaderboard-list">
                 `;
-            } else {
-                participants.forEach((participant) => {
-                    const isCurrentUser = participant.user_id === currentUserId;
-                    const medalIcon = participant.place === 1 ? '🥇' : 
-                                     participant.place === 2 ? '🥈' : 
-                                     participant.place === 3 ? '🥉' : '';
-                    const placeText = medalIcon ? `${medalIcon} ${participant.place}` : `${participant.place}`;
-                    const score = participant.score !== null ? Math.round(participant.score) : 0;
-                    const userName = participant.user_display_name || `Участник ${participant.user_id}`;
-                    
+                
+                // Показываем сообщение "Ждем других игроков" если не все завершили
+                if (waitingCount > 0) {
                     leaderboardHtml += `
-                        <div class="leaderboard-item ${isCurrentUser ? 'leaderboard-item--current' : ''}">
-                            <div class="leaderboard-place">${placeText} место</div>
-                            <div class="leaderboard-name">${escapeHtml(userName)}</div>
-                            <div class="leaderboard-score">${score}%</div>
+                        <div class="leaderboard-waiting">
+                            <div class="waiting-indicator">
+                                <div class="waiting-spinner"></div>
+                                <span>⏳ Ждем других игроков (${waitingCount} ${waitingCount === 1 ? 'игрок' : waitingCount < 5 ? 'игрока' : 'игроков'} еще проходят тест)</span>
+                            </div>
                         </div>
                     `;
-                });
+                }
+                
+                // Показываем завершивших участников
+                if (finishedParticipants.length === 0) {
+                    leaderboardHtml += `
+                        <div class="leaderboard-empty">
+                            <p>Пока никто не завершил тест</p>
+                        </div>
+                    `;
+                } else {
+                    finishedParticipants.forEach((participant) => {
+                        const isCurrentUser = participant.user_id === currentUserId;
+                        const medalIcon = participant.place === 1 ? '🥇' : 
+                                         participant.place === 2 ? '🥈' : 
+                                         participant.place === 3 ? '🥉' : '';
+                        const placeText = medalIcon ? `${medalIcon} ${participant.place}` : `${participant.place}`;
+                        const score = participant.score !== null ? Math.round(participant.score) : 0;
+                        const userName = participant.user_display_name || `Участник ${participant.user_id}`;
+                        
+                        leaderboardHtml += `
+                            <div class="leaderboard-item ${isCurrentUser ? 'leaderboard-item--current' : ''}">
+                                <div class="leaderboard-place">${placeText} место</div>
+                                <div class="leaderboard-name">${escapeHtml(userName)}</div>
+                                <div class="leaderboard-score">${score}%</div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Показываем участников, которые еще проходят тест
+                if (inProgressParticipants.length > 0) {
+                    leaderboardHtml += `
+                        <div class="leaderboard-in-progress">
+                            <div class="in-progress-header">В процессе:</div>
+                    `;
+                    inProgressParticipants.forEach((participant) => {
+                        const isCurrentUser = participant.user_id === currentUserId;
+                        const userName = participant.user_display_name || `Участник ${participant.user_id}`;
+                        leaderboardHtml += `
+                            <div class="leaderboard-item leaderboard-item--in-progress ${isCurrentUser ? 'leaderboard-item--current' : ''}">
+                                <div class="leaderboard-place">⏳</div>
+                                <div class="leaderboard-name">${escapeHtml(userName)}</div>
+                                <div class="leaderboard-score">—</div>
+                            </div>
+                        `;
+                    });
+                    leaderboardHtml += `</div>`;
+                }
+                
+                leaderboardHtml += `
+                    </div>
+                    <div class="leaderboard-actions">
+                        <button class="primary-btn" id="finishTournamentBtn">Завершить</button>
+                    </div>
+                `;
+                
+                leaderboardContainer.innerHTML = leaderboardHtml;
+                leaderboardContainer.style.display = 'block';
+                
+                // Обработчик кнопки завершения
+                const finishBtn = document.getElementById('finishTournamentBtn');
+                if (finishBtn) {
+                    finishBtn.onclick = () => {
+                        // Останавливаем обновление перед переходом
+                        if (leaderboardRefreshInterval) {
+                            clearInterval(leaderboardRefreshInterval);
+                            leaderboardRefreshInterval = null;
+                        }
+                        window.location.href = '/front/html/tournament.html';
+                    };
+                }
+                
+            } catch (err) {
+                console.error('Ошибка загрузки турнирной таблицы:', err);
+                // Не показываем ошибку каждый раз, только логируем
+                // app.notify(err.message || 'Не удалось загрузить турнирную таблицу', 'error');
             }
-            
-            leaderboardHtml += `
-                </div>
-                <div class="leaderboard-actions">
-                    <button class="primary-btn" id="finishTournamentBtn">Завершить</button>
-                </div>
-            `;
-            
-            leaderboardContainer.innerHTML = leaderboardHtml;
-            leaderboardContainer.style.display = 'block';
-            
-            // Обработчик кнопки завершения
-            const finishBtn = document.getElementById('finishTournamentBtn');
-            if (finishBtn) {
-                finishBtn.onclick = () => {
-                    window.location.href = '/front/html/tournament.html';
-                };
-            }
-            
-        } catch (err) {
-            console.error('Ошибка загрузки турнирной таблицы:', err);
-            app.notify(err.message || 'Не удалось загрузить турнирную таблицу', 'error');
-        }
+        };
+        
+        // Первое обновление сразу
+        await updateLeaderboard();
+        
+        // Затем периодические обновления каждые 2 секунды
+        leaderboardRefreshInterval = setInterval(updateLeaderboard, 2000);
     }
     
     function showEmptyState(message) {
