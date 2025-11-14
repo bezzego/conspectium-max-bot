@@ -25,6 +25,11 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/conspectium
       AUDIO_STORAGE_DIR: /app/var/audio
       GUNICORN_WORKERS: 4
+      # Default values if .env doesn't exist
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GOOGLE_API_KEY_TEXT: ${GOOGLE_API_KEY_TEXT:-}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
+      SECRET_KEY: ${SECRET_KEY:-${JWT_SECRET_KEY:-}}
     ports:
       - "8000:8000"
     volumes:
