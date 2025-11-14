@@ -51,10 +51,24 @@ if (typeof window.copyToClipboard === 'undefined') {
 
     
     
-    function logout() {
-        clearAuthState();
-        // Перенаправляем на страницу регистрации
-        window.location.href = '/front/html/welcome_modal.html';
+    async function logout() {
+        try {
+            clearAuthState();
+            // Очищаем все данные
+            localStorage.removeItem('conspectium_token');
+            localStorage.removeItem('conspectium_user');
+            localStorage.removeItem('userData');
+            // Перенаправляем на страницу регистрации
+            window.location.href = '/front/html/welcome_modal.html';
+        } catch (err) {
+            console.error('Ошибка при выходе:', err);
+            // В любом случае очищаем и перенаправляем
+            clearAuthState();
+            localStorage.removeItem('conspectium_token');
+            localStorage.removeItem('conspectium_user');
+            localStorage.removeItem('userData');
+            window.location.href = '/front/html/welcome_modal.html';
+        }
     }
 
     if (localStorage.getItem(USER_KEY)) {
@@ -1092,12 +1106,12 @@ if (typeof window.copyToClipboard === 'undefined') {
         async function uploadBanner(file) {
         await ensureAuth();
         const formData = new FormData();
-        formData.append('banner', file);
+        formData.append('file', file);
         
         console.log('Uploading banner...', file);
         
         const attempt = async (retry = false) => {
-            const response = await fetch(`${API_BASE}/user/banner`, {
+            const response = await fetch(`${API_BASE}/auth/upload-banner`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${state.token}`,
@@ -1149,12 +1163,11 @@ if (typeof window.copyToClipboard === 'undefined') {
             
             const result = await response.json();
             // Обновляем данные пользователя
-            if (result.success && state.user) {
-                state.user.banner_url = result.data.banner_url;
-                state.user.banner_id = result.data.banner_id;
+            if (result && state.user) {
+                state.user.banner_url = result.banner_url;
                 setUser(state.user);
             }
-            return result.data;
+            return result;
         };
         
         return attempt();
@@ -1195,6 +1208,7 @@ if (typeof window.copyToClipboard === 'undefined') {
         getMyMedals,
         listMyMedals,
         logout,
+        deleteAccount,
         notify,
         state,
         // Profile functions
@@ -1211,12 +1225,12 @@ if (typeof window.copyToClipboard === 'undefined') {
         async function uploadBanner(file) {
         await ensureAuth();
         const formData = new FormData();
-        formData.append('banner', file);
+        formData.append('file', file);
         
         console.log('Uploading banner...', file);
         
         const attempt = async (retry = false) => {
-            const response = await fetch(`${API_BASE}/user/banner`, {
+            const response = await fetch(`${API_BASE}/auth/upload-banner`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${state.token}`,
@@ -1268,12 +1282,60 @@ if (typeof window.copyToClipboard === 'undefined') {
             
             const result = await response.json();
             // Обновляем данные пользователя
-            if (result.success && state.user) {
-                state.user.banner_url = result.data.banner_url;
-                state.user.banner_id = result.data.banner_id;
+            if (result && state.user) {
+                state.user.banner_url = result.banner_url;
                 setUser(state.user);
             }
-            return result.data;
+            return result;
+        };
+        
+        return attempt();
+    }
+
+        async function deleteAccount() {
+        await ensureAuth();
+        
+        const attempt = async (retry = false) => {
+            const response = await fetch(`${API_BASE}/auth/me`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${state.token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            if (response.status === 401 || response.status === 403) {
+                if (retry) {
+                    const text = await response.text();
+                    throw new Error(text || 'Не удалось удалить аккаунт');
+                }
+                clearAuthState();
+                await ensureAuth();
+                return attempt(true);
+            }
+            
+            if (!response.ok && response.status !== 204) {
+                const text = await response.text();
+                let errorMessage = 'Не удалось удалить аккаунт';
+                try {
+                    const errorData = JSON.parse(text);
+                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                } catch (e) {
+                    if (text && text.length < 500 && !text.includes('<html>')) {
+                        errorMessage = text;
+                    } else {
+                        errorMessage = `Ошибка ${response.status}: Не удалось удалить аккаунт`;
+                    }
+                }
+                throw new Error(errorMessage);
+            }
+            
+            // Очищаем все данные и перенаправляем на страницу регистрации
+            clearAuthState();
+            localStorage.removeItem('conspectium_token');
+            localStorage.removeItem('conspectium_user');
+            localStorage.removeItem('userData');
+            window.location.href = '/front/html/welcome_modal.html';
         };
         
         return attempt();

@@ -9,6 +9,7 @@ from app.schemas.conspect import (
     ConspectCreateRequest,
     ConspectListResponse,
     ConspectRead,
+    ConspectUpdateRequest,
     ConspectVariantCreateRequest,
 )
 from app.schemas.job import JobRead
@@ -139,6 +140,31 @@ def create_conspect_variant(
 
     background_tasks.add_task(generation_service.process_conspect_job, job.id)
     return JobRead.model_validate(job)
+
+
+@router.patch("/{conspect_id}", response_model=ConspectRead)
+def update_conspect(
+    conspect_id: int,
+    payload: ConspectUpdateRequest,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> ConspectRead:
+    """Обновляет название конспекта"""
+    conspect = (
+        db.query(Conspect)
+        .filter(Conspect.id == conspect_id, Conspect.user_id == user.id)
+        .one_or_none()
+    )
+    if conspect is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Конспект не найден")
+    
+    if payload.title is not None:
+        conspect.title = (payload.title or "").strip() or None
+    
+    db.add(conspect)
+    db.commit()
+    db.refresh(conspect)
+    return _serialize_conspect(conspect)
 
 
 @router.post(

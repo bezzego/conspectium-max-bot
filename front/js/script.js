@@ -1267,13 +1267,48 @@ async function loadMainConspects(app) {
                 wrapper.id = `conspect-${conspect.id}`;
             }
 
+            const contentWrapper = document.createElement('div');
+            contentWrapper.style.display = 'flex';
+            contentWrapper.style.alignItems = 'center';
+            contentWrapper.style.gap = '10px';
+            contentWrapper.style.width = '100%';
+
             const content = document.createElement('div');
             content.className = 'item-content';
+            content.style.flex = '1';
             const prefix = `${index + 1}. `;
             const text = conspect.title || (conspect.summary ? conspect.summary.slice(0, 120) + '…' : 'Без названия');
             content.textContent = prefix + text;
+            content.dataset.originalTitle = conspect.title || '';
 
-            wrapper.appendChild(content);
+            const editBtn = document.createElement('button');
+            editBtn.className = 'conspect-edit-btn';
+            editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            editBtn.title = 'Редактировать название';
+            editBtn.style.cssText = 'background: transparent; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 14px; transition: all 0.2s;';
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const appInstance = window.ConspectiumApp;
+                if (!appInstance) {
+                    console.error('ConspectiumApp не найден');
+                    return;
+                }
+                editConspectTitle(conspect.id, content, items, container, appInstance);
+            });
+            editBtn.addEventListener('mouseenter', () => {
+                editBtn.style.color = 'rgba(255,255,255,1)';
+                editBtn.style.background = 'rgba(255,255,255,0.1)';
+            });
+            editBtn.addEventListener('mouseleave', () => {
+                editBtn.style.color = 'rgba(255,255,255,0.7)';
+                editBtn.style.background = 'transparent';
+            });
+
+            contentWrapper.appendChild(content);
+            if (container.id === 'conspectList') {
+                contentWrapper.appendChild(editBtn);
+            }
+            wrapper.appendChild(contentWrapper);
             container.appendChild(wrapper);
         });
 
@@ -1285,6 +1320,74 @@ async function loadMainConspects(app) {
             detail: { context: container.id || 'conspects', items },
         }));
         return items;
+    }
+
+    async function editConspectTitle(conspectId, contentElement, items, container, app) {
+        const conspect = items.find(c => c.id === conspectId);
+        if (!conspect) return;
+
+        const currentTitle = conspect.title || '';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentTitle;
+        input.maxLength = 255;
+        input.style.cssText = 'flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 6px 10px; color: white; font-size: inherit; font-family: inherit;';
+        input.placeholder = 'Введите название';
+
+        const originalText = contentElement.textContent;
+        const prefix = originalText.match(/^\d+\.\s/)?.[0] || '';
+        
+        contentElement.textContent = '';
+        contentElement.appendChild(input);
+        input.focus();
+        input.select();
+
+        const saveEdit = async () => {
+            const newTitle = input.value.trim();
+            if (newTitle === currentTitle) {
+                contentElement.textContent = originalText;
+                return;
+            }
+
+            try {
+                app.showLoading('Сохраняем название...');
+                const updated = await app.authFetch(`/conspects/${conspectId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle || null }),
+                });
+                app.hideLoading();
+
+                const index = items.findIndex(c => c.id === conspectId);
+                if (index !== -1) {
+                    items[index] = { ...items[index], ...updated };
+                }
+
+                const displayText = newTitle || (conspect.summary ? conspect.summary.slice(0, 120) + '…' : 'Без названия');
+                contentElement.textContent = prefix + displayText;
+                app.notify('Название обновлено', 'success');
+            } catch (err) {
+                console.error(err);
+                app.hideLoading();
+                contentElement.textContent = originalText;
+                app.notify(err.message || 'Не удалось сохранить название', 'error');
+            }
+        };
+
+        const cancelEdit = () => {
+            contentElement.textContent = originalText;
+        };
+
+        input.addEventListener('blur', saveEdit);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                input.blur();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cancelEdit();
+            }
+        });
     }
 
     // Choose test -------------------------------------------------------

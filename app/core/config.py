@@ -22,8 +22,10 @@ class Settings(BaseSettings):
 
     audio_storage_dir: str = "var/audio"
     avatar_storage_dir: str = "var/avatars"
+    banner_storage_dir: str = "var/banners"
     max_upload_size_mb: int = 50
     max_avatar_size_mb: int = 5
+    max_banner_size_mb: int = 10
 
     backend_cors_origins: List[str] = Field(default_factory=list)
 

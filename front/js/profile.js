@@ -1273,7 +1273,7 @@ function showBannerEditModal() {
 // Функция для прямой загрузки баннера (fallback)
 async function uploadBannerDirectly(formData) {
     try {
-        const response = await fetch('/api/user/banner', {
+        const response = await fetch('/api/auth/upload-banner', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${app.state.token}`,

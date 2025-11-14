@@ -165,7 +165,7 @@ main {
 .preview {
     background: var(--light-gray);
     border-radius: 20px;
-    height: 750px;
+    height: 850px; /* Увеличено с 750px до 850px */
     display: flex;
     flex-direction: column;
     color: #333;
@@ -195,19 +195,19 @@ main {
 
 @media (max-height: 1158px)  {
   .preview {
-    max-height: 620px;
+    max-height: 720px; /* Увеличено с 620px */
   }
 }
 
 @media (max-height: 900px)  {
   .preview {
-    max-height: 540px;
+    max-height: 640px; /* Увеличено с 540px */
   }
 }
 
 @media (max-height: 750px)  {
   .preview {
-    max-height: 380px;
+    max-height: 480px; /* Увеличено с 380px */
   }
 }
 

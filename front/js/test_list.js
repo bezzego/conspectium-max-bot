@@ -297,13 +297,21 @@
     async function deleteQuiz(quizId, app) {
         app.showLoading('Удаляем тест...');
         try {
-            await app.deleteQuiz(quizId);
+            if (app.deleteQuiz && typeof app.deleteQuiz === 'function') {
+                await app.deleteQuiz(quizId);
+            } else {
+                // Fallback: прямой вызов API
+                await app.authFetch(`/quizzes/${quizId}`, {
+                    method: 'DELETE',
+                });
+            }
             state.tests = state.tests.filter((quiz) => quiz.id !== quizId);
             renderTests();
             app.notify('Тест удалён', 'success');
         } catch (err) {
-            console.error(err);
-            app.notify(err.message || 'Не удалось удалить тест', 'error');
+            console.error('Ошибка удаления теста:', err);
+            const errorMessage = err.message || 'Не удалось удалить тест';
+            app.notify(errorMessage, 'error');
         } finally {
             app.hideLoading();
         }
@@ -387,16 +395,36 @@
             app.showLoading('Генерируем ссылку...');
             const shareToken = await app.getShareToken('quiz', quizId);
             const shareUrl = `${window.location.origin}/front/html/quiz_shared.html?token=${shareToken}`;
-            // Используем глобальную функцию копирования
-            const success = await window.copyToClipboard(shareUrl);
             app.hideLoading();
-            if (success) {
-                app.notify('Ссылка скопирована в буфер обмена!', 'success');
+            
+            // Используем глобальную функцию копирования
+            if (window.copyToClipboard) {
+                const success = await window.copyToClipboard(shareUrl);
+                if (success) {
+                    app.notify('Ссылка скопирована в буфер обмена!', 'success');
+                } else {
+                    // Fallback для браузеров без поддержки Clipboard API
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareUrl;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        app.notify('Ссылка скопирована в буфер обмена!', 'success');
+                    } catch (e) {
+                        document.body.removeChild(textArea);
+                        prompt('Скопируйте ссылку:', shareUrl);
+                    }
+                }
             } else {
+                // Fallback если функция не загружена
                 prompt('Скопируйте ссылку:', shareUrl);
             }
         } catch (err) {
-            console.error(err);
+            console.error('Ошибка при создании ссылки:', err);
             app.hideLoading();
             app.notify(err.message || 'Не удалось создать ссылку', 'error');
         }

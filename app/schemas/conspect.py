@@ -49,3 +49,7 @@ class ConspectListResponse(BaseModel):
 
 class ConspectVariantCreateRequest(BaseModel):
     variant: ConspectVariantType
+
+
+class ConspectUpdateRequest(BaseModel):
+    title: Optional[str] = None

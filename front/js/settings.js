@@ -131,10 +131,6 @@ class SettingsManager {
             nameInput.value = this.userName;
         }
 
-        const descriptionInput = document.getElementById('userDescriptionInput');
-        if (descriptionInput) {
-            descriptionInput.value = this.userDescription || '';
-        }
 
         document.querySelectorAll('.gender-btn-settings').forEach((btn) => btn.classList.remove('selected'));
         if (this.userGender) {
@@ -251,16 +247,69 @@ class SettingsManager {
         // Обработчик кнопки выхода
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const confirmed = window.confirm('Вы уверены, что хотите выйти из аккаунта?');
                 if (confirmed) {
-                    if (this.app && this.app.logout) {
-                        this.app.logout();
-                    } else {
-                        // Если app недоступен, очищаем вручную
+                    try {
+                        if (this.app && typeof this.app.logout === 'function') {
+                            await this.app.logout();
+                        } else {
+                            // Если app недоступен, очищаем вручную
+                            localStorage.removeItem('conspectium_token');
+                            localStorage.removeItem('conspectium_user');
+                            localStorage.removeItem('userData');
+                            window.location.href = '/front/html/welcome_modal.html';
+                        }
+                    } catch (err) {
+                        console.error('Ошибка при выходе:', err);
+                        // В любом случае очищаем и перенаправляем
                         localStorage.removeItem('conspectium_token');
                         localStorage.removeItem('conspectium_user');
+                        localStorage.removeItem('userData');
                         window.location.href = '/front/html/welcome_modal.html';
+                    }
+                }
+            });
+        }
+
+        // Обработчик кнопки удаления аккаунта
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+        if (deleteAccountBtn) {
+            deleteAccountBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const confirmed = window.confirm(
+                    'ВНИМАНИЕ! Вы уверены, что хотите удалить аккаунт?\n\n' +
+                    'Это действие необратимо. Все ваши данные будут удалены:\n' +
+                    '- Конспекты\n' +
+                    '- Тесты\n' +
+                    '- Результаты турниров\n' +
+                    '- Профиль\n\n' +
+                    'Это действие нельзя отменить!'
+                );
+                if (confirmed) {
+                    const doubleConfirm = window.confirm(
+                        'Последнее предупреждение!\n\n' +
+                        'Вы действительно хотите удалить аккаунт навсегда?'
+                    );
+                    if (doubleConfirm) {
+                        try {
+                            if (this.app && typeof this.app.deleteAccount === 'function') {
+                                this.app.showLoading('Удаляем аккаунт...');
+                                await this.app.deleteAccount();
+                            } else {
+                                throw new Error('Функция удаления аккаунта недоступна');
+                            }
+                        } catch (err) {
+                            console.error('Ошибка при удалении аккаунта:', err);
+                            this.app?.hideLoading();
+                            this.app?.notify(
+                                err.message || 'Не удалось удалить аккаунт. Попробуйте позже.',
+                                'error'
+                            );
+                        }
                     }
                 }
             });
@@ -274,13 +323,6 @@ class SettingsManager {
             });
         }
 
-        const descriptionInput = document.getElementById('userDescriptionInput');
-        if (descriptionInput) {
-            descriptionInput.addEventListener('input', (e) => {
-                this.userDescription = e.target.value;
-                this.scheduleSave();
-            });
-        }
 
         document.querySelectorAll('input[name="genderSettings"]').forEach((radio) => {
             radio.addEventListener('change', (e) => {

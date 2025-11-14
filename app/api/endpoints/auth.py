@@ -172,6 +172,10 @@ def update_me(
         user.description = payload.description.strip() or None
         changed = True
 
+    if payload.banner_url is not None:
+        user.banner_url = payload.banner_url.strip() or None
+        changed = True
+
     if changed:
         db.add(user)
         db.commit()
@@ -281,3 +285,89 @@ def get_avatar(
         )
     except ValueError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Аватар не найден")
+
+
+@router.post("/upload-banner", response_model=UserRead, summary="Загрузка баннера пользователя")
+async def upload_banner(
+    file: UploadFile = File(...),
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> UserRead:
+    """Загружает баннер пользователя"""
+    if not file.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Файл не найден")
+
+    # Проверяем тип файла (разрешаем изображения)
+    allowed_types = ("image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif")
+    if file.content_type and file.content_type not in allowed_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Неподдерживаемый тип файла: {file.content_type}. Разрешенные типы: {', '.join(allowed_types)}",
+        )
+
+    # Сохраняем файл (используем тот же сервис, что и для аватаров)
+    path, size = avatar_storage.save_upload(user.id, file)
+    size_mb = size / (1024 * 1024)
+    if size_mb > settings.max_avatar_size_mb:
+        path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Файл слишком большой. Максимальный размер: {settings.max_avatar_size_mb} МБ",
+        )
+
+    # Получаем относительный путь для сохранения в БД
+    relative_path = path.relative_to(avatar_storage.base_dir)
+    
+    # Формируем URL для доступа к файлу
+    banner_url = f"/api/auth/banner/{user.id}/{relative_path.name}"
+    
+    # Обновляем пользователя
+    user.banner_url = banner_url
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return UserRead.model_validate(user)
+
+
+@router.get("/banner/{user_id}/{filename}", response_class=FileResponse, summary="Получить баннер пользователя")
+def get_banner(
+    user_id: int,
+    filename: str,
+    db: Session = Depends(deps.get_db_session),
+) -> FileResponse:
+    """Получает баннер пользователя"""
+    try:
+        file_path = avatar_storage.resolve_path(f"{user_id}/{filename}")
+        if not file_path.exists():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Баннер не найден")
+        
+        # Определяем MIME тип по расширению
+        ext = file_path.suffix.lower()
+        mime_types = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif',
+        }
+        media_type = mime_types.get(ext, 'image/jpeg')
+        
+        return FileResponse(
+            path=file_path,
+            media_type=media_type,
+            filename=filename,
+        )
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Баннер не найден")
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT, summary="Удаление аккаунта")
+def delete_account(
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> None:
+    """Удаляет аккаунт пользователя и все связанные данные"""
+    # Удаляем пользователя (каскадное удаление должно удалить все связанные данные)
+    db.delete(user)
+    db.commit()

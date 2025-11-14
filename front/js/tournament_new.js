@@ -409,16 +409,26 @@
             participantEl.className = 'participant';
             participantEl.dataset.userId = participant.user_id;
             
-            const avatar = participant.user_avatar_url 
-                ? `<img src="${participant.user_avatar_url}" alt="${participant.user_display_name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
-                : '';
+            // Правильно обрабатываем аватар
+            let avatarHtml = '';
+            let avatarFallbackHtml = '';
             
-            const avatarFallback = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px; background: linear-gradient(135deg, rgba(243, 194, 17, 0.3), rgba(240, 193, 25, 0.2)); border-radius: 50%; color: white; font-weight: 600;">${(participant.user_display_name || 'U')[0].toUpperCase()}</div>`;
+            if (participant.user_avatar_url) {
+                // Если аватар загружен с устройства
+                if (participant.user_avatar_url.startsWith('/api/auth/avatar/')) {
+                    avatarHtml = `<img src="${participant.user_avatar_url}" alt="${participant.user_display_name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+                } else {
+                    // Если это URL из коллекции
+                    avatarHtml = `<img src="${participant.user_avatar_url}" alt="${participant.user_display_name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+                }
+            }
+            
+            avatarFallbackHtml = `<div style="width: 100%; height: 100%; display: none; align-items: center; justify-content: center; font-size: 24px; background: linear-gradient(135deg, rgba(243, 194, 17, 0.3), rgba(240, 193, 25, 0.2)); border-radius: 50%; color: white; font-weight: 600;">${(participant.user_display_name || 'U')[0].toUpperCase()}</div>`;
             
             participantEl.innerHTML = `
                 <div class="participant-avatar ${participant.is_ready ? 'ready' : ''} ${participant.is_host ? 'host' : ''}">
-                    ${avatar}
-                    ${avatarFallback}
+                    ${avatarHtml}
+                    ${avatarFallbackHtml}
                     ${participant.is_host ? '<div class="host-badge">👑</div>' : ''}
                     ${participant.is_ready ? '<div class="ready-badge"><i class="fas fa-check"></i></div>' : ''}
                 </div>
@@ -427,6 +437,14 @@
                     ${participant.is_ready ? '<i class="fas fa-check-circle"></i> Готов' : '<i class="fas fa-clock"></i> Не готов'}
                 </div>
             `;
+            
+            // Исправляем fallback: показываем его если нет аватара или если изображение не загрузилось
+            if (!participant.user_avatar_url) {
+                const fallback = participantEl.querySelector('.participant-avatar > div[style*="display: none"]');
+                if (fallback) {
+                    fallback.style.display = 'flex';
+                }
+            }
             
             // Добавляем возможность перехода на профиль
             if (participant.user_id && participant.user_id !== currentUserId) {
@@ -453,7 +471,9 @@
             grid.appendChild(inviteBtn);
         }
         
-        countElement.textContent = `${lobby.participants_count}/${lobby.max_participants}`;
+        // Исправляем отображение количества участников
+        const actualCount = lobby.participants ? lobby.participants.length : lobby.participants_count || 0;
+        countElement.textContent = `${actualCount}/${lobby.max_participants}`;
         updateStartButton(lobby, isHost);
         
         // Обновляем прогресс-бар готовности
@@ -500,7 +520,7 @@
         if (!startBtn || !readyBtn) return;
         
         const allReady = lobby.participants.length > 0 && lobby.participants.every(p => p.is_ready);
-        const minParticipants = lobby.participants_count >= 2;
+        const minParticipants = lobby.participants_count >= 1; // Разрешаем одиночное прохождение
         const canStart = allReady && minParticipants && lobby.status === 'waiting';
         
         // Обновляем кнопку "Готов" для текущего пользователя
@@ -527,7 +547,7 @@
                 if (lobby.status !== 'waiting') {
                     reason = 'Турнир уже начат';
                 } else if (!minParticipants) {
-                    reason = `Минимум 2 участника (сейчас ${lobby.participants_count})`;
+                    reason = `Минимум 1 участник (сейчас ${lobby.participants_count})`;
                 } else if (!allReady) {
                     const notReadyCount = lobby.participants.filter(p => !p.is_ready).length;
                     reason = `${notReadyCount} участник${notReadyCount === 1 ? '' : notReadyCount < 5 ? 'а' : 'ов'} не готов${notReadyCount === 1 ? '' : 'ы'}`;
@@ -795,13 +815,13 @@
                 }
             }
             
-            // Обновляем участников
-            await updateParticipants(currentLobby);
+            // Обновляем участников (это обновит лобби и может показать уведомление)
+            const updatedLobby = await app.getTournamentLobby(currentLobby.id);
+            currentLobby = updatedLobby;
+            await updateParticipants(updatedLobby);
             
             if (app.hideLoading) app.hideLoading();
-            if (app.notify) {
-                app.notify(newReadyStatus ? 'Вы готовы!' : 'Готовность снята', 'success');
-            }
+            // Убираем дублирующее уведомление - оно уже показывается в updateParticipants через обновление лобби
         } catch (err) {
             console.error(err);
             if (app.hideLoading) app.hideLoading();
@@ -840,11 +860,11 @@
         
         // Дополнительные проверки
         const allReady = currentLobby.participants.length > 0 && currentLobby.participants.every(p => p.is_ready);
-        const minParticipants = currentLobby.participants_count >= 2;
+        const minParticipants = currentLobby.participants_count >= 1; // Разрешаем одиночное прохождение
         
         if (!minParticipants) {
             if (app.notify) {
-                app.notify(`Для начала турнира нужно минимум 2 участника (сейчас ${currentLobby.participants_count})`, 'error');
+                app.notify(`Для начала турнира нужно минимум 1 участник (сейчас ${currentLobby.participants_count})`, 'error');
             }
             if (startBtn) {
                 startBtn.disabled = false;
@@ -1031,17 +1051,33 @@
             if (!confirmed) return;
         }
         
-        // Останавливаем обновление
-        if (refreshInterval) {
-            clearInterval(refreshInterval);
-            refreshInterval = null;
-        }
-        
-        // Возвращаемся к списку турниров
-        showTournamentsView();
-        
-        if (app.notify) {
-            app.notify('Вы покинули лобби', 'info');
+        try {
+            // Останавливаем обновление
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+            
+            // Пытаемся покинуть лобби через API, если есть такой endpoint
+            if (app.leaveTournamentLobby && typeof app.leaveTournamentLobby === 'function') {
+                try {
+                    await app.leaveTournamentLobby(currentLobby.id);
+                } catch (err) {
+                    console.error('Ошибка при выходе из лобби через API:', err);
+                    // Продолжаем даже если API вызов не удался
+                }
+            }
+            
+            // Возвращаемся к списку турниров
+            showTournamentsView();
+            
+            if (app.notify) {
+                app.notify('Вы покинули лобби', 'info');
+            }
+        } catch (err) {
+            console.error('Ошибка при выходе из лобби:', err);
+            // В любом случае возвращаемся к списку
+            showTournamentsView();
         }
     }
     

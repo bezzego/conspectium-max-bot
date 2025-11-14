@@ -41,6 +41,7 @@ def create_app() -> FastAPI:
     def _startup() -> None:
         Path(settings.audio_storage_dir).mkdir(parents=True, exist_ok=True)
         Path(settings.avatar_storage_dir).mkdir(parents=True, exist_ok=True)
+        Path(settings.banner_storage_dir).mkdir(parents=True, exist_ok=True)
 
     return app
 
