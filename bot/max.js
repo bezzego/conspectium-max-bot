@@ -232,6 +232,9 @@ function sendMainMenu(ctx) {
     ctx.reply('Главное меню', { attachments: [keyboard] });
 }
 
+bot.command('start', async (ctx) => {
+    sendWelcomeMessage(ctx);
+});
 // Запуск бота
 console.log('🚀 Запуск MAX бота...');
 bot.start()
