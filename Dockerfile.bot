@@ -1,0 +1,32 @@
+# ===========================
+#   Stage 1 — Build deps
+# ===========================
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY bot/package.json bot/package-lock.json* /app/bot/
+
+# Install dependencies
+WORKDIR /app/bot
+RUN npm ci --only=production || npm install
+
+# ===========================
+#   Stage 2 — Runtime image
+# ===========================
+FROM node:18-alpine AS runtime
+
+WORKDIR /app
+
+# Copy node_modules from builder
+COPY --from=builder /app/bot/node_modules /app/bot/node_modules
+
+# Copy bot code (will be overridden by volume mount in docker-compose, but needed for image)
+COPY bot/ /app/bot/
+
+# Set working directory to bot folder
+WORKDIR /app/bot
+
+# Entry point - will run bot/max.js
+CMD ["npm", "start"]

@@ -79,3 +79,29 @@ ENV/
 *.heif
 *.heif-srgb
 *.heif-srgb-alpha
+# Переменные окружения
+.env
+.env.local
+.env.*.local
+
+# Зависимости
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Логи
+*.log
+logs/
+
+# Временные файлы
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

@@ -39,6 +39,9 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libpq-dev \
+        curl \
+        netcat-openbsd \
+        postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy python deps from builder
@@ -50,11 +53,20 @@ RUN pip install gunicorn
 
 # Copy app code
 COPY . /app
-COPY .env /app/.env
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Create .env file placeholder if it doesn't exist (will be overridden by env_file in docker-compose)
+RUN touch /app/.env || true
 
 # Entry point
 ENV PORT=8000
 EXPOSE 8000
+
+# Use entrypoint script
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # ✅ Prod server: Gunicorn + Uvicorn workers
 CMD ["gunicorn", "app.main:app", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "4"]
