@@ -292,9 +292,9 @@ def start_lobby(
             detail="Турнир уже начат или завершен"
         )
     
-    from datetime import datetime
+    from datetime import datetime, timezone
     lobby.status = TournamentLobbyStatus.STARTED
-    lobby.started_at = datetime.utcnow()
+    lobby.started_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(lobby)
     
@@ -341,3 +341,39 @@ def list_my_medals(
     
     return [MedalRead.model_validate(medal) for medal in medals]
 
+
+@router.get("/{lobby_id}/leaderboard", response_model=TournamentLobbyRead)
+def get_leaderboard(
+    lobby_id: int,
+    db: Session = Depends(deps.get_db_session),
+    user: User = Depends(deps.get_current_user),
+) -> TournamentLobbyRead:
+    """Получает турнирную таблицу (leaderboard) для лобби"""
+    lobby = (
+        db.query(TournamentLobby)
+        .filter(TournamentLobby.id == lobby_id)
+        .options(selectinload(TournamentLobby.participants).selectinload(TournamentParticipant.user))
+        .options(selectinload(TournamentLobby.quiz))
+        .first()
+    )
+    
+    if not lobby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Лобби не найдено")
+    
+    # Проверяем, является ли пользователь участником
+    is_participant = (
+        db.query(TournamentParticipant)
+        .filter(
+            TournamentParticipant.lobby_id == lobby_id,
+            TournamentParticipant.user_id == user.id,
+        )
+        .first()
+    )
+    
+    if not is_participant:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Вы не являетесь участником этого лобби"
+        )
+    
+    return _serialize_lobby(lobby)

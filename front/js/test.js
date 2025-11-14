@@ -180,13 +180,20 @@
             }
 
             renderQuestions(quizState.questions);
-            renderHistory(quizState.results);
-            renderLatestResultPanel();
+            
+            // Скрываем историю прохождений для турнирных тестов
+            const historySection = document.querySelector('.quiz-history');
+            if (lobbyId && historySection) {
+                historySection.style.display = 'none';
+            } else {
+                renderHistory(quizState.results);
+                renderLatestResultPanel();
+            }
 
             if (submitBtn) {
                 submitBtn.style.display = '';
                 submitBtn.onclick = async () => {
-                    await submitQuiz(app, quizId);
+                    await submitQuiz(app, quizId, lobbyId);
                 };
             }
         } catch (err) {
@@ -714,17 +721,30 @@ function forceQuestionAnimation(question) {
             submitBtn.style.display = 'none';
         }
 
-        quizState.results = [
-            result,
-            ...quizState.results.filter((item) => item.id !== result.id),
-        ].slice(0, 20);
+        // Если это турнирный тест, показываем турнирную таблицу вместо обычного результата
+        if (lobbyId) {
+            // Скрываем обычный результат
+            const resultEl = document.getElementById('quizResult');
+            if (resultEl) {
+                resultEl.classList.add('hidden');
+            }
+            
+            // Загружаем и показываем турнирную таблицу
+            await showTournamentLeaderboard(app, parseInt(lobbyId));
+        } else {
+            // Обычный тест - показываем результат как обычно
+            quizState.results = [
+                result,
+                ...quizState.results.filter((item) => item.id !== result.id),
+            ].slice(0, 20);
 
-        renderLatestResultPanel();
-        renderHistory(quizState.results);
-        displayAnswerFeedback(questions);
+            renderLatestResultPanel();
+            renderHistory(quizState.results);
+            displayAnswerFeedback(questions);
 
-        const scoreValue = typeof result.score === 'number' ? Math.round(result.score) : 0;
-        app.notify(`Тест завершён! Результат: ${scoreValue}%`, 'success');
+            const scoreValue = typeof result.score === 'number' ? Math.round(result.score) : 0;
+            app.notify(`Тест завершён! Результат: ${scoreValue}%`, 'success');
+        }
     } catch (err) {
         console.error(err);
         hideQuizResultsLoader();
@@ -1095,6 +1115,118 @@ function formatDateTime(value) {
         });
     }
 
+    async function showTournamentLeaderboard(app, lobbyId) {
+        try {
+            // Загружаем турнирную таблицу
+            const leaderboard = await app.authFetch(`/tournament/${lobbyId}/leaderboard`);
+            
+            // Скрываем контейнер с вопросами
+            const questionsContainer = document.getElementById('quizQuestions');
+            if (questionsContainer) {
+                questionsContainer.style.display = 'none';
+            }
+            
+            // Создаем или получаем контейнер для турнирной таблицы
+            let leaderboardContainer = document.getElementById('tournamentLeaderboard');
+            if (!leaderboardContainer) {
+                leaderboardContainer = document.createElement('div');
+                leaderboardContainer.id = 'tournamentLeaderboard';
+                leaderboardContainer.className = 'tournament-leaderboard glass-card';
+                
+                const main = document.querySelector('main');
+                if (main) {
+                    main.appendChild(leaderboardContainer);
+                }
+            }
+            
+            // Сортируем участников по месту (score по убыванию)
+            const participants = (leaderboard.participants || []).filter(p => p.finished_at !== null);
+            participants.sort((a, b) => {
+                // Сначала по score (убывание)
+                if (b.score !== a.score) {
+                    return (b.score || 0) - (a.score || 0);
+                }
+                // Если score одинаковый, по времени (возрастание)
+                if (a.time_seconds !== b.time_seconds) {
+                    return (a.time_seconds || Infinity) - (b.time_seconds || Infinity);
+                }
+                // Если все одинаково, по дате завершения (возрастание)
+                return new Date(a.finished_at) - new Date(b.finished_at);
+            });
+            
+            // Определяем место каждого участника
+            let currentPlace = 1;
+            participants.forEach((participant, index) => {
+                if (index > 0) {
+                    const prev = participants[index - 1];
+                    if (prev.score !== participant.score || 
+                        prev.time_seconds !== participant.time_seconds) {
+                        currentPlace = index + 1;
+                    }
+                }
+                participant.place = currentPlace;
+            });
+            
+            const currentUserId = app?.state?.user?.id;
+            
+            // Формируем HTML таблицы
+            let leaderboardHtml = `
+                <div class="leaderboard-header">
+                    <h2 class="leaderboard-title">🏆 Турнирная таблица</h2>
+                </div>
+                <div class="leaderboard-list">
+            `;
+            
+            if (participants.length === 0) {
+                leaderboardHtml += `
+                    <div class="leaderboard-empty">
+                        <p>Пока никто не завершил тест</p>
+                    </div>
+                `;
+            } else {
+                participants.forEach((participant) => {
+                    const isCurrentUser = participant.user_id === currentUserId;
+                    const medalIcon = participant.place === 1 ? '🥇' : 
+                                     participant.place === 2 ? '🥈' : 
+                                     participant.place === 3 ? '🥉' : '';
+                    const placeText = medalIcon ? `${medalIcon} ${participant.place}` : `${participant.place}`;
+                    const score = participant.score !== null ? Math.round(participant.score) : 0;
+                    const userName = participant.user_display_name || `Участник ${participant.user_id}`;
+                    
+                    leaderboardHtml += `
+                        <div class="leaderboard-item ${isCurrentUser ? 'leaderboard-item--current' : ''}">
+                            <div class="leaderboard-place">${placeText} место</div>
+                            <div class="leaderboard-name">${escapeHtml(userName)}</div>
+                            <div class="leaderboard-score">${score}%</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            leaderboardHtml += `
+                </div>
+                <div class="leaderboard-actions">
+                    <button class="primary-btn" id="finishTournamentBtn">Завершить</button>
+                </div>
+            `;
+            
+            leaderboardContainer.innerHTML = leaderboardHtml;
+            leaderboardContainer.style.display = 'block';
+            
+            // Обработчик кнопки завершения
+            const finishBtn = document.getElementById('finishTournamentBtn');
+            if (finishBtn) {
+                finishBtn.onclick = () => {
+                    window.location.href = '/front/html/tournament.html';
+                };
+            }
+            
+        } catch (err) {
+            console.error('Ошибка загрузки турнирной таблицы:', err);
+            app.notify(err.message || 'Не удалось загрузить турнирную таблицу', 'error');
+        }
+    }
+    
     function showEmptyState(message) {
         const empty = document.getElementById('quizEmptyState');
         const container = document.getElementById('quizQuestions');

@@ -573,7 +573,7 @@ def submit_quiz_result(
     # Если это турнирный тест, обновляем информацию об участнике
     if payload.lobby_id:
         from app.models.tournament import TournamentParticipant
-        from datetime import datetime
+        from datetime import datetime, timezone
         
         participant = (
             db.query(TournamentParticipant)
@@ -587,10 +587,10 @@ def submit_quiz_result(
         if participant:
             participant.quiz_result_id = result.id
             participant.score = int(round(score * 100, 2))
-            participant.finished_at = datetime.utcnow()
+            participant.finished_at = datetime.now(timezone.utc)
             # Время прохождения можно вычислить, если есть started_at в лобби
             if lobby and lobby.started_at:
-                time_elapsed = (datetime.utcnow() - lobby.started_at).total_seconds()
+                time_elapsed = (datetime.now(timezone.utc) - lobby.started_at).total_seconds()
                 participant.time_seconds = int(time_elapsed)
             db.add(participant)
     
