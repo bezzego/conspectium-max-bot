@@ -100,20 +100,38 @@ function getUserInfo(ctx) {
         userInfo.userId = userId;
     }
     
-    // Обновляем имя, если изменилось (и это не имя бота)
-    if (userInfo.name !== userName && 
-        userName !== 'Пользователь' && 
-        !userName.includes('Bot') && 
-        !userName.includes('бот')) {
-        userInfo.name = userName;
+    // Обновляем имя только если:
+    // 1. Новое имя валидное (не бот, не дефолтное)
+    // 2. Текущее сохраненное имя - дефолтное или пустое
+    const isValidName = userName !== 'Пользователь' && 
+                       !userName.includes('Bot') && 
+                       !userName.includes('бот') &&
+                       !userName.includes('Conspectium') &&
+                       userName.trim().length > 0;
+    
+    if (isValidName) {
+        // Если сохраненное имя дефолтное или пустое, обновляем
+        if (!userInfo.name || 
+            userInfo.name === 'Пользователь' || 
+            userInfo.name.includes('Bot') || 
+            userInfo.name.includes('бот')) {
+            userInfo.name = userName;
+        }
+        // Если новое имя отличается от сохраненного, но оба валидные - обновляем
+        // (пользователь мог изменить имя в профиле)
+        else if (userInfo.name !== userName) {
+            userInfo.name = userName;
+        }
     }
     
-    // Используем сохраненное имя, если текущее имя - это имя бота или дефолтное
-    const finalUserName = (userName !== 'Пользователь' && 
-                          !userName.includes('Bot') && 
-                          !userName.includes('бот')) 
-                          ? userName 
-                          : (userInfo.name && userInfo.name !== 'Пользователь' ? userInfo.name : userName);
+    // ВСЕГДА используем сохраненное имя из userInfo для консистентности
+    // Это гарантирует, что один и тот же пользователь будет называться одинаково
+    const finalUserName = (userInfo.name && 
+                          userInfo.name !== 'Пользователь' && 
+                          !userInfo.name.includes('Bot') && 
+                          !userInfo.name.includes('бот'))
+                          ? userInfo.name
+                          : (isValidName ? userName : 'Пользователь');
     
     // Проверяем streak (посещения подряд)
     const now = new Date();
@@ -445,7 +463,7 @@ bot.on('message_callback', async (ctx) => {
             break;
             
         case 'show_my_id':
-            await showMyId(ctx, userId, userName);
+            await showMyId(ctx, userId, userInfo);
             break;
             
         case 'random_number':
@@ -775,10 +793,18 @@ async function sendMainMenu(ctx, userName, userInfo) {
 }
 
 // Функция показа ID пользователя
-async function showMyId(ctx, userId, userName) {
+async function showMyId(ctx, userId, userInfo) {
+    // Используем сохраненное имя из userInfo для консистентности
+    const displayName = (userInfo.name && 
+                        userInfo.name !== 'Пользователь' && 
+                        !userInfo.name.includes('Bot') && 
+                        !userInfo.name.includes('бот'))
+                        ? userInfo.name
+                        : 'Пользователь';
+    
     const message = `🆔 **Ваш ID**\n\n` +
                    `**ID:** \`${userId}\`\n` +
-                   `**Имя:** ${userName}\n\n` +
+                   `**Имя:** ${displayName}\n\n` +
                    `💡 Этот ID уникален для вас и используется для сохранения вашей статистики и достижений.`;
     
     const keyboard = Keyboard.inlineKeyboard([
