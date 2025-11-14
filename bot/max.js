@@ -33,13 +33,45 @@ function getTimeOfDay() {
 
 // Функция получения информации о пользователе с расширенными данными
 function getUserInfo(ctx) {
-    const user = ctx.message?.sender || ctx.sender || ctx.callback?.sender || ctx.update?.sender || ctx.callbackQuery?.sender;
-    const userId = user?.user_id || user?.id || 'unknown';
-    const userName = user?.name || user?.first_name || user?.username || 'Пользователь';
+    // Пробуем разные варианты получения пользователя из контекста
+    const user = ctx.message?.sender || 
+                 ctx.sender || 
+                 ctx.callback?.sender || 
+                 ctx.update?.sender || 
+                 ctx.callbackQuery?.sender ||
+                 ctx.message?.from ||
+                 ctx.from;
+    
+    // Пробуем разные варианты получения userId
+    const userId = user?.user_id || 
+                   user?.id || 
+                   user?.userId ||
+                   ctx.message?.from?.id ||
+                   ctx.from?.id ||
+                   String(user?.user_id || user?.id || 'unknown');
+    
+    const userName = user?.name || 
+                     user?.first_name || 
+                     user?.username || 
+                     user?.display_name ||
+                     'Пользователь';
+    
+    // Логируем для отладки (только если userId unknown)
+    if (userId === 'unknown' || !userId) {
+        console.warn('⚠️ Не удалось получить userId из контекста:', {
+            hasMessage: !!ctx.message,
+            hasSender: !!ctx.sender,
+            hasCallback: !!ctx.callback,
+            hasUpdate: !!ctx.update,
+            userKeys: user ? Object.keys(user) : 'no user',
+            ctxKeys: Object.keys(ctx)
+        });
+    }
     
     // Инициализация данных пользователя, если его еще нет
     if (!userData.has(userId)) {
         userData.set(userId, {
+            userId: userId, // Сохраняем userId в данных пользователя
             name: userName,
             streak: 0,
             lastVisit: null,
@@ -54,6 +86,11 @@ function getUserInfo(ctx) {
     }
     
     const userInfo = userData.get(userId);
+    
+    // Обновляем userId на случай, если он изменился
+    if (userInfo.userId !== userId) {
+        userInfo.userId = userId;
+    }
     
     // Обновляем имя, если изменилось
     if (userInfo.name !== userName) {
@@ -323,37 +360,15 @@ function addExperience(userInfo, amount) {
 
 // Обработчик события bot_started
 bot.on('bot_started', async (ctx) => {
-    const { userName, userInfo } = getUserInfo(ctx);
-    const greeting = getPersonalizedGreeting(userName, userInfo);
-    const message = `${greeting}Выберите действие:`;
-    const keyboard = Keyboard.inlineKeyboard([
-        [callbackButton('📊 Моя статистика', 'my_stats')],
-        [callbackButton('📖 Инструкция', 'show_instruction')],
-        [callbackButton('🎮 Развлечения', 'fun')],
-        [callbackButton('🧠 Викторина', 'start_quiz')],
-        [callbackButton('📅 Ежедневные задания', 'daily_tasks')],
-        [callbackButton('💡 Советы по обучению', 'learning_tips')]
-    ]);
-    
-    await sendMessage(ctx, message, keyboard);
-    console.log(`✅ Персонализированное приветствие отправлено пользователю ${userName}`);
+    const { userId, userName, userInfo } = getUserInfo(ctx);
+    await sendMainMenu(ctx, userName, userInfo);
+    console.log(`✅ Персонализированное приветствие отправлено пользователю ${userName} (${userId})`);
 });
 
 // Обработчик команды /start
 bot.command('start', async (ctx) => {
     const { userName, userInfo } = getUserInfo(ctx);
-    const greeting = getPersonalizedGreeting(userName, userInfo);
-    const message = `${greeting}Выберите действие:`;
-    const keyboard = Keyboard.inlineKeyboard([
-        [callbackButton('📊 Моя статистика', 'my_stats')],
-        [callbackButton('📖 Инструкция', 'show_instruction')],
-        [callbackButton('🎮 Развлечения', 'fun')],
-        [callbackButton('🧠 Викторина', 'start_quiz')],
-        [callbackButton('📅 Ежедневные задания', 'daily_tasks')],
-        [callbackButton('💡 Советы по обучению', 'learning_tips')]
-    ]);
-    
-    await sendMessage(ctx, message, keyboard);
+    await sendMainMenu(ctx, userName, userInfo);
 });
 
 // Обработчик callback кнопок
@@ -400,7 +415,7 @@ bot.on('message_callback', async (ctx) => {
             break;
             
         case 'start_quiz':
-            await startQuiz(ctx, userInfo);
+            await startQuiz(ctx, userInfo, userId);
             break;
             
         case 'daily_tasks':
@@ -409,6 +424,10 @@ bot.on('message_callback', async (ctx) => {
             
         case 'learning_tips':
             await showLearningTips(ctx);
+            break;
+            
+        case 'show_my_id':
+            await showMyId(ctx, userId, userName);
             break;
             
         case 'random_number':
@@ -484,7 +503,7 @@ bot.on('message_callback', async (ctx) => {
         default:
             // Обработка ответов викторины
             if (callbackData.startsWith('quiz_')) {
-                await handleQuizAnswer(ctx, callbackData, userInfo);
+                await handleQuizAnswer(ctx, callbackData, userInfo, userId);
             } else {
                 console.log(`⚠️ Неизвестный callback: ${callbackData}`);
                 await sendMainMenu(ctx, userName, userInfo);
@@ -530,21 +549,21 @@ async function showUserStats(ctx, userInfo, userName) {
 }
 
 // Функция запуска викторины
-async function startQuiz(ctx, userInfo) {
-    activeQuizzes.set(userInfo.userId || 'unknown', {
+async function startQuiz(ctx, userInfo, userId) {
+    activeQuizzes.set(userId, {
         currentQuestion: 0,
         score: 0,
         answers: []
     });
     
-    await showQuizQuestion(ctx, 0, userInfo);
+    await showQuizQuestion(ctx, 0, userInfo, userId);
 }
 
 // Функция показа вопроса викторины
-async function showQuizQuestion(ctx, questionIndex, userInfo, previousResult = null) {
-    const quiz = activeQuizzes.get(userInfo.userId || 'unknown');
+async function showQuizQuestion(ctx, questionIndex, userInfo, userId, previousResult = null) {
+    const quiz = activeQuizzes.get(userId);
     if (!quiz || questionIndex >= quizQuestions.length) {
-        await finishQuiz(ctx, userInfo);
+        await finishQuiz(ctx, userInfo, userId);
         return;
     }
     
@@ -572,9 +591,9 @@ async function showQuizQuestion(ctx, questionIndex, userInfo, previousResult = n
 }
 
 // Обработка ответа на вопрос викторины
-async function handleQuizAnswer(ctx, callbackData, userInfo) {
+async function handleQuizAnswer(ctx, callbackData, userInfo, userId) {
     if (callbackData === 'cancel_quiz') {
-        activeQuizzes.delete(userInfo.userId || 'unknown');
+        activeQuizzes.delete(userId);
         await sendMessage(ctx, '❌ Викторина отменена', 
             Keyboard.inlineKeyboard([
                 [callbackButton('🏠 Главное меню', 'main_menu')]
@@ -588,7 +607,7 @@ async function handleQuizAnswer(ctx, callbackData, userInfo) {
     
     const questionIndex = parseInt(match[1]);
     const answerIndex = parseInt(match[2]);
-    const quiz = activeQuizzes.get(userInfo.userId || 'unknown');
+    const quiz = activeQuizzes.get(userId);
     
     if (!quiz || quiz.currentQuestion !== questionIndex) {
         return;
@@ -613,17 +632,17 @@ async function handleQuizAnswer(ctx, callbackData, userInfo) {
     if (quiz.currentQuestion < quizQuestions.length) {
         // Небольшая задержка для лучшего UX
         setTimeout(() => {
-            showQuizQuestion(ctx, quiz.currentQuestion, userInfo, previousResult);
+            showQuizQuestion(ctx, quiz.currentQuestion, userInfo, userId, previousResult);
         }, 800);
     } else {
         // Если это был последний вопрос, показываем финальный результат
-        await finishQuiz(ctx, userInfo);
+        await finishQuiz(ctx, userInfo, userId);
     }
 }
 
 // Завершение викторины
-async function finishQuiz(ctx, userInfo) {
-    const quiz = activeQuizzes.get(userInfo.userId || 'unknown');
+async function finishQuiz(ctx, userInfo, userId) {
+    const quiz = activeQuizzes.get(userId);
     if (!quiz) return;
     
     const scorePercent = Math.floor((quiz.score / quizQuestions.length) * 100);
@@ -670,7 +689,7 @@ async function finishQuiz(ctx, userInfo) {
     ]);
     
     await sendMessage(ctx, message, keyboard);
-    activeQuizzes.delete(userInfo.userId || 'unknown');
+    activeQuizzes.delete(userId);
 }
 
 // Показ ежедневных заданий
@@ -731,8 +750,24 @@ async function sendMainMenu(ctx, userName, userInfo) {
         [callbackButton('🎮 Развлечения', 'fun')],
         [callbackButton('🧠 Викторина', 'start_quiz')],
         [callbackButton('📅 Ежедневные задания', 'daily_tasks')],
-        [callbackButton('💡 Советы по обучению', 'learning_tips')]
+        [callbackButton('💡 Советы по обучению', 'learning_tips')],
+        [callbackButton('🆔 Узнать мой ID', 'show_my_id')]
     ]);
+    await sendMessage(ctx, message, keyboard);
+}
+
+// Функция показа ID пользователя
+async function showMyId(ctx, userId, userName) {
+    const message = `🆔 **Ваш ID**\n\n` +
+                   `**ID:** \`${userId}\`\n` +
+                   `**Имя:** ${userName}\n\n` +
+                   `💡 Этот ID уникален для вас и используется для сохранения вашей статистики и достижений.`;
+    
+    const keyboard = Keyboard.inlineKeyboard([
+        [callbackButton('🔄 Обновить', 'show_my_id')],
+        [callbackButton('🏠 Главное меню', 'main_menu')]
+    ]);
+    
     await sendMessage(ctx, message, keyboard);
 }
 
@@ -756,7 +791,7 @@ bot.on('message', async (ctx) => {
     } else if (lowerText.includes('статистика') || lowerText.includes('стата') || lowerText.includes('stats')) {
         await showUserStats(ctx, userInfo, userName);
     } else if (lowerText.includes('викторина') || lowerText.includes('квиз') || lowerText.includes('quiz')) {
-        await startQuiz(ctx, userInfo);
+        await startQuiz(ctx, userInfo, userId);
     } else if (lowerText.includes('задания') || lowerText.includes('tasks')) {
         await showDailyTasks(ctx, userInfo);
     } else if (lowerText.includes('совет') || lowerText.includes('tip')) {
