@@ -99,12 +99,18 @@ function getUserInfo(ctx) {
     return { userId, userName };
 }
 
+async function sendInstruction(ctx) {
+    const message = INSTRUCTION_TEXT + "\n\n[🏠 Вернуться в меню](main_menu)";
+    await ctx.reply(message, { parse_mode: "Markdown" });
+}
+
 // Обработчик события bot_started
 bot.on('bot_started', async (ctx) => {
     const { userName } = getUserInfo(ctx);
     const message = `👋 Привет, ${userName}!\n\nДобро пожаловать в Конспектиум! 🎓`;
     const keyboard = Keyboard.inlineKeyboard([
-        [callbackButton('📖 Инструкция', 'show_instruction')],
+        [callbackButton('🎮 Развлечения', 'fun')],
+        [callbackButton('📖 Инструкция', 'show_instruction')]
     ]);
     
     try {
@@ -126,14 +132,20 @@ bot.on('message_callback', async (ctx) => {
     const callbackQueryId = ctx.callback?.query_id || ctx.callback?.id || `${Date.now()}_${Math.random()}`;
     const { userId, userName } = getUserInfo(ctx);
     
-    // Игнорируем неизвестные callback
-    if (callbackData !== 'show_instruction') {
-        if (ctx.answerCallbackQuery) {
-            try {
-                await ctx.answerCallbackQuery();
-            } catch (e) {}
-        }
-        return;
+    switch (callbackData) {
+        case 'show_instruction':
+            await sendInstruction(ctx);
+            break;
+        default:
+            // Игнорируем неизвестные callback
+            if (callbackData !== 'show_instruction') {
+                if (ctx.answerCallbackQuery) {
+                    try {
+                        await ctx.answerCallbackQuery();
+                    } catch (e) {}
+                }
+                return;
+            }
     }
     
     // Защита 1: Проверяем по уникальному ID callback
@@ -188,6 +200,37 @@ bot.on('message_callback', async (ctx) => {
         lastInstructionSent.delete(userId);
     }
 });
+
+async function sendFunMenu(ctx) {
+    const message = `🎮 *Развлечения*\n\nВыбери игру:`;
+    const keyboard = Keyboard.inlineKeyboard([
+        [callbackButton('🎲 Случайное число', 'random_number')],
+        [callbackButton('🧠 Угадай число', 'guess_number')],
+        [callbackButton('😂 Шутка дня', 'joke')],
+        [callbackButton('🌈 Цвет дня', 'color')],
+        [callbackButton('📅 Факт дня', 'fact')],
+        [callbackButton('🏠 Главное меню', 'main_menu')]
+    ]);
+    await ctx.reply(message, { attachments: [keyboard], parse_mode: "Markdown" });
+}
+
+function sendWelcomeMessage(ctx) {
+    const keyboard = Keyboard.inlineKeyboard([
+        [callbackButton('🎮 Развлечения', 'fun')],
+        [callbackButton('📖 Инструкция', 'show_instruction')]
+    ]);
+    const { userName } = getUserInfo(ctx);
+    const message = `👋 Привет, ${userName}!\n\nДобро пожаловать в Конспектиум! 🎓`;
+    ctx.reply(message, { attachments: [keyboard] });
+}
+
+function sendMainMenu(ctx) {
+    const keyboard = Keyboard.inlineKeyboard([
+        [callbackButton('🎮 Развлечения', 'fun')],
+        [callbackButton('📖 Инструкция', 'show_instruction')]
+    ]);
+    ctx.reply('Главное меню', { attachments: [keyboard] });
+}
 
 // Запуск бота
 console.log('🚀 Запуск MAX бота...');
