@@ -50,21 +50,29 @@ function getUserInfo(ctx) {
                    ctx.from?.id ||
                    String(user?.user_id || user?.id || 'unknown');
     
-    const userName = user?.name || 
-                     user?.first_name || 
-                     user?.username || 
+    // Приоритет: first_name > display_name > name > username
+    // Избегаем использования user?.name, так как это может быть имя бота
+    const userName = user?.first_name || 
                      user?.display_name ||
+                     user?.username || 
+                     (user?.name && user?.name !== 'Conspectium Bot' && user?.name !== 'MAX Bot' ? user.name : null) ||
                      'Пользователь';
     
-    // Логируем для отладки (только если userId unknown)
-    if (userId === 'unknown' || !userId) {
-        console.warn('⚠️ Не удалось получить userId из контекста:', {
+    // Логируем для отладки (только если userId unknown или имя не найдено)
+    if (userId === 'unknown' || !userId || userName === 'Пользователь') {
+        console.warn('⚠️ Проблема с получением данных пользователя:', {
+            userId: userId,
+            userName: userName,
             hasMessage: !!ctx.message,
             hasSender: !!ctx.sender,
             hasCallback: !!ctx.callback,
-            hasUpdate: !!ctx.update,
             userKeys: user ? Object.keys(user) : 'no user',
-            ctxKeys: Object.keys(ctx)
+            userData: user ? {
+                first_name: user.first_name,
+                display_name: user.display_name,
+                username: user.username,
+                name: user.name
+            } : 'no user'
         });
     }
     
@@ -92,10 +100,20 @@ function getUserInfo(ctx) {
         userInfo.userId = userId;
     }
     
-    // Обновляем имя, если изменилось
-    if (userInfo.name !== userName) {
+    // Обновляем имя, если изменилось (и это не имя бота)
+    if (userInfo.name !== userName && 
+        userName !== 'Пользователь' && 
+        !userName.includes('Bot') && 
+        !userName.includes('бот')) {
         userInfo.name = userName;
     }
+    
+    // Используем сохраненное имя, если текущее имя - это имя бота или дефолтное
+    const finalUserName = (userName !== 'Пользователь' && 
+                          !userName.includes('Bot') && 
+                          !userName.includes('бот')) 
+                          ? userName 
+                          : (userInfo.name && userInfo.name !== 'Пользователь' ? userInfo.name : userName);
     
     // Проверяем streak (посещения подряд)
     const now = new Date();
@@ -112,7 +130,7 @@ function getUserInfo(ctx) {
     }
     userInfo.lastVisit = now.toISOString();
     
-    return { userId, userName, userInfo };
+    return { userId, userName: finalUserName, userInfo };
 }
 
 // Функция отправки сообщения с Markdown для MAX
