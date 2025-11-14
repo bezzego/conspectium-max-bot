@@ -1481,12 +1481,58 @@ body.question-expanded .primary-btn {
     margin-bottom: 24px;
 }
 
+.leaderboard-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    position: relative;
+}
+
 .leaderboard-title {
     font-size: 24px;
     font-weight: 700;
     color: #fff;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    margin: 0 0 8px 0;
+    margin: 0;
+}
+
+.leaderboard-refresh-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    position: absolute;
+    right: 0;
+}
+
+.leaderboard-refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(245, 216, 110, 0.4);
+    color: #f5d86e;
+    transform: scale(1.05);
+}
+
+.leaderboard-refresh-btn:active {
+    transform: scale(0.95);
+}
+
+.leaderboard-refresh-btn.refreshing i {
+    animation: spin 0.6s linear infinite;
 }
 
 .leaderboard-stats {
@@ -1657,8 +1703,19 @@ body.question-expanded .primary-btn {
         padding: clamp(16px, 4vw, 20px) clamp(12px, 3vw, 16px);
     }
     
+    .leaderboard-header-top {
+        gap: clamp(8px, 2vw, 12px);
+        margin-bottom: clamp(6px, 1.5vw, 8px);
+    }
+    
     .leaderboard-title {
         font-size: clamp(18px, 4.5vw, 20px);
+    }
+    
+    .leaderboard-refresh-btn {
+        width: clamp(36px, 9vw, 40px);
+        height: clamp(36px, 9vw, 40px);
+        font-size: clamp(14px, 3.5vw, 16px);
     }
     
     .leaderboard-stats {

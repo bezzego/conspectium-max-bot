@@ -1196,7 +1196,12 @@ function formatDateTime(value) {
                 // Формируем HTML таблицы
                 let leaderboardHtml = `
                     <div class="leaderboard-header">
-                        <h2 class="leaderboard-title">🏆 Турнирная таблица</h2>
+                        <div class="leaderboard-header-top">
+                            <h2 class="leaderboard-title">🏆 Турнирная таблица</h2>
+                            <button class="leaderboard-refresh-btn" id="leaderboardRefreshBtn" title="Обновить таблицу">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                         <div class="leaderboard-stats">
                             <span>Завершили: ${finishedCount}/${totalParticipants}</span>
                         </div>
@@ -1272,6 +1277,26 @@ function formatDateTime(value) {
                 
                 leaderboardContainer.innerHTML = leaderboardHtml;
                 leaderboardContainer.style.display = 'block';
+                
+                // Обработчик кнопки обновления
+                const refreshBtn = document.getElementById('leaderboardRefreshBtn');
+                if (refreshBtn) {
+                    refreshBtn.onclick = async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Добавляем анимацию вращения
+                        refreshBtn.classList.add('refreshing');
+                        
+                        // Обновляем таблицу
+                        await updateLeaderboard();
+                        
+                        // Убираем анимацию через небольшую задержку
+                        setTimeout(() => {
+                            refreshBtn.classList.remove('refreshing');
+                        }, 500);
+                    };
+                }
                 
                 // Обработчик кнопки завершения
                 const finishBtn = document.getElementById('finishTournamentBtn');
