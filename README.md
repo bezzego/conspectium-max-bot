@@ -82,21 +82,35 @@ cd conspectium-max-bot
 <summary>📝 Полный список переменных окружения</summary>
 
 ```env
-# GOOGLE GEMINI API (ОБЯЗАТЕЛЬНО)
-GOOGLE_API_KEY=your_gemini_api_key_for_audio
-GOOGLE_API_KEY_TEXT=your_gemini_api_key_for_text
+# Core settings
+PROJECT_NAME=Conspectium API
+API_V1_PREFIX=/api
+SECRET_KEY=2f5ca1e52ff42439c022d00ec83dd534b1500bd0dbf6f428cda19fcc085c0126
+ACCESS_TOKEN_EXPIRE_MINUTES=4320
+TELEGRAM_BOT_TOKEN=dummy-token
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/conspectium
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=conspectium
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# Google Gemini
+GOOGLE_API_KEY=AIzaSyD7XPydid3hIVQeg13DHtvLGhv-fqFB1_c
 GOOGLE_MODEL=gemini-2.5-flash
+GOOGLE_API_KEY_TEXT=AIzaSyAI0V9pknSPb_C86eZs7PjSGB1l00rCzvs
 
-# JWT И БЕЗОПАСНОСТЬ (автогенерация)
-JWT_SECRET_KEY=  # Генерируется автоматически
-SECRET_KEY=      # Генерируется автоматически
+# Storage
+AUDIO_STORAGE_DIR=var/audio
 
-# MAX БОТ (ОБЯЗАТЕЛЬНО)
-MAX_BOT_TOKEN=your_max_bot_token_here
+# CORS
+BACKEND_CORS_ORIGINS=["http://localhost:3000","https://t.me"]
 
-# НАСТРОЙКИ (опционально)
-ENVIRONMENT=production
-DATABASE_URL=postgresql://postgres:postgres@db:5432/conspectium
+# Telegram
+# MAX Bot
+MAX_API_BASE_URL=https://platform-api.max.ru
+MAX_BOT_TOKEN=f9LHodD0cOKVvL6Os8H-RlGnfxOkJIqBaRi2lAeLjJO2nDiIg97mfJgbjAd8azQrbz2N-KcbwMk6BebSF7pf
 ```
 
 </details>
@@ -451,7 +465,7 @@ poetry run uvicorn app.main:app --reload --log-level debug
 
 **Подключение к БД через psql:**
 ```bash
-psql -U conspectium_user -d conspectium
+psql -U postgres -d conspectium
 ```
 
 **Просмотр таблиц:**
